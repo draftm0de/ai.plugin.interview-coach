@@ -26,6 +26,11 @@ class InstallationTests(unittest.TestCase):
                 self.assertIn("zyris-interview-coach/references/setup.md", names)
                 self.assertFalse(any("/candidate/" in n or "/runs/" in n or "/jobs/" in n for n in names))
 
+    def test_setup_confirmation_pattern(self):
+        text = (SOURCE / "references/setup.md").read_text()
+        for phrase in ("Ja, verwenden", "Nein, anderen Wert angeben", "Wait for confirmation", "plain text chat"):
+            self.assertIn(phrase, text)
+
     def test_setup_contract_present(self):
         text = (SOURCE / "references/setup.md").read_text().lower()
         for term in ("access verification", "cv", "linkedin", "local", "git", "chatgpt"):
