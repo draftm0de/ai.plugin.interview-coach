@@ -20,7 +20,7 @@ def package(source, output):
                 raise ValueError("Symlinks are not permitted in portable skill packages")
             if any(p.startswith(".") or p == "__pycache__" for p in file.relative_to(source).parts):
                 continue
-            archive.write(file, arcname=str(Path(source.name) / file.relative_to(source)))\n        archive.write(workspace_cli, arcname=str(Path(source.name) / "scripts" / "interview_workspace.py"))
+            archive.write(file, arcname=str(Path(source.name) / file.relative_to(source)))
     return output
 
 if __name__ == "__main__":
