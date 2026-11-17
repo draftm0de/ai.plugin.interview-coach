@@ -18,7 +18,7 @@ Use when a user requests interview preparation, realistic interview simulation, 
 3. If no workspace exists, create/download a portable file bundle with `state.md`, `candidate/profile.md`, `jobs/` and `runs/` or use supplied documents. Declare whether saving is automatic or user-managed.
 4. For targeted preparation, require both a candidate CV (or verified equivalent profile) and the job posting or a reliable source. Ask for missing essentials, but begin general practice if possible; do not infer a job description.
 5. If a real interview is scheduled, collect known date, format and interviewers from available materials. Never invent them.
-6. Read the skill references selectively: `references/research.md`, `references/training.md`, `references/evaluation.md`, `references/storage.md`.
+6. For developer/engineering roles, read `references/technical-interview.md` and offer coding, debugging, review or architecture exercises; execute candidate code only in a safe isolated runner.\n7. For a local first run, use `python scripts/interview_workspace.py init --path <workspace>` when authorized, or guide the user through it. The configuration pointer is local to the user's machine; it is not a ChatGPT-wide setting. For Git workspaces, use the repository `workspace.yaml` or an explicit user-supplied repo reference.\n8. Read the skill references selectively: `references/research.md`, `references/training.md`, `references/evaluation.md`, `references/storage.md`.
 
 ## Modes
 
@@ -57,6 +57,6 @@ For every completed session:
 5. Never mark a weakness resolved on one polished coached answer; require at least two independent answers in distinct scenarios.
 6. No automatic saving between sessions without available writable storage and a successful tool action.
 
-## Workspace boundary
+## Validation\n\nThe public repository provides `python -m unittest discover -s tests -v` for deterministic tests and `python scripts/run_llm_smoke.py --cli claude|codex` for opt-in local CLI smoke tests. The latter may consume tokens and is heuristic, not a proof of correctness. Never claim that tests passed without actual execution.\n\n## Workspace boundary
 
 The skill is public and reusable; keep all CVs, actual job applications, names, interview answers, contact details and learning state **in the candidate's private workspace**. See `references/storage.md`.
