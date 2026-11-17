@@ -1,30 +1,49 @@
-# Interview Coach Skill
+# Interview Coach
 
-An adaptive, portable interview coach for ChatGPT-compatible agent workflows and Claude-style skills.
+Portable interview coaching skill with targeted research on a vacancy, employer and publicly documented professional interviewers; evidence-based interview practice; and persistence of learning progress.
 
-## Capabilities
+## Canonical skill source
 
-- General competency development and targeted vacancy interview preparation
-- Public employer, role and interviewer professional research with attribution
-- One-question-at-a-time coaching, second attempts and uninterrupted mock interviews
-- Durable, evidence-based training progress and immutable session reports
-- Storage via local Markdown files, private Git repos or supplied ChatGPT project files
+**[.claude/skills/interview-coach/SKILL.md](.claude/skills/interview-coach/SKILL.md)** is the single authoritative implementation. All supporting references are in its own `references/` directory.
 
-## Install / use
+## Claude Code
 
-Read `SKILL.md` as skill instructions in an agent or install it with the skill mechanism available in your client. **A repository by itself is not automatically an installed ChatGPT skill.** In a regular chat, attach or reference these instructions and the workspace files.
+**Project-local:** Clone the repository and launch Claude Code from its root. Claude Code discovers the skill in `.claude/skills/interview-coach/` and can invoke `/interview-coach`.
 
-The skill repository contains no personal data. Use a separate private workspace such as `draftm0de/private.job-interview` or a local directory.
+**Globally installed:** Copy the entire skill directory (including `references/`) to:
 
-## Start example
+```text
+~/.claude/skills/interview-coach/
+  SKILL.md
+  references/
+```
 
-> Use the Interview Coach instructions from this repository. My private workspace is draftm0de/private.job-interview. Read state.md, my profile/CV and previous runs. Start a new adaptive interview focused on my open learning goals.
+For example (run from a clone of this repository):
 
-For a job-specific run provide the job posting or a link, CV and any known interview details. It performs public research before the simulation.
+```bash
+mkdir -p ~/.claude/skills
+cp -R .claude/skills/interview-coach ~/.claude/skills/
+```
 
-## Documentation
+A repository containing `.claude/skills/` does not automatically install the skill in unrelated projects. For global availability, use the user-level directory.
 
-- [Research](references/research.md)
-- [Training](references/training.md)
-- [Evaluation](references/evaluation.md)
-- [Storage contract](references/storage.md)
+## ChatGPT / Codex / other agents
+
+Use the **same skill folder** as the source for import or attachment. ChatGPT availability depends on the specific Skills installation capability in the client. For Codex project discovery, copy or link the folder into `.agents/skills/interview-coach/` (Codex supports symlinked skill directories). <https://learn.chatgpt.com/docs/build-skills>
+
+Do not maintain duplicate instruction copies across clients; copy or link from the canonical directory.
+
+## Private workspace
+
+No CV, job ad, interviewer research or user training history belongs here. A separate workspace such as `draftm0de/private.job-interview` holds `state.md`, `candidate/profile.md`, `jobs/` and immutable `runs/`. It can alternatively be a local folder or supported ChatGPT project files.
+
+## How to start
+
+> Use the interview-coach skill. My persistent workspace is draftm0de/private.job-interview. Read my CV/profile, state.md, prior runs and target vacancy. Research the employer and known interviewers, then start an adaptive targeted interview. After completion write a run report and update state.md.
+
+## Contracts
+
+- [Research](.claude/skills/interview-coach/references/research.md)
+- [Training](.claude/skills/interview-coach/references/training.md)
+- [Evaluation](.claude/skills/interview-coach/references/evaluation.md)
+- [Storage](.claude/skills/interview-coach/references/storage.md)
