@@ -7,7 +7,8 @@ SKILL = ROOT / ".claude/skills/zyris-interview-coach"
 class SkillContractTests(unittest.TestCase):
     def test_skill_name_and_references(self):
         text = (SKILL / "SKILL.md").read_text()
-        self.assertTrue(text.startswith("---\n"))
+        self.assertTrue(text.startswith("---
+"))
         self.assertIn("name: zyris-interview-coach", text)
         for name in ("research", "training", "evaluation", "storage", "technical-interview", "setup"):
             self.assertTrue((SKILL / "references" / (name + ".md")).is_file(), name)
@@ -23,7 +24,13 @@ class SkillContractTests(unittest.TestCase):
         for phrase in ('coding', 'debugging', 'sandbox', 'test', 'security'):
             self.assertIn(phrase, content)
 
-    def test_neutral_first_run(self):\n        setup = (SKILL / 'references/setup.md').read_text().lower()\n        self.assertIn('do not silently select a default private repository', setup)\n        readme = (ROOT / 'README.md').read_text()\n        self.assertNotIn('draftm0de/private.job-interview', readme)\n\n    def test_docs_cover_cli_and_storage(self):
+    def test_neutral_first_run(self):
+        setup = (SKILL / 'references/setup.md').read_text().lower()
+        self.assertIn('do not silently select a default private repository', setup)
+        readme = (ROOT / 'README.md').read_text()
+        self.assertNotIn('draftm0de/private.job-interview', readme)
+
+    def test_docs_cover_cli_and_storage(self):
         readme = (ROOT / "README.md").read_text().lower()
         for term in ("claude", "codex", "chatgpt", "local", "github", "init", "pytest"):
             self.assertIn(term, readme)
