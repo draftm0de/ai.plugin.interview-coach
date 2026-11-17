@@ -139,3 +139,9 @@ In Claude Code after installation, invoke `/zyris-interview-coach setup`. In Cha
 Local-only command alternative: `python3 scripts/interview_workspace.py init --path ~/interview-workspace`.
 
 See [setup contract](.claude/skills/zyris-interview-coach/references/setup.md). LinkedIn import is **planned**, not implemented; a user-authorized profile export may later supplement an approved CV.
+
+## Language and interview controls
+
+During `setup`, the coach confirms the user's preferred **interface language** and optionally a different **interview language**. The confirmed choice is stored privately in `preferences.json` and reloaded at the start of each session. For a persistent local workspace the bundled CLI can update it with `python3 <skill-directory>/scripts/interview_workspace.py set-language --interface de --interview de`. No language is preselected for new users.
+
+During an interview, say `stop`, `end` or `beenden` to stop immediately, receive a summary and save a partial run plus updated state. Say `pause` to request a resumable checkpoint. A stopped interview is marked `stopped_early`, never `completed`. These are conversational commands; availability of automatic persistence depends on verified storage access.
