@@ -113,3 +113,24 @@ Prerequisites: installed and authenticated `claude` or `codex` CLI, suitable per
 4. End-to-end trial uses a **fictional** CV and vacancy; check research claims, question quality, repeated answers, immutable run and state update.
 5. Private workspace is used for real candidate interviews; no private artifacts leak into this public repository.
 
+
+## Installation with Make
+
+Run from the **public skill repository clone**:
+
+```bash
+make install-claude    # copies to ~/.claude/skills/zyris-interview-coach
+make install-codex     # copies to ~/.agents/skills/zyris-interview-coach
+make install-chatgpt   # creates dist/zyris-interview-coach.zip
+make test              # deterministic tests, no model usage
+```
+
+`install-chatgpt` **packages only**: import the ZIP through a supported ChatGPT custom-skill workflow or attach the skill files to the intended project. There is no universal ChatGPT filesystem installation directory and no claim of automatic activation.
+
+### Guided setup
+
+In Claude Code after installation, invoke `/zyris-interview-coach setup`. In ChatGPT with the skill instructions available, say **"zyris-interview-coach setup"**. The coach asks conversationally for storage (local, private Git or ChatGPT files), verifies authorized access, requests your current CV and optionally a job posting, then reuses or initializes the state. It does **not** overwrite existing data.
+
+Local-only command alternative: `python3 scripts/interview_workspace.py init --path ~/interview-workspace`.
+
+See [setup contract](.claude/skills/zyris-interview-coach/references/setup.md). LinkedIn import is **planned**, not implemented; a user-authorized profile export may later supplement an approved CV.
