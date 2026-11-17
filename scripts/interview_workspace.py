@@ -38,10 +38,6 @@ def init_workspace(root, config=DEFAULT_CONFIG, force=False):
         target = root / name
         if not target.exists():
             write_atomic(target, content)
-    if config.exists() and not force:
-        old = json.loads(config.read_text(encoding="utf-8"))
-        if old.get("workspace") != str(root):
-            raise ValueError("Configuration exists for another workspace. Use --force to switch explicitly.")
     write_atomic(config, json.dumps({"schema_version": 1, "workspace": str(root), "storage": "local"}, indent=2) + "\n")
     return root
 
