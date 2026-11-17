@@ -76,7 +76,7 @@ def set_language(root, interface_language, interview_language=None):
     data["interface_language"] = interface_language
     if interview_language:
         data["interview_language"] = interview_language
-    write_atomic(target, json.dumps(data, ensure_ascii=False, indent=2) + "\\n")
+    write_atomic(target, json.dumps(data, ensure_ascii=False, indent=2) + "\n")
     return data
 
 def finish(root, run_id, run_text, state_text):
