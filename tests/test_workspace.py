@@ -4,7 +4,7 @@ import tempfile
 import unittest
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from interview_workspace import init_workspace, configured_root, validate, finish
+from interview_workspace import init_workspace, configured_root, validate, finish, set_language
 
 class WorkspaceTests(unittest.TestCase):
     def setUp(self):
@@ -42,6 +42,18 @@ class WorkspaceTests(unittest.TestCase):
         for bad in ("../outside", "/tmp/foo", "a/b", ".."):
             with self.assertRaises(ValueError):
                 finish(self.root, bad, "run", "state")
+
+    def test_language_preferences_are_explicit_and_persistent(self):
+        init_workspace(self.root, self.cfg)
+        prefs = self.root / "preferences.json"
+        self.assertFalse(prefs.exists(), "No language should be assumed")
+        set_language(self.root, "de", "en")
+        self.assertEqual(json.loads(prefs.read_text())["interface_language"], "de")
+        self.assertEqual(json.loads(prefs.read_text())["interview_language"], "en")
+        set_language(self.root, "fr")
+        self.assertEqual(json.loads(prefs.read_text())["interview_language"], "en")
+        with self.assertRaises(ValueError):
+            set_language(self.root, "../invalid")
 
     def test_missing_files_reported(self):
         self.root.mkdir()
