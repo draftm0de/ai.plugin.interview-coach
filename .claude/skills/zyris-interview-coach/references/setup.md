@@ -27,6 +27,16 @@ When a storage option, folder, repository, CV source or training mode has a sens
 - Apply the same decision pattern to an existing workspace ("Weiterverwenden / Anderen auswählen"), a known CV ("Vorhandenen verwenden / Neuen hochladen") and interview mode ("Allgemein / Stellenbezogen"), with wording suited to the choice.
 - Keep explanations of access and persistence brief, and provide additional detail only if requested or necessary for informed consent.
 
+## Bundled local workspace tool and persistence boundaries
+
+The distributed ZIP and Claude Code installation include `scripts/interview_workspace.py` **inside the skill package**, alongside `SKILL.md` and `references/`. The source of truth in the development repository is `scripts/interview_workspace.py`; the installer and packager copy it during distribution. Locate the script relative to the installed skill folder, not relative to the user's current working directory.
+
+When the host provides an authorized **persistent local filesystem and Python runtime**, execute `python3 <skill-directory>/scripts/interview_workspace.py init --path <confirmed-path>` and verify with `status` and `validate`. The CLI writes a machine-local pointer; only claim future-session reuse when the same persistent filesystem is actually available.
+
+**Claude Chat / hosted execution:** A tool-visible path such as `~/ai/interview-workspace` might be a temporary container path, **not the user's Mac**. Do not claim access to the Mac, a durable home-directory pointer or cross-chat persistence unless an explicit persistent integration verifies it. If the host has no durable writable storage, offer a private connected repository or downloadable workspace files. Even when Python runs, do not equate execution with persistent storage. State this limitation before accepting the storage choice.
+
+When a workspace was created before the script was available, never recreate or overwrite its contents. After permission and confirmation, use `init --path <existing-path>` to register the pointer in an actually persistent local environment; otherwise explain why the pointer cannot be durable.
+
 ## Conversation flow
 
 Ask **one question at a time** (do not dump a questionnaire):
