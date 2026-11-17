@@ -27,6 +27,11 @@ class InstallationTests(unittest.TestCase):
                 self.assertIn("zyris-interview-coach/scripts/interview_workspace.py", names)
                 self.assertFalse(any("/candidate/" in n or "/runs/" in n or "/jobs/" in n for n in names))
 
+    def test_workspace_cli_bundled_and_in_sync(self):
+        bundled = SOURCE / "scripts/interview_workspace.py"
+        self.assertTrue(bundled.is_file())
+        self.assertEqual(bundled.read_bytes(), (ROOT / "scripts/interview_workspace.py").read_bytes())
+
     def test_setup_confirmation_pattern(self):
         text = (SOURCE / "references/setup.md").read_text()
         for phrase in ("Ja, verwenden", "Nein, anderen Wert angeben", "Wait for confirmation", "plain text chat"):
