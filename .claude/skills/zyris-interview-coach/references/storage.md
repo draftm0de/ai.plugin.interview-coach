@@ -9,6 +9,14 @@
 
 Never claim a successful write until tool response confirms it. Saving the run and updating state are separate operations; report partial failures and how to reconcile.
 
+## First-run initialization and pointer
+
+Local storage: `python scripts/interview_workspace.py init --path ~/interview-workspace` creates missing files without overwriting existing data and writes a user-local JSON pointer at `~/.config/zyris/zyris-interview-coach/config.json` (or under `$XDG_CONFIG_HOME`). `status`, `validate` and `finish` provide deterministic operations. Changing the pointer requires explicit `init --force`. The CLI currently implements **local storage only**.
+
+GitHub/GitLab: choose an existing authorized private repository, verify access, and persist its location via a workspace manifest or explicit prompt. Do not pretend the local CLI supports remote Git writes. For Git write use the host's connector or separately authenticated Git CLI, and verify commits.
+
+ChatGPT: no universal user-local config file; provide the workspace location through attached project instructions or explicitly each new session when unavailable.
+
 ## Portable canonical layout
 
 ```text
