@@ -9,7 +9,7 @@ class SkillContractTests(unittest.TestCase):
         text = (SKILL / "SKILL.md").read_text()
         self.assertTrue(text.startswith("---" + chr(10)))
         self.assertIn("name: zyris-interview-coach", text)
-        for name in ("research", "training", "evaluation", "storage", "technical-interview", "setup"):
+        for name in ("research", "training", "evaluation", "storage", "technical-interview", "setup", "session-control"):
             self.assertTrue((SKILL / "references" / (name + ".md")).is_file(), name)
 
     def test_no_personal_baseline_in_public_skill(self):
@@ -22,6 +22,14 @@ class SkillContractTests(unittest.TestCase):
         content = (SKILL / 'references' / 'technical-interview.md').read_text().lower()
         for phrase in ('coding', 'debugging', 'sandbox', 'test', 'security'):
             self.assertIn(phrase, content)
+
+    def test_early_stop_and_language_contract(self):
+        content = (SKILL / "references/session-control.md").read_text()
+        for term in ("preferences.json", "interface_language", "interview_language", "stopped_early", "pause", "stop"):
+            self.assertIn(term, content)
+        main = (SKILL / "SKILL.md").read_text()
+        self.assertIn("Before the first response", main)
+        self.assertIn("immediately end questioning", main)
 
     def test_neutral_first_run(self):
         setup = (SKILL / 'references/setup.md').read_text().lower()
