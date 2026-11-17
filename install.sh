@@ -6,9 +6,9 @@ SOURCE="$ROOT/.claude/skills/zyris-interview-coach"
 NAME="zyris-interview-coach"
 usage() {
   cat <<'EOF'
-Usage: bash install.sh [claude|codex|chatgpt|all] [--yes]
+Usage: bash install.sh [claude|claude-chat|codex|chatgpt|all] [--yes]
 Without a target, the installer asks interactively.
-  claude   Install to ~/.claude/skills/zyris-interview-coach/
+  claude   Install for Claude Code to ~/.claude/skills/zyris-interview-coach/\n  claude-chat  Build ZIP for upload to claude.ai Customize > Skills
   codex    Install to ~/.agents/skills/zyris-interview-coach/
   chatgpt  Build dist/zyris-interview-coach.zip for manual import
   all      Perform all three
@@ -20,7 +20,7 @@ TARGET=""
 YES=0
 for arg in "$@"; do
   case "$arg" in
-    claude|codex|chatgpt|all) if [[ -n "$TARGET" ]]; then echo "Only one target allowed" >&2; exit 2; fi; TARGET="$arg" ;;
+    claude|claude-chat|codex|chatgpt|all) if [[ -n "$TARGET" ]]; then echo "Only one target allowed" >&2; exit 2; fi; TARGET="$arg" ;;
     --yes) YES=1 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown argument: $arg" >&2; usage; exit 2 ;;
@@ -31,7 +31,7 @@ if [[ -z "$TARGET" ]]; then
   if [[ ! -t 0 ]]; then echo "Noninteractive session: specify claude, codex, chatgpt or all." >&2; exit 2; fi
   printf 'Install ZYRIS Interview Coach for:\n  1) Claude Code\n  2) Codex CLI\n  3) ChatGPT package\n  4) All\nSelection [1-4]: '
   read -r choice
-  case "$choice" in 1) TARGET=claude;; 2) TARGET=codex;; 3) TARGET=chatgpt;; 4) TARGET=all;; *) echo "Invalid selection" >&2; exit 2;; esac
+  case "$choice" in 1) TARGET=claude;; 2) TARGET=claude-chat;; 3) TARGET=codex;; 4) TARGET=chatgpt;; 5) TARGET=all;; *) echo "Invalid selection" >&2; exit 2;; esac
 fi
 copy_skill() {
   local dest="$1"
@@ -68,11 +68,11 @@ package_chatgpt() {
 case "$TARGET" in
   claude) copy_skill "${CLAUDE_HOME:-$HOME/.claude}/skills/$NAME" ;;
   codex) copy_skill "${CODEX_HOME:-$HOME/.agents}/skills/$NAME" ;;
-  chatgpt) package_chatgpt ;;
+  chatgpt) package_chatgpt ;;\n  claude-chat) package_chatgpt; echo "Upload ZIP in claude.ai: Customize > Skills > + > Create skill > Upload a skill; enable it." ;;
   all)
     copy_skill "${CLAUDE_HOME:-$HOME/.claude}/skills/$NAME"
     copy_skill "${CODEX_HOME:-$HOME/.agents}/skills/$NAME"
     package_chatgpt
     ;;
 esac
-echo "Next: in Claude Code use /zyris-interview-coach setup; in ChatGPT use 'zyris-interview-coach setup' after importing the skill."
+echo "Next: in Claude Code use /zyris-interview-coach setup; in Claude Chat upload the ZIP first; in ChatGPT use 'zyris-interview-coach setup' after importing the skill."
