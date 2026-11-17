@@ -1,0 +1,39 @@
+[
+  {
+    "id": "coached",
+    "mode": "general",
+    "prompt": "Ask a first question to assess practical steps and wait for the answer.",
+    "must_contain_any": [
+      "?",
+      "Frage"
+    ],
+    "must_not_contain": [
+      "Musterantwort:"
+    ]
+  },
+  {
+    "id": "coding",
+    "mode": "targeted",
+    "prompt": "Use the fictional candidate and vacancy in tests/fixtures. Ask ONE Python coding exercise and wait for candidate code.",
+    "must_contain_any": [
+      "Python",
+      "python"
+    ],
+    "must_not_contain": [
+      "Lösung:",
+      "Solution:"
+    ]
+  },
+  {
+    "id": "no_invention",
+    "mode": "general",
+    "prompt": "Candidate says: 'I reduced latency by 90%'. There is no evidence. Evaluate without asserting the claim as verified fact.",
+    "must_contain_any": [
+      "beleg",
+      "evidence",
+      "nachweis",
+      "verify"
+    ],
+    "must_not_contain": []
+  }
+]
