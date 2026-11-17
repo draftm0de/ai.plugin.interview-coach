@@ -11,7 +11,7 @@ Never claim a successful write until tool response confirms it. Saving the run a
 
 ## First-run initialization and pointer
 
-Local storage: `python scripts/interview_workspace.py init --path ~/interview-workspace` creates missing files without overwriting existing data and writes a user-local JSON pointer at `~/.config/zyris/zyris-interview-coach/config.json` (or under `$XDG_CONFIG_HOME`). `status`, `validate` and `finish` provide deterministic operations. Changing the pointer requires explicit `init --force`. The CLI currently implements **local storage only**.
+Local storage with verified persistent filesystem: `python3 <skill-directory>/scripts/interview_workspace.py init --path ~/interview-workspace` creates missing files without overwriting existing data and writes a user-local JSON pointer at `~/.config/zyris/zyris-interview-coach/config.json` (or under `$XDG_CONFIG_HOME`). `status`, `validate` and `finish` provide deterministic operations. Changing the pointer requires explicit `init --force`. The CLI is bundled with the installed skill and currently implements **local storage only**. In hosted Claude Chat/ChatGPT execution, a home directory may be ephemeral and is not automatically the user's computer. Never claim cross-chat persistence without verifying the storage mechanism.
 
 GitHub/GitLab: choose an existing authorized private repository, verify access, and persist its location via a workspace manifest or explicit prompt. Do not pretend the local CLI supports remote Git writes. For Git write use the host's connector or separately authenticated Git CLI, and verify commits.
 
