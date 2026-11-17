@@ -34,7 +34,6 @@ def init_workspace(root, config=DEFAULT_CONFIG, force=False):
     for folder in ("candidate", "jobs", "runs"):
         (root / folder).mkdir(exist_ok=True)
     defaults = {
-        "preferences.json": json.dumps({"schema_version": 1, "interface_language": "de", "interview_language": "de"}, indent=2) + "\\n",
         "state.md": "# Interview training state\n\nStatus: initial / no completed runs\n\n## Competencies\n\n## Next training\n",
         "candidate/profile.md": "# Candidate profile\n\nProvide an approved CV or verified profile before targeted interviews.\n",
         "README.md": "# Interview workspace\n\nPrivate candidate data. Skill: zyris-interview-coach.\n",
