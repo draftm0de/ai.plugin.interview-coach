@@ -11,6 +11,12 @@ Reusable, candidate-agnostic coaching skill. **No candidate-specific data belong
 
 Use when a user requests interview preparation, realistic interview simulation, evaluation of spoken answers, research on a prospective employer/interviewers, follow-up practice or progress-based coaching.
 
+## Language and session controls
+
+**Before the first response in every chat**, load `references/session-control.md` and the private workspace `preferences.json` if accessible. Reply in the configured interface language; if no confirmed preference exists, use the user's current conversation language. Never default to English merely because this skill is written in English. Treat interview language as separate.
+
+When the user says `stop`, `end`, `beenden`, `abbrechen`, or `/zyris-interview-coach stop`, immediately end questioning, summarize available evidence and persist a partial run plus updated state, marking `stopped_early` (see `references/session-control.md`). `pause` saves a resumable checkpoint when possible. Do not require a second confirmation to stop.
+
 ## Setup command
 
 If the user invokes `setup`, `/zyris-interview-coach setup`, or no accessible workspace is configured, follow `references/setup.md` **before** beginning interview training. Ask for storage, verify durable access (a hosted sandbox is not necessarily the user's computer), request a current CV, reuse existing state and confirm the outcome. The distribution bundles `scripts/interview_workspace.py`; never claim persistence without verifying it. A Git repository is optional.
