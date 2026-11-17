@@ -31,6 +31,17 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("Before the first response", main)
         self.assertIn("immediately end questioning", main)
 
+    def test_reusable_job_research_and_interviewer_intake(self):
+        research = (SKILL / "references/research.md").read_text()
+        training = (SKILL / "references/training.md").read_text()
+        main = (SKILL / "SKILL.md").read_text()
+        for artifact in ("job.md", "research.md", "preparation.md"):
+            self.assertIn(artifact, research)
+        self.assertIn("Mit wem führst du das Bewerbungsgespräch?", research)
+        self.assertIn("read these artifacts first", research)
+        self.assertIn("Always ask who will conduct the interview", main)
+        self.assertIn("role and seniority", training)
+
     def test_neutral_first_run(self):
         setup = (SKILL / 'references/setup.md').read_text().lower()
         self.assertIn('do not silently select a default private repository', setup)
