@@ -29,6 +29,20 @@ class BashInstallerTests(unittest.TestCase):
             subprocess.run(["bash", str(INSTALLER), "codex", "--yes"], env=env, check=True, capture_output=True)
             self.assertTrue((Path(tmp) / "agents/skills/zyris-interview-coach/SKILL.md").exists())
 
+    def test_claude_chat_package(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            # Work on an isolated copy to avoid writing to the checkout.
+            import shutil
+            work = Path(tmp) / "repo"
+            shutil.copytree(ROOT / ".claude", work / ".claude")
+            shutil.copytree(ROOT / "scripts", work / "scripts")
+            shutil.copy2(INSTALLER, work / "install.sh")
+            subprocess.run(["bash", str(work / "install.sh"), "claude-chat"], check=True, capture_output=True)
+            package = work / "dist/zyris-interview-coach.zip"
+            self.assertTrue(package.is_file())
+            with zipfile.ZipFile(package) as z:
+                self.assertIn("zyris-interview-coach/SKILL.md", z.namelist())
+
     def test_noninteractive_without_target_rejected(self):
         cp = subprocess.run(["bash", str(INSTALLER)], input="", text=True, capture_output=True)
         self.assertEqual(cp.returncode, 2)
