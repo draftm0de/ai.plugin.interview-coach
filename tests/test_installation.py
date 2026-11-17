@@ -8,10 +8,12 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / ".claude/skills/zyris-interview-coach"
 
 class InstallationTests(unittest.TestCase):
-    def test_makefile_targets(self):
-        makefile = (ROOT / "Makefile").read_text()
-        for name in ("install-claude:", "install-codex:", "install-chatgpt:", "test:"):
-            self.assertIn(name, makefile)
+    def test_bash_installer_is_primary(self):
+        installer = ROOT / "install.sh"
+        self.assertTrue(installer.is_file())
+        readme = (ROOT / "README.md").read_text().lower()
+        self.assertIn("bash install.sh", readme)
+        self.assertNotIn("make install-", readme)
 
     def test_portable_package_has_no_private_files(self):
         with tempfile.TemporaryDirectory() as td:
