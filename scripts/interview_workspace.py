@@ -26,6 +26,10 @@ def safe_root(path):
 
 def init_workspace(root, config=DEFAULT_CONFIG, force=False):
     root = safe_root(root)
+    if config.exists() and not force:
+        old = json.loads(config.read_text(encoding="utf-8"))
+        if old.get("workspace") != str(root):
+            raise ValueError("Configuration exists for another workspace. Use --force to switch explicitly.")
     root.mkdir(parents=True, exist_ok=True)
     for folder in ("candidate", "jobs", "runs"):
         (root / folder).mkdir(exist_ok=True)
