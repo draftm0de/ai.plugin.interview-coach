@@ -33,14 +33,7 @@ Portable interview coaching skill with targeted research on a vacancy, employer 
   references/
 ```
 
-For example (run from a clone of this repository):
-
-```bash
-mkdir -p ~/.claude/skills
-cp -R .claude/skills/zyris-interview-coach ~/.claude/skills/
-```
-
-A repository containing `.claude/skills/` does not automatically install the skill in unrelated projects. For global availability, use the user-level directory.
+Use `bash install.sh claude` from the cloned repository.\n\nA repository containing `.claude/skills/` does not automatically install the skill in unrelated projects. For global availability, use the user-level directory.
 
 ## ChatGPT / Codex / other agents
 
@@ -50,7 +43,7 @@ Do not maintain duplicate instruction copies across clients; copy or link from t
 
 ## Private workspace
 
-No CV, job ad, interviewer research or user training history belongs here. A separate workspace such as `YOUR_ORG/private-interview-workspace` holds `state.md`, `candidate/profile.md`, `jobs/` and immutable `runs/`. It can alternatively be a local folder or supported ChatGPT project files.
+No CV, job ad, interviewer research or user training history belongs here. A separate private workspace (for example, your own private repository) holds `state.md`, `candidate/profile.md`, `jobs/` and immutable `runs/`. It can alternatively be a local folder or supported ChatGPT project files.
 
 ## How to start
 
@@ -128,19 +121,6 @@ Prerequisites: installed and authenticated `claude` or `codex` CLI, suitable per
 4. End-to-end trial uses a **fictional** CV and vacancy; check research claims, question quality, repeated answers, immutable run and state update.
 5. Private workspace is used for real candidate interviews; no private artifacts leak into this public repository.
 
-
-## Installation with Make
-
-Run from the **public skill repository clone**:
-
-```bash
-make install-claude    # copies to ~/.claude/skills/zyris-interview-coach
-make install-codex     # copies to ~/.agents/skills/zyris-interview-coach
-make install-chatgpt   # creates dist/zyris-interview-coach.zip
-make test              # deterministic tests, no model usage
-```
-
-`install-chatgpt` **packages only**: import the ZIP through a supported ChatGPT custom-skill workflow or attach the skill files to the intended project. There is no universal ChatGPT filesystem installation directory and no claim of automatic activation.
 
 ### Guided setup
 
