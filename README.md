@@ -1,5 +1,20 @@
 # ZYRIS Interview Coach
 
+## Quick install (recommended)
+
+Clone this public repository and run the interactive installer:
+
+```bash
+git clone https://github.com/draftm0de/zyris.skill.interview-coach.git
+cd zyris.skill.interview-coach
+bash install.sh
+```
+
+Choose **Claude Code**, **Codex CLI**, **ChatGPT ZIP**, or **all**. For automation use `bash install.sh claude --yes`, `bash install.sh codex --yes`, or `bash install.sh chatgpt`. Existing CLI installations require confirmation before replacement (or explicit `--yes`). Only public skill files are installed; no private CV, state or runs are accessed. The ChatGPT target creates a ZIP for manual import where supported, not an automatic installation.
+
+After installation, start `/zyris-interview-coach setup` in Claude Code. For ChatGPT, first import the skill where supported, then request `zyris-interview-coach setup`.
+
+
 Portable interview coaching skill with targeted research on a vacancy, employer and publicly documented professional interviewers; evidence-based interview practice; and persistence of learning progress.
 
 ## Canonical skill source
