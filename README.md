@@ -21,7 +21,15 @@ Portable interview coaching skill with targeted research on a vacancy, employer 
 
 **[.claude/skills/zyris-interview-coach/SKILL.md](.claude/skills/zyris-interview-coach/SKILL.md)** is the single authoritative implementation. All supporting references are in its own `references/` directory.
 
-## Claude Chat (claude.ai browser)\n\n**Claude Chat and Claude Code are separate installation targets.** The local `~/.claude/skills/` folder is read by Claude Code, **not** by Claude Chat in your browser. To use this skill on claude.ai:\n\n```bash\nbash install.sh claude-chat\n```\n\nThis creates `dist/zyris-interview-coach.zip`. In claude.ai, ensure file creation/code execution is enabled in Settings > Capabilities, then go to **Customize > Skills > + > Create skill > Upload a skill**, select the ZIP and enable the uploaded skill. Start a new chat and ask **\"Use zyris-interview-coach and run setup\"**. This is a chat instruction, not a guaranteed slash command. The upload is manual and must be repeated for updates. See [Anthropic documentation](https://support.claude.com/en/articles/12512180-use-skills-in-claude).\n\n## Claude Code
+## Claude Chat (claude.ai browser)
+
+**Claude Chat and Claude Code are separate installation targets.** The local `~/.claude/skills/` folder is read by Claude Code, **not** by Claude Chat in your browser. To use this skill on claude.ai:
+
+```bash\nbash install.sh claude-chat\n```
+
+This creates `dist/zyris-interview-coach.zip`. In claude.ai, ensure file creation/code execution is enabled in Settings > Capabilities, then go to **Customize > Skills > + > Create skill > Upload a skill**, select the ZIP and enable the uploaded skill. Start a new chat and ask **\"Use zyris-interview-coach and run setup\"**. This is a chat instruction, not a guaranteed slash command. The upload is manual and must be repeated for updates. See [Anthropic documentation](https://support.claude.com/en/articles/12512180-use-skills-in-claude).
+
+## Claude Code
 
 **Project-local:** Clone the repository and launch Claude Code from its root. Claude Code discovers the skill in `.claude/skills/zyris-interview-coach/` and can invoke `/zyris-interview-coach`.
 
@@ -33,7 +41,9 @@ Portable interview coaching skill with targeted research on a vacancy, employer 
   references/
 ```
 
-Use `bash install.sh claude` from the cloned repository.\n\nA repository containing `.claude/skills/` does not automatically install the skill in unrelated projects. For global availability, use the user-level directory.
+Use `bash install.sh claude` from the cloned repository.
+
+A repository containing `.claude/skills/` does not automatically install the skill in unrelated projects. For global availability, use the user-level directory.
 
 ## ChatGPT / Codex / other agents
 
@@ -56,16 +66,16 @@ No CV, job ad, interviewer research or user training history belongs here. A sep
 - [Evaluation](.claude/skills/zyris-interview-coach/references/evaluation.md)
 - [Storage](.claude/skills/zyris-interview-coach/references/storage.md)
 
-## First-time setup and storage
+## Portable skill completeness and storage caveat\n\nBoth `bash install.sh claude` and `bash install.sh claude-chat` include `scripts/interview_workspace.py` in the installed folder or ZIP. The script is copied from the single canonical development source `scripts/interview_workspace.py`. No repository checkout is required to run the bundled script after installation.\n\n**Important:** A hosted Claude Chat sandbox is not automatically the user's Mac. A folder created there may disappear between sessions. Cross-chat persistence is guaranteed only when the chosen storage is demonstrably durable and accessible on the next session (for example a connected private repository). Do not treat a home-directory pointer in an ephemeral container as a durable personal setting.\n\n## First-time setup and storage
 
 ### Local workspace (no Git required)
 
 Requires Python 3.10+ and a writable local directory:
 
 ```bash
-python3 scripts/interview_workspace.py init --path ~/interview-workspace
-python3 scripts/interview_workspace.py status
-python3 scripts/interview_workspace.py validate
+python3 <installed-skill-directory>/scripts/interview_workspace.py init --path ~/interview-workspace
+python3 <installed-skill-directory>/scripts/interview_workspace.py status
+python3 <installed-skill-directory>/scripts/interview_workspace.py validate
 ```
 
 The local pointer is stored in `~/.config/zyris/zyris-interview-coach/config.json` (or `$XDG_CONFIG_HOME/zyris/zyris-interview-coach/config.json`). The `init` command preserves existing files. To intentionally change workspace, use `init --path NEW_PATH --force`. This configuration is local to the machine and **does not synchronize to ChatGPT**.
