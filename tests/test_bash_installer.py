@@ -18,7 +18,7 @@ class BashInstallerTests(unittest.TestCase):
             subprocess.run(["bash", str(INSTALLER), "claude", "--yes"], env=env, check=True, capture_output=True)
             dest = Path(tmp) / "claude/skills/zyris-interview-coach"
             self.assertTrue((dest / "SKILL.md").exists())
-            self.assertTrue((dest / "references/setup.md").exists())
+            self.assertTrue((dest / "references/setup.md").exists())\n            self.assertTrue((dest / "scripts/interview_workspace.py").exists())
             (dest / "obsolete.txt").write_text("old")
             subprocess.run(["bash", str(INSTALLER), "claude", "--yes"], env=env, check=True, capture_output=True)
             self.assertFalse((dest / "obsolete.txt").exists())
@@ -41,7 +41,7 @@ class BashInstallerTests(unittest.TestCase):
             package = work / "dist/zyris-interview-coach.zip"
             self.assertTrue(package.is_file())
             with zipfile.ZipFile(package) as z:
-                self.assertIn("zyris-interview-coach/SKILL.md", z.namelist())
+                self.assertIn("zyris-interview-coach/SKILL.md", z.namelist())\n                self.assertIn("zyris-interview-coach/scripts/interview_workspace.py", z.namelist())
 
     def test_noninteractive_without_target_rejected(self):
         cp = subprocess.run(["bash", str(INSTALLER)], input="", text=True, capture_output=True)
