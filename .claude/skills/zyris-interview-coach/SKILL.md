@@ -11,7 +11,7 @@ Reusable, candidate-agnostic coaching skill. **No candidate-specific data belong
 
 Use when a user requests interview preparation, realistic interview simulation, evaluation of spoken answers, research on a prospective employer/interviewers, follow-up practice or progress-based coaching.
 
-## Preconditions and bootstrap
+## Setup command\n\nIf the user invokes `setup`, `/zyris-interview-coach setup`, or no accessible workspace is configured, follow `references/setup.md` **before** beginning interview training. Ask for storage, verify access, request a current CV, reuse existing state and confirm the outcome. A Git repository is optional.\n\n## Preconditions and bootstrap
 
 1. Identify the candidate workspace provided by the user (local directory, private Git repository, or supplied ChatGPT files). A Git repository is **optional**; do not require one.
 2. Read `references/storage.md` and the workspace's `state.md`, prior `runs/`, candidate CV/profile and any relevant `jobs/` record. Read only necessary files and keep context compact.
