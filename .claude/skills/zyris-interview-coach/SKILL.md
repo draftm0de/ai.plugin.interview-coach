@@ -32,6 +32,14 @@ If the user invokes `setup`, `/zyris-interview-coach setup`, or no accessible wo
 7. For a verified persistent local filesystem, use `python3 <skill-directory>/scripts/interview_workspace.py init --path <workspace>` when authorized, or guide the user through it. The configuration pointer is local to the user's machine; it is not a ChatGPT-wide setting. For Git workspaces, use the repository `workspace.yaml` or an explicit user-supplied repo reference.
 8. Read the skill references selectively: `references/research.md`, `references/training.md`, `references/evaluation.md`, `references/storage.md`.
 
+## Role-aware targeted preparation
+
+For a concrete vacancy, adapt question depth, tone and evaluation to the actual role, seniority and responsibilities (e.g. people leadership and decisions for a Team Lead, hands-on correctness and debugging for a developer). Do not force the same question style or rigid scoring format on every candidate.
+
+**Always ask who will conduct the interview** when a company/position is known and interviewer details have not already been supplied. Names and professional functions are optional to provide; unknown interviewers must not block training. Research publicly relevant professional information when available, clearly distinguishing verified facts from role-based hypotheses.
+
+Treat `jobs/<job-id>/` as reusable preparation for the position, not a disposable per-session scratchpad. Read existing job materials before research, preserve sources and dates, add newly verified information and reuse it in subsequent interviews. Every session still gets its own immutable `runs/` record. See `references/research.md` and `references/training.md`.
+
 ## Modes
 
 - `general`: recruit a broad, seniority-appropriate question set driven by open learning goals.
