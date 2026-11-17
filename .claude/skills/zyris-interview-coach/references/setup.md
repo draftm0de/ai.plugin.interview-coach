@@ -37,6 +37,10 @@ When the host provides an authorized **persistent local filesystem and Python ru
 
 When a workspace was created before the script was available, never recreate or overwrite its contents. After permission and confirmation, use `init --path <existing-path>` to register the pointer in an actually persistent local environment; otherwise explain why the pointer cannot be durable.
 
+## Language during setup
+
+At the first setup, infer a suggested interface language from the user's own messages, then confirm it in the user's language before storing it. Ask independently whether the interview itself should use the same language; default to the confirmed interface language unless the user chooses another. When a persistent local workspace is available, execute `python3 <skill-directory>/scripts/interview_workspace.py set-language --interface de --interview de` (replace `de` with confirmed BCP-47 codes). This writes private `preferences.json` and never modifies the public skill. For Git or hosted storage, write the same schema using the authorized storage adapter; do not pretend local CLI settings synchronize automatically. See `references/session-control.md`.
+
 ## Conversation flow
 
 Ask **one question at a time** (do not dump a questionnaire):
