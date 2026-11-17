@@ -34,6 +34,7 @@ def init_workspace(root, config=DEFAULT_CONFIG, force=False):
     for folder in ("candidate", "jobs", "runs"):
         (root / folder).mkdir(exist_ok=True)
     defaults = {
+        "preferences.json": json.dumps({"schema_version": 1, "interface_language": "de", "interview_language": "de"}, indent=2) + "\\n",
         "state.md": "# Interview training state\n\nStatus: initial / no completed runs\n\n## Competencies\n\n## Next training\n",
         "candidate/profile.md": "# Candidate profile\n\nProvide an approved CV or verified profile before targeted interviews.\n",
         "README.md": "# Interview workspace\n\nPrivate candidate data. Skill: zyris-interview-coach.\n",
@@ -62,6 +63,22 @@ def validate(root):
     if (root / "state.md").exists() and not (root / "state.md").is_file():
         problems.append("state.md must be a file")
     return problems
+
+LANGUAGE = re.compile(r"^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$")
+
+def set_language(root, interface_language, interview_language=None):
+    root = safe_root(root)
+    if not LANGUAGE.fullmatch(interface_language) or (interview_language and not LANGUAGE.fullmatch(interview_language)):
+        raise ValueError("Invalid language tag")
+    target = root / "preferences.json"
+    data = json.loads(target.read_text(encoding="utf-8")) if target.exists() else {"schema_version": 1}
+    if data.get("schema_version") != 1:
+        raise ValueError("Unsupported preferences schema")
+    data["interface_language"] = interface_language
+    if interview_language:
+        data["interview_language"] = interview_language
+    write_atomic(target, json.dumps(data, ensure_ascii=False, indent=2) + "\\n")
+    return data
 
 def finish(root, run_id, run_text, state_text):
     """Local completion: prepare files, refuse overwrite, write run then state with recovery notice on failure."""
@@ -97,6 +114,9 @@ def main(argv=None):
     f.add_argument("--run-id", required=True)
     f.add_argument("--run-file", type=Path, required=True)
     f.add_argument("--state-file", type=Path, required=True)
+    lang = sub.add_parser("set-language", help="Persist confirmed language preference")
+    lang.add_argument("--interface", required=True, dest="interface_language")
+    lang.add_argument("--interview", dest="interview_language")
     args = p.parse_args(argv)
     try:
         if args.cmd == "init":
@@ -111,6 +131,10 @@ def main(argv=None):
             print("VALID" if not problems else "\n".join(problems))
             if problems:
                 return 1
+        elif args.cmd == "set-language":
+            root = configured_root(args.config)
+            data = set_language(root, args.interface_language, args.interview_language)
+            print(json.dumps(data, ensure_ascii=False, indent=2))
         elif args.cmd == "finish":
             root = configured_root(args.config)
             run = finish(root, args.run_id, args.run_file.read_text(encoding="utf-8"), args.state_file.read_text(encoding="utf-8"))
