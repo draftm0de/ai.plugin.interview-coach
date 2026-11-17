@@ -10,6 +10,9 @@ def package(source, output):
     if not (source / "SKILL.md").is_file():
         raise ValueError("SKILL.md missing from source")
     output.parent.mkdir(parents=True, exist_ok=True)
+    workspace_cli = Path(__file__).resolve().parent / "interview_workspace.py"
+    if not workspace_cli.is_file():
+        raise ValueError("Required workspace CLI missing")
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         for file in sorted(source.rglob("*")):
             if not file.is_file():
@@ -18,7 +21,7 @@ def package(source, output):
                 raise ValueError("Symlinks are not permitted in portable skill packages")
             if any(p.startswith(".") or p == "__pycache__" for p in file.relative_to(source).parts):
                 continue
-            archive.write(file, arcname=str(Path(source.name) / file.relative_to(source)))
+            archive.write(file, arcname=str(Path(source.name) / file.relative_to(source)))\n        archive.write(workspace_cli, arcname=str(Path(source.name) / "scripts" / "interview_workspace.py"))
     return output
 
 if __name__ == "__main__":
