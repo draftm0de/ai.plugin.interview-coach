@@ -50,11 +50,11 @@ Do not maintain duplicate instruction copies across clients; copy or link from t
 
 ## Private workspace
 
-No CV, job ad, interviewer research or user training history belongs here. A separate workspace such as `draftm0de/private.job-interview` holds `state.md`, `candidate/profile.md`, `jobs/` and immutable `runs/`. It can alternatively be a local folder or supported ChatGPT project files.
+No CV, job ad, interviewer research or user training history belongs here. A separate workspace such as `YOUR_ORG/private-interview-workspace` holds `state.md`, `candidate/profile.md`, `jobs/` and immutable `runs/`. It can alternatively be a local folder or supported ChatGPT project files.
 
 ## How to start
 
-> Use the zyris-interview-coach skill. My persistent workspace is draftm0de/private.job-interview. Read my CV/profile, state.md, prior runs and target vacancy. Research the employer and known interviewers, then start an adaptive targeted interview. After completion write a run report and update state.md.
+> Use the zyris-interview-coach skill. My persistent workspace is <your private workspace path or repository>. Read my CV/profile, state.md, prior runs and target vacancy. Research the employer and known interviewers, then start an adaptive targeted interview. After completion write a run report and update state.md.
 
 ## Contracts
 
