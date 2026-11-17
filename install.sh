@@ -8,10 +8,11 @@ usage() {
   cat <<'EOF'
 Usage: bash install.sh [claude|claude-chat|codex|chatgpt|all] [--yes]
 Without a target, the installer asks interactively.
-  claude   Install for Claude Code to ~/.claude/skills/zyris-interview-coach/\n  claude-chat  Build ZIP for upload to claude.ai Customize > Skills
+  claude   Install for Claude Code to ~/.claude/skills/zyris-interview-coach/
+  claude-chat  Build ZIP for upload to claude.ai Customize > Skills
   codex    Install to ~/.agents/skills/zyris-interview-coach/
   chatgpt  Build dist/zyris-interview-coach.zip for manual import
-  all      Perform all three
+  all      Install for Claude Code and Codex; build ChatGPT/Claude Chat ZIP
 --yes skips overwrite confirmation (useful for scripted upgrades).
 No CV or private training data is copied.
 EOF
@@ -28,8 +29,8 @@ for arg in "$@"; do
 done
 if [[ ! -f "$SOURCE/SKILL.md" ]]; then echo "Skill source missing: $SOURCE" >&2; exit 1; fi
 if [[ -z "$TARGET" ]]; then
-  if [[ ! -t 0 ]]; then echo "Noninteractive session: specify claude, codex, chatgpt or all." >&2; exit 2; fi
-  printf 'Install ZYRIS Interview Coach for:\n  1) Claude Code\n  2) Codex CLI\n  3) ChatGPT package\n  4) All\nSelection [1-4]: '
+  if [[ ! -t 0 ]]; then echo "Noninteractive session: specify claude, claude-chat, codex, chatgpt or all." >&2; exit 2; fi
+  printf 'Install ZYRIS Interview Coach for:\n  1) Claude Code\n  2) Claude Chat (ZIP)\n  3) Codex CLI\n  4) ChatGPT package\n  5) All\nSelection [1-5]: '
   read -r choice
   case "$choice" in 1) TARGET=claude;; 2) TARGET=claude-chat;; 3) TARGET=codex;; 4) TARGET=chatgpt;; 5) TARGET=all;; *) echo "Invalid selection" >&2; exit 2;; esac
 fi
@@ -68,7 +69,8 @@ package_chatgpt() {
 case "$TARGET" in
   claude) copy_skill "${CLAUDE_HOME:-$HOME/.claude}/skills/$NAME" ;;
   codex) copy_skill "${CODEX_HOME:-$HOME/.agents}/skills/$NAME" ;;
-  chatgpt) package_chatgpt ;;\n  claude-chat) package_chatgpt; echo "Upload ZIP in claude.ai: Customize > Skills > + > Create skill > Upload a skill; enable it." ;;
+  chatgpt) package_chatgpt ;;
+  claude-chat) package_chatgpt; echo "Upload ZIP in claude.ai: Customize > Skills > + > Create skill > Upload a skill; enable it." ;;
   all)
     copy_skill "${CLAUDE_HOME:-$HOME/.claude}/skills/$NAME"
     copy_skill "${CODEX_HOME:-$HOME/.agents}/skills/$NAME"
