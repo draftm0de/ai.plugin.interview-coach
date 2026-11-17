@@ -10,7 +10,7 @@ cd zyris.skill.interview-coach
 bash install.sh
 ```
 
-Choose **Claude Code**, **Codex CLI**, **ChatGPT ZIP**, or **all**. For automation use `bash install.sh claude --yes`, `bash install.sh codex --yes`, or `bash install.sh chatgpt`. Existing CLI installations require confirmation before replacement (or explicit `--yes`). Only public skill files are installed; no private CV, state or runs are accessed. The ChatGPT target creates a ZIP for manual import where supported, not an automatic installation.
+Choose **Claude Code**, **Claude Chat**, **Codex CLI**, **ChatGPT ZIP**, or **all**. For automation use `bash install.sh claude-chat` (Claude Chat ZIP), `bash install.sh claude --yes`, `bash install.sh codex --yes`, or `bash install.sh chatgpt`. Existing CLI installations require confirmation before replacement (or explicit `--yes`). Only public skill files are installed; no private CV, state or runs are accessed. The ChatGPT target creates a ZIP for manual import where supported, not an automatic installation.
 
 After installation, start `/zyris-interview-coach setup` in Claude Code. For ChatGPT, first import the skill where supported, then request `zyris-interview-coach setup`.
 
@@ -21,7 +21,7 @@ Portable interview coaching skill with targeted research on a vacancy, employer 
 
 **[.claude/skills/zyris-interview-coach/SKILL.md](.claude/skills/zyris-interview-coach/SKILL.md)** is the single authoritative implementation. All supporting references are in its own `references/` directory.
 
-## Claude Code
+## Claude Chat (claude.ai browser)\n\n**Claude Chat and Claude Code are separate installation targets.** The local `~/.claude/skills/` folder is read by Claude Code, **not** by Claude Chat in your browser. To use this skill on claude.ai:\n\n```bash\nbash install.sh claude-chat\n```\n\nThis creates `dist/zyris-interview-coach.zip`. In claude.ai, ensure file creation/code execution is enabled in Settings > Capabilities, then go to **Customize > Skills > + > Create skill > Upload a skill**, select the ZIP and enable the uploaded skill. Start a new chat and ask **\"Use zyris-interview-coach and run setup\"**. This is a chat instruction, not a guaranteed slash command. The upload is manual and must be repeated for updates. See [Anthropic documentation](https://support.claude.com/en/articles/12512180-use-skills-in-claude).\n\n## Claude Code
 
 **Project-local:** Clone the repository and launch Claude Code from its root. Claude Code discovers the skill in `.claude/skills/zyris-interview-coach/` and can invoke `/zyris-interview-coach`.
 
