@@ -46,7 +46,7 @@ copy_skill() {
   parent="$(dirname "$dest")"
   mkdir -p "$parent"
   stage="$(mktemp -d "$parent/.zyris-interview-coach.XXXXXXXX")"
-  cp -R "$SOURCE/." "$stage/"
+  cp -R "$SOURCE/." "$stage/"\n  mkdir -p "$stage/scripts"\n  cp "$ROOT/scripts/interview_workspace.py" "$stage/scripts/interview_workspace.py"
   if [[ -e "$dest" ]]; then
     backup="$parent/.zyris-interview-coach.backup.$$"
     mv "$dest" "$backup"
