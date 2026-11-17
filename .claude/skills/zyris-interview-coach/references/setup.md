@@ -6,6 +6,27 @@ Invoked by `/zyris-interview-coach setup` (Claude) or "zyris-interview-coach set
 
 On explicit setup request or when the workspace cannot be resolved. Do not silently select a default private repository or create folders without permission. If a valid existing workspace is already configured, report its location and ask whether to keep it or switch.
 
+## Interaction pattern: confirm a proposed value
+
+When a storage option, folder, repository, CV source or training mode has a sensible proposed value, **close the decision in the same message**. Do not merely suggest a value and leave the user to guess how to respond.
+
+- Ask **one decision per turn**, with a concise question, a concrete proposed value and two explicit choices: **"Ja, verwenden"** and **"Nein, anderen Wert angeben"**.
+- When supported by the host, use a native selection control with an optional text input for the alternative. Never promise that a skill can force UI widgets to appear.
+- In plain text chat, use a compact fallback such as:
+  ```text
+  Soll ich diesen Ordner für deine privaten Interviewdaten verwenden?
+  ~/ai/interview-workspace
+
+  1. Ja, diesen Ordner verwenden
+  2. Nein, anderen Ordner angeben (bitte Pfad nennen)
+  ```
+- Only show an input field or request an alternative value **after** "Nein" is chosen, unless the host offers a compact conditional input.
+- Do not claim to know the user's folder structure, permissions or file contents unless they were actually inspected with an authorized tool. A proposed folder is only a suggestion.
+- **Wait for confirmation before creating folders, changing a storage pointer, writing files or requesting access**. Then verify access and continue to the CV step without re-asking the same question.
+- If the user already gave an exact folder or repository, do not propose a different default. Confirm the supplied location only when authorization or ambiguity requires it.
+- Apply the same decision pattern to an existing workspace ("Weiterverwenden / Anderen auswählen"), a known CV ("Vorhandenen verwenden / Neuen hochladen") and interview mode ("Allgemein / Stellenbezogen"), with wording suited to the choice.
+- Keep explanations of access and persistence brief, and provide additional detail only if requested or necessary for informed consent.
+
 ## Conversation flow
 
 Ask **one question at a time** (do not dump a questionnaire):
