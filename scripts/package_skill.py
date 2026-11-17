@@ -10,9 +10,8 @@ def package(source, output):
     if not (source / "SKILL.md").is_file():
         raise ValueError("SKILL.md missing from source")
     output.parent.mkdir(parents=True, exist_ok=True)
-    workspace_cli = Path(__file__).resolve().parent / "interview_workspace.py"
-    if not workspace_cli.is_file():
-        raise ValueError("Required workspace CLI missing")
+    if not (source / "scripts" / "interview_workspace.py").is_file():
+        raise ValueError("Required bundled workspace CLI missing")
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         for file in sorted(source.rglob("*")):
             if not file.is_file():
