@@ -17,6 +17,12 @@ GitHub/GitLab: choose an existing authorized private repository, verify access, 
 
 ChatGPT: no universal user-local config file; provide the workspace location through attached project instructions or explicitly each new session when unavailable.
 
+## Language preferences and partial sessions
+
+Store user-confirmed `preferences.json` in the **private workspace** using `{"schema_version":1,"interface_language":"de","interview_language":"de"}` (example only). The local bundled CLI supports `set-language --interface de --interview de`; no language is preselected until confirmed. Read preferences at the start of every new session before the first visible response.
+
+Runs have explicit lifecycle status `completed | stopped_early | paused` and answered/planned counts. For early stop, persist an immutable partial run and update state, without treating the interview as completed or inferring competence from missing answers. For pause, save a checkpoint for later continuation; never overwrite an immutable run. If storage is unavailable, state that clearly and return the report for manual saving.
+
 ## Portable canonical layout
 
 ```text
