@@ -41,6 +41,8 @@ workspace/
     YYYY-MM-DD-<scope>-<slug>.md
 ```
 
+A job folder is persistent across multiple interview sessions for the same vacancy. Preserve its source-backed posting, research on employer and professional interviewers, role-specific question perspectives and preparation notes. Reuse before researching again; refresh outdated facts with dates and sources. Keep separate immutable run reports for each training attempt.
+
 Existing private workspaces may provide paths in a `workspace.yaml` manifest. Prefer mapping paths over duplicating facts.
 
 ## Run format
