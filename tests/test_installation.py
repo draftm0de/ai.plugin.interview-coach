@@ -23,7 +23,7 @@ class InstallationTests(unittest.TestCase):
             with zipfile.ZipFile(dest) as z:
                 names = z.namelist()
                 self.assertIn("zyris-interview-coach/SKILL.md", names)
-                self.assertIn("zyris-interview-coach/references/setup.md", names)
+                self.assertIn("zyris-interview-coach/references/setup.md", names)\n                self.assertIn("zyris-interview-coach/scripts/interview_workspace.py", names)
                 self.assertFalse(any("/candidate/" in n or "/runs/" in n or "/jobs/" in n for n in names))
 
     def test_setup_confirmation_pattern(self):
