@@ -7,8 +7,7 @@ SKILL = ROOT / ".claude/skills/zyris-interview-coach"
 class SkillContractTests(unittest.TestCase):
     def test_skill_name_and_references(self):
         text = (SKILL / "SKILL.md").read_text()
-        self.assertTrue(text.startswith("---
-"))
+        self.assertTrue(text.startswith("---" + chr(10)))
         self.assertIn("name: zyris-interview-coach", text)
         for name in ("research", "training", "evaluation", "storage", "technical-interview", "setup"):
             self.assertTrue((SKILL / "references" / (name + ".md")).is_file(), name)
