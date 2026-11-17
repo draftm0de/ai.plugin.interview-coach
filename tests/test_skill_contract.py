@@ -9,7 +9,7 @@ class SkillContractTests(unittest.TestCase):
         text = (SKILL / "SKILL.md").read_text()
         self.assertTrue(text.startswith("---\n"))
         self.assertIn("name: zyris-interview-coach", text)
-        for name in ("research", "training", "evaluation", "storage", "technical-interview"):
+        for name in ("research", "training", "evaluation", "storage", "technical-interview", "setup"):
             self.assertTrue((SKILL / "references" / (name + ".md")).is_file(), name)
 
     def test_no_personal_baseline_in_public_skill(self):
