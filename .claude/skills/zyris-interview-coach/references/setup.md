@@ -6,6 +6,16 @@ Invoked by `/zyris-interview-coach setup` (Claude) or "zyris-interview-coach set
 
 On explicit setup request or when the workspace cannot be resolved. Do not silently select a default private repository or create folders without permission. If a valid existing workspace is already configured, report its location and ask whether to keep it or switch.
 
+## Storage choice: selection first, details second
+
+For first-time setup, **offer a storage-type choice before requesting a path or repository URL**. Prefer the host's native single-choice UI (radio/select or equivalent) and a conditional editable field. Do not demand a path in the initial question. Present these choices in the user's interface language:
+
+- **Lokales Verzeichnis** — suggest `~/ai/interview-workspace` only as an editable example, never as an observed folder. If the agent is hosted, immediately explain that a hosted filesystem is not automatically the user's computer; check for genuine local persistent access before offering automatic writes.
+- **Privates Git-Repository** — GitHub or GitLab, request repository URL or identifier only after selection; verify authenticated read/write access.
+- **Dateien selbst verwalten** — downloadable workspace files and manual re-upload on return, without implying automatic persistence.
+
+If native controls are unavailable, show the same three options as a short numbered selection, **without requiring a path in that first reply**. After selection, propose/ask for the concrete location and close that decision with a clear confirmation. If a workspace is already connected, first offer **Vorhandenen Workspace verwenden / Speicherort wechseln**, rather than repeating setup. Never assume the UI can render custom controls merely because the skill requests them.
+
 ## Interaction pattern: confirm a proposed value
 
 When a storage option, folder, repository, CV source or training mode has a sensible proposed value, **close the decision in the same message**. Do not merely suggest a value and leave the user to guess how to respond.
@@ -45,7 +55,7 @@ At the first setup, infer a suggested interface language from the user's own mes
 
 Ask **one question at a time** (do not dump a questionnaire):
 
-1. **Storage:** "Wo sollen deine privaten Trainingsdaten liegen: lokaler Ordner, privates GitHub-/GitLab-Repository oder Dateien in ChatGPT?" Explain trade-offs. Ask for exact path or repository identifier, not tokens/passwords.
+1. **Storage:** Present the three storage-type choices from the section above, preferably as native options. Ask for the exact local path or Git repository **only after** the user selects that type; never request tokens/passwords.
 2. **Access verification:** For local, check directory read/write authorization before creating files. For Git, check authenticated repository read and permitted write capabilities; do not make a test commit without approval. For ChatGPT files, verify attached/Project files are readable and clearly state whether writes are supported. If inaccessible, stop and offer a different storage mode.
 3. **Initialize or reuse:** If existing `state.md` and `runs/` exist, **reuse**, never overwrite. For local, after permission use `python scripts/interview_workspace.py init --path PATH`; for Git use available authorized connector or Git CLI and `workspace.yaml` as reference. Never claim a local pointer is a universal ChatGPT setting.
 4. **CV:** Ask "Bitte lade deinen aktuellen Lebenslauf (PDF/DOCX/Markdown) hoch oder gib mir den Pfad zu einer bereits zugänglichen Datei." Verify file is actually readable. Store original **only with user permission** in private workspace; otherwise store a provenance-aware reference and a derived, user-confirmed profile. If CV is missing, allow general practice but mark targeted preparation as blocked.
