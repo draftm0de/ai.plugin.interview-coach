@@ -3,7 +3,7 @@ from pathlib import Path
 import tempfile
 import unittest
 import sys
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / ".claude/skills/zyris-interview-coach/scripts"))
 from interview_workspace import init_workspace, configured_root, validate, finish, set_language
 
 class WorkspaceTests(unittest.TestCase):
