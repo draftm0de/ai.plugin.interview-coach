@@ -1,3 +1,4 @@
+import json
 import subprocess
 import tempfile
 from pathlib import Path
@@ -8,6 +9,19 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / ".claude/skills/zyris-interview-coach"
 
 class InstallationTests(unittest.TestCase):
+    def test_plugin_metadata(self):
+        chatgpt = json.loads((ROOT / "plugin.json").read_text())
+        claude = json.loads((ROOT / ".claude-plugin/plugin.json").read_text())
+        for manifest in (chatgpt, claude):
+            self.assertEqual(manifest["name"], "zyris-interview-coach")
+            self.assertEqual(manifest["author"]["name"], "Peter Fux")
+            self.assertEqual(manifest["author"]["url"], "https://draftmode.io")
+            self.assertIn("Job Coach", manifest["keywords"])
+        ui = chatgpt["extensions"]["com.openai"]["interface"]
+        self.assertEqual(ui["developerName"], "draftmode")
+        self.assertEqual(ui["websiteURL"], "https://draftmode.io")
+        self.assertTrue((ROOT / "assets/icon.png").is_file())
+
     def test_bash_installer_is_primary(self):
         installer = ROOT / "install.sh"
         self.assertTrue(installer.is_file())
