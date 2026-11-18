@@ -108,15 +108,15 @@ The skill supports developer/engineering role question types in [technical-inter
 **Deterministic checks (no model calls):**
 
 ```bash
-python3 -m unittest discover -s tests -v
+python3 -m unittest discover -s tests -p 'test_*.py' -v
 # or: python3 -m pip install pytest && python3 -m pytest -q
 ```
 
 **Optional local model smoke tests (may incur usage costs):**
 
 ```bash
-python3 tests/run_smoke.py --cli claude
-python3 tests/run_smoke.py --cli codex
+python3 tests/behavior/run_smoke.py --cli claude
+python3 tests/behavior/run_smoke.py --cli codex
 ```
 
 Prerequisites: installed and authenticated `claude` or `codex` CLI, suitable permissions and model quota. The smoke harness uses `claude -p` and `codex exec` with read-only sandbox where supported. It only tests selected output heuristics, not complete interview quality or storage integration. Run manually, review outputs and avoid placing private CVs in public fixtures. CLI flags may change with installed versions; check `claude --help` / `codex exec --help`.
@@ -166,16 +166,16 @@ Publisher: **draftmode** · https://draftmode.io · Author: **Peter Fux**. Keywo
 Run deterministic unit, packaging and workspace checks after every change:
 
 ```bash
-python3 -m unittest discover -s tests -v
+python3 -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
 Run **opt-in model behavior simulations** locally with an authenticated Codex CLI or Claude Code CLI. They use fictional candidates and do not need the ChatGPT UI:
 
 ```bash
-python3 tests/run_behavior.py --list
-python3 tests/run_behavior.py --cli codex --output-dir /tmp/zyris-quality
+python3 tests/behavior/run.py --list
+python3 tests/behavior/run.py --cli codex --output-dir /tmp/zyris-quality
 # or:
-python3 tests/run_behavior.py --cli claude --output-dir /tmp/zyris-quality
+python3 tests/behavior/run.py --cli claude --output-dir /tmp/zyris-quality
 ```
 
 The behavior suite checks role-aware score structure, feedback, no-storage stop behavior and interviewer uncertainty. It sends skill/reference text and fictional prompts to the selected model, may consume API/CLI credits, and uses **heuristic** text checks. Review generated outputs manually; a passing score does not prove good coaching or UI behavior. It does not read private candidate workspaces. Run it explicitly, not automatically on every commit.
@@ -186,12 +186,14 @@ The behavior suite checks role-aware score structure, feedback, no-storage stop 
 
 - `.claude/skills/zyris-interview-coach/`: **shipped runtime**, including `SKILL.md`, references and the one canonical `scripts/interview_workspace.py`.
 - Root `scripts/`: **development/build-only**, with `package_skill.py` and `package_plugin.py`; these are not shipped as runtime.
-- Root `tests/`: **development/test-only**, including `test_*.py`, `fixtures/`, `run_behavior.py` and `run_smoke.py`; not shipped.
+- Root `tests/`: **development/test-only**: `unit/test_<source_module>.py` for source-oriented unit tests, `regression/test_<behavior>.py` for contracts and cross-component regressions, and `behavior/run.py`, `behavior/run_smoke.py`, `behavior/fixtures/` for opt-in LLM simulations; never shipped.
 - `Makefile`: developer convenience commands; `install.sh` remains the user-facing installer.
 
 ```bash
 make help
-make test                         # deterministic, no LLM costs
+make test                         # unit + regression, no LLM costs
+make test-unit                    # only source-oriented unit tests
+make test-regression              # only regression/contract tests
 make test-list                    # list fictional behavior scenarios
 make test-behavior CLI=codex      # opt-in model tests, may use credits
 make test-behavior CLI=claude CASE=lead_feedback
