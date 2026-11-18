@@ -160,3 +160,24 @@ The ChatGPT package uses portable Agent Plugins `plugin.json`; the Claude Code p
 Publisher: **draftmode** · https://draftmode.io · Author: **Peter Fux**. Keywords: Personal Training, Job Coach, Jobs. OpenAI's directory category is `Productivity` because the directory uses predefined categories; the user-provided terms remain searchable keywords. Icon: the supplied draftmode favicon.
 
 **Legal metadata pending:** Do not invent a privacy policy or terms of service URL. Add the actual published HTTPS links to `plugin.json` before public submission. Public listing, developer verification and approval are separate from building a valid ZIP. The package is not automatically published.
+
+## Regression testing and release confidence
+
+Run deterministic unit, packaging and workspace checks after every change:
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+Run **opt-in model behavior simulations** locally with an authenticated Codex CLI or Claude Code CLI. They use fictional candidates and do not need the ChatGPT UI:
+
+```bash
+python3 scripts/test_interview_behavior.py --list
+python3 scripts/test_interview_behavior.py --cli codex --output-dir /tmp/zyris-quality
+# or:
+python3 scripts/test_interview_behavior.py --cli claude --output-dir /tmp/zyris-quality
+```
+
+The behavior suite checks role-aware score structure, feedback, no-storage stop behavior and interviewer uncertainty. It sends skill/reference text and fictional prompts to the selected model, may consume API/CLI credits, and uses **heuristic** text checks. Review generated outputs manually; a passing score does not prove good coaching or UI behavior. It does not read private candidate workspaces. Run it explicitly, not automatically on every commit.
+
+**Platform acceptance remains manual:** Install the new ChatGPT plugin or Claude Chat skill and verify native selection controls, permissions, durable workspace reuse across a new chat, saved job research and end-of-run persistence. A CLI simulation cannot validate those host-specific interactions. Use a disposable workspace for acceptance tests; do not overwrite a real candidate's data.
