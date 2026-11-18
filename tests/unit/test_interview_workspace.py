@@ -8,7 +8,7 @@ import sys
 import subprocess
 import os
 from unittest.mock import patch
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / ".claude/skills/zyris-interview-coach/scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "skills/zyris-interview-coach/scripts"))
 import interview_workspace as workspace
 from interview_workspace import init_workspace, configured_root, validate, finish, set_language
 

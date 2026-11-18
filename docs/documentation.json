@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "source_skill": ".claude/skills/zyris-interview-coach",
+  "source_skill": "skills/zyris-interview-coach",
   "extra_sources": [],
   "open_questions": [],
   "documentation": {

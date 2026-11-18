@@ -6,7 +6,7 @@ import zipfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCE = ROOT / ".claude/skills/zyris-interview-coach"
+SOURCE = ROOT / "skills/zyris-interview-coach"
 
 class InstallationTests(unittest.TestCase):
     def test_plugin_metadata(self):
@@ -15,6 +15,16 @@ class InstallationTests(unittest.TestCase):
             subprocess.run(['python3', str(ROOT / 'scripts/plugin.py'), 'build', '--output', td], check=True, capture_output=True)
             with zipfile.ZipFile(Path(td) / 'zyris-interview-coach-claude-plugin.zip') as package:
                 claude = json.loads(package.read('.claude-plugin/plugin.json'))
+            expected = {str(p.relative_to(ROOT)): p.read_bytes() for p in SOURCE.rglob('*')
+                        if p.is_file() and '__pycache__' not in p.parts}
+            for archive in Path(td).glob('*.zip'):
+                with zipfile.ZipFile(archive) as package:
+                    runtime = {name: package.read(name) for name in package.namelist() if name.startswith('skills/')}
+                    self.assertEqual(expected, runtime, archive.name)
+                    self.assertFalse(any(name.startswith('.claude/skills/') for name in package.namelist()))
+        self.assertEqual('skills', chatgpt['extensions']['io.zyris.distribution']['skillRoot'])
+        self.assertFalse((ROOT / '.claude/skills').exists())
+        self.assertFalse((ROOT / '.codex-plugin/plugin.json').exists())
         self.assertFalse((ROOT / '.claude-plugin/plugin.json').exists())
         for manifest in (chatgpt, claude):
             self.assertEqual(manifest["name"], "zyris-interview-coach")

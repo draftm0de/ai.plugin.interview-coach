@@ -6,9 +6,11 @@
 
 ## Kanonische Quelle
 
-Die [kanonische Quelle](../../.claude/skills/zyris-interview-coach/SKILL.md) liegt unter `.claude/skills/zyris-interview-coach/`, einschließlich Referenzen und `scripts/interview_workspace.py`. Nur diese Laufzeit wird ausgeliefert. Root-`scripts/` enthält den Build-Helfer `plugin.py`; Tests und Dokumentation sind Entwicklungsdateien.
+Die [kanonische Quelle](../../skills/zyris-interview-coach/SKILL.md) liegt unter `skills/zyris-interview-coach/`, einschließlich Referenzen und `scripts/interview_workspace.py`. Nur diese Laufzeit wird ausgeliefert. Root-`scripts/` enthält den Build-Helfer `plugin.py`; Tests und Dokumentation sind Entwicklungsdateien.
 
 `plugin.json` legt Identität, Basisversion, MIT-Lizenz und Distribution fest. `Makefile` bindet `plugin.mk` ein; dieses und `install.sh` delegieren an den gemeinsamen Helfer. Die drei Installer-Dateien sind abgeleitete Kopien der ZYRIS-Dokumentationsvorlagen. Änderungen zuerst an den Vorlagen vornehmen und geprüft übertragen; Verify erkennt Abweichungen.
+
+Gemeinsame Ablageregeln: `.tmp/` entsteht erst für lokale Arbeitsdateien oder Diagnoseausgaben; `dist/` enthält erzeugte Pakete. `.DS_Store`, `.idea/`, Caches, Bytecode und Abhängigkeitsumgebungen werden ignoriert. Projektspezifische Ignore-Regeln und Diagnosen bleiben erhalten. Entwicklungswerkzeuge liegen in Root-`scripts/`, Laufzeit-Scripts beim jeweiligen Skill. Lokale Python-Imports sollen keinen Bytecode erzeugen; entpackte Pakete werden unabhängig vom Checkout getestet. Verify des Dokumentationsplugins prüft wirksame Ignore-Regeln, versionierte Ausgabedateien und statisch Python-Syntax/Imports im Paket; es führt keinen Zielcode aus und ersetzt keine Host-Abnahme.
 
 ## Prüfungen
 

@@ -92,7 +92,7 @@ make package       # generate three plugin ZIPs and local Claude/Codex marketpla
 
 Optional alternative after installing pytest: `python3 -m pytest -q`. Python 3.10+ is required for packaging and the local workspace CLI. See [development and testing](docs/en/development.md) for model tests and repository boundaries.
 
-The [canonical skill](.claude/skills/zyris-interview-coach/SKILL.md) is the single runtime source. User documentation lives in [docs/](docs/en/README.md).
+The [canonical skill](skills/zyris-interview-coach/SKILL.md) is the single runtime source. User documentation lives in [docs/](docs/en/README.md).
 
 Publisher: **draftmode** · [draftmode.io](https://draftmode.io) · Author: **Peter Fux**.
 

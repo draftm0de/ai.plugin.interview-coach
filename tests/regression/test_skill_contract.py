@@ -3,7 +3,7 @@ import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
-SKILL = ROOT / ".claude/skills/zyris-interview-coach"
+SKILL = ROOT / "skills/zyris-interview-coach"
 class SkillContractTests(unittest.TestCase):
     def test_skill_name_and_references(self):
         text = (SKILL / "SKILL.md").read_text()

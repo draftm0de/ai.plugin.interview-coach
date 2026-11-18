@@ -9,7 +9,7 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-SKILL = ROOT / ".claude/skills/zyris-interview-coach"
+SKILL = ROOT / "skills/zyris-interview-coach"
 
 def skill_context():
     paths = [SKILL / "SKILL.md", SKILL / "references/training.md",

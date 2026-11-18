@@ -42,7 +42,7 @@
       }
     },
     "io.zyris.distribution": {
-      "skillRoot": ".claude/skills"
+      "skillRoot": "skills"
     }
   },
   "license": "MIT"

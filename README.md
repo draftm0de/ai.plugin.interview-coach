@@ -90,7 +90,7 @@ make package       # Drei Plugin-ZIPs und lokale Claude-/Codex-Kataloge bauen
 
 Alternativ nach Installation von pytest: `python3 -m pytest -q`. Python 3.10+ ist für Paketierung und lokalen Speicherhelfer erforderlich. [Entwicklung und Tests](docs/de/development.md).
 
-Die [kanonische Skill-Quelle](.claude/skills/zyris-interview-coach/SKILL.md) definiert das Laufzeitverhalten. Nutzerdokumentation liegt unter [docs/de/](docs/de/README.md) und wird direkt auf GitHub dargestellt.
+Die [kanonische Skill-Quelle](skills/zyris-interview-coach/SKILL.md) definiert das Laufzeitverhalten. Nutzerdokumentation liegt unter [docs/de/](docs/de/README.md) und wird direkt auf GitHub dargestellt.
 
 Herausgeber: **draftmode** · [draftmode.io](https://draftmode.io) · Autor: **Peter Fux**.
 

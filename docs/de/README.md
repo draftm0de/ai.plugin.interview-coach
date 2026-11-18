@@ -17,13 +17,13 @@
 
 ## Quellen und Referenzen
 
-- [setup](../../.claude/skills/zyris-interview-coach/references/setup.md)
-- [training](../../.claude/skills/zyris-interview-coach/references/training.md)
-- [evaluation](../../.claude/skills/zyris-interview-coach/references/evaluation.md)
-- [research](../../.claude/skills/zyris-interview-coach/references/research.md)
-- [session-control](../../.claude/skills/zyris-interview-coach/references/session-control.md)
-- [technical-interview](../../.claude/skills/zyris-interview-coach/references/technical-interview.md)
-- [storage](../../.claude/skills/zyris-interview-coach/references/storage.md)
+- [setup](../../skills/zyris-interview-coach/references/setup.md)
+- [training](../../skills/zyris-interview-coach/references/training.md)
+- [evaluation](../../skills/zyris-interview-coach/references/evaluation.md)
+- [research](../../skills/zyris-interview-coach/references/research.md)
+- [session-control](../../skills/zyris-interview-coach/references/session-control.md)
+- [technical-interview](../../skills/zyris-interview-coach/references/technical-interview.md)
+- [storage](../../skills/zyris-interview-coach/references/storage.md)
 
 [Plugin-Manifest](../../plugin.json) · [MIT-Lizenz](../../LICENSE)
 

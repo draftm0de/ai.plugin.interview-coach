@@ -35,7 +35,7 @@ Run `make install TARGET=codex`, then open a new Codex chat or restart Codex if 
 
 Run `make install TARGET=claude`. The helper builds and registers the local marketplace in `dist/claude-marketplace`, then invokes native plugin installation. Restart Claude Code and ask the installed plugin to run setup. Keep the checkout available: subsequent updates use this local marketplace.
 
-The checkout retains its canonical source under `.claude/skills/zyris-interview-coach`; package paths are normalized to `skills/zyris-interview-coach`. Opening this repository may also expose that project-local capability. Test the installed plugin from a separate project to avoid confusing it with project-local discovery.
+The checkout and all host packages share the neutral runtime path `skills/zyris-interview-coach`. Host manifests are generated during the build. Test the installed plugin from a separate project to verify the installed artifact independently of its source checkout.
 
 ### Existing standalone installations
 

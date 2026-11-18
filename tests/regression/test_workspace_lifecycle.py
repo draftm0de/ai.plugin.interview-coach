@@ -9,7 +9,7 @@ import unittest
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCE = ROOT / '.claude/skills/zyris-interview-coach'
+SOURCE = ROOT / 'skills/zyris-interview-coach'
 
 
 class WorkspaceLifecycleTests(unittest.TestCase):

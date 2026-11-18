@@ -11,7 +11,7 @@ import sys
 from run import ROOT, run as run_case, check
 
 CASES = json.loads((ROOT / "tests/behavior/fixtures/behavior-cases.json").read_text())
-SKILL = (ROOT / ".claude/skills/zyris-interview-coach/SKILL.md").read_text()
+SKILL = (ROOT / "skills/zyris-interview-coach/SKILL.md").read_text()
 
 def main():
     p = argparse.ArgumentParser()

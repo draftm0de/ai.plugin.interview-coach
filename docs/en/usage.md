@@ -28,7 +28,7 @@ Research requires available browsing tools. Facts, hypotheses and unknowns must 
 
 In coached modes, expect an overall **overall assessment x/10**, relevant individual criteria, supported strengths and concrete improvement suggestions. A natural spoken example is a suggestion, not evidence of your professional experience. Scores are qualitative and role-relative, not hiring probabilities.
 
-A second attempt can show that your answer improved after coaching. It is not an independent demonstration of stable competence. Learning status uses actual candidate answers, distinct scenarios and later confirmation. See the [evaluation contract](../../.claude/skills/zyris-interview-coach/references/evaluation.md).
+A second attempt can show that your answer improved after coaching. It is not an independent demonstration of stable competence. Learning status uses actual candidate answers, distinct scenarios and later confirmation. See the [evaluation contract](../../skills/zyris-interview-coach/references/evaluation.md).
 
 Learning status `improving` requires two spontaneous successful answers in distinct scenarios; `stable` requires confirmation in a later run without coaching. Relevant criteria usually number three to six; the overall score is not a mechanical average. Role-fit gaps remain separate from communication weaknesses.
 

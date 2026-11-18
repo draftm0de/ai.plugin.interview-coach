@@ -33,7 +33,7 @@ Der Installer verwendet `codex plugin marketplace add` und `codex plugin add`. D
 
 ### Claude Code
 
-Der Helfer baut und registriert `dist/claude-marketplace` und installiert über die native Plugin-Verwaltung. Starte Claude Code neu und fordere die Einrichtung an. Bewahre den Checkout für Updates auf. Teste aus einem anderen Projekt: Im Quellrepository kann bereits `.claude/skills/zyris-interview-coach` als lokale Fähigkeit sichtbar sein. Im Paket lautet der Pfad `skills/zyris-interview-coach`.
+Der Helfer baut und registriert `dist/claude-marketplace` und installiert über die native Plugin-Verwaltung. Starte Claude Code neu und fordere die Einrichtung an. Bewahre den Checkout für Updates auf. Checkout und Host-Pakete verwenden denselben neutralen Laufzeitpfad `skills/zyris-interview-coach`. Die Host-Manifeste entstehen beim Build. Teste das installierte Plugin aus einem anderen Projekt, um das installierte Paket unabhängig vom Quellcheckout zu prüfen.
 
 ### Frühere Einzelinstallationen
 

@@ -28,7 +28,7 @@ Der Coach fragt jeweils eine Frage und passt Tiefe und Kriterien an Rolle und Er
 
 In begleiteten Modi erhältst du eine qualitative **Gesamtbewertung x/10**, etwa drei bis sechs passende Einzelkriterien, belegte Stärken, konkrete Verbesserungen und bei Bedarf einen Formulierungsvorschlag. Die Gesamtnote ist kein mechanischer Mittelwert und keine Einstellungswahrscheinlichkeit. Bei zu wenig Inhalt soll der Coach nachfragen statt eine sichere Bewertung zu erfinden.
 
-Deine Originalantwort bleibt von Vorschlägen getrennt. Ein besserer zweiter Versuch nach Coaching belegt noch keine stabile Kompetenz. Laut [Bewertungsregeln](../../.claude/skills/zyris-interview-coach/references/evaluation.md) braucht `improving` zwei spontane erfolgreiche Antworten in unterschiedlichen Szenarien; `stable` eine Bestätigung in einer späteren Sitzung ohne Coaching. Eignungslücken für eine Stelle sind von Kommunikationsschwächen getrennt.
+Deine Originalantwort bleibt von Vorschlägen getrennt. Ein besserer zweiter Versuch nach Coaching belegt noch keine stabile Kompetenz. Laut [Bewertungsregeln](../../skills/zyris-interview-coach/references/evaluation.md) braucht `improving` zwei spontane erfolgreiche Antworten in unterschiedlichen Szenarien; `stable` eine Bestätigung in einer späteren Sitzung ohne Coaching. Eignungslücken für eine Stelle sind von Kommunikationsschwächen getrennt.
 
 ## Sitzung steuern
 

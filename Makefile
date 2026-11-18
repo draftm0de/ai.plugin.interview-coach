@@ -1,5 +1,6 @@
 include docs.mk
 include plugin.mk
+export PYTHONDONTWRITEBYTECODE := 1
 # Developer-only entry points. Not shipped in plugin/skill packages.
 PYTHON ?= python3
 CLI ?= codex

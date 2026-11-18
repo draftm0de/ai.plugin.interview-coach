@@ -6,12 +6,14 @@
 
 ## Source of truth
 
-The [canonical skill](../../.claude/skills/zyris-interview-coach/SKILL.md) contains runtime instructions, references and the bundled workspace CLI. Root `scripts/` contains packaging tools only. Keep documentation and demo assets under `docs/`; they are not shipped in plugin ZIPs.
+The [canonical skill](../../skills/zyris-interview-coach/SKILL.md) contains runtime instructions, references and the bundled workspace CLI. Root `scripts/` contains packaging tools only. Keep documentation and demo assets under `docs/`; they are not shipped in plugin ZIPs.
 
-- `.claude/skills/zyris-interview-coach/`: **shipped runtime**, including `SKILL.md`, references and the one canonical `scripts/interview_workspace.py`.
+- `skills/zyris-interview-coach/`: **shipped runtime**, including `SKILL.md`, references and the one canonical `scripts/interview_workspace.py`.
 - Root `scripts/`: **development/build-only**, with the sole manifest-driven builder `plugin.py`; these are not shipped as runtime.
 - Root `tests/`: **development/test-only**: `unit/test_<source_module>.py` for source-oriented unit tests, `regression/test_<behavior>.py` for contracts and cross-component regressions, and `behavior/run.py`, `behavior/run_smoke.py`, `behavior/fixtures/` for opt-in LLM simulations; never shipped.
 - `Makefile` includes `plugin.mk`; it and `install.sh` delegate to `scripts/plugin.py`. These installer files are generated snapshots of the documentation plugin templates. Update the templates first and propagate reviewed changes; the documentation verify action detects drift.
+
+Shared hygiene: `.tmp/` is created only when local scratch work or diagnostic output needs it; `dist/` contains generated packages. `.DS_Store`, `.idea/`, caches, bytecode and dependency environments are ignored. Preserve project-specific ignore rules and diagnostic evidence. Development scripts belong in root `scripts/`; runtime scripts belong with their skill. Use bytecode suppression for local Python imports and test extracted packages independently of the checkout. Documentation-plugin verify checks effective ignore rules, tracked generated files and static packaged-Python syntax/imports; it does not run target code or prove host acceptance.
 
 ## Checks
 
