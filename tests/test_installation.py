@@ -44,7 +44,7 @@ class InstallationTests(unittest.TestCase):
     def test_workspace_cli_bundled_and_in_sync(self):
         bundled = SOURCE / "scripts/interview_workspace.py"
         self.assertTrue(bundled.is_file())
-        self.assertEqual(bundled.read_bytes(), (ROOT / "scripts/interview_workspace.py").read_bytes())
+        self.assertFalse((ROOT / "scripts/interview_workspace.py").exists(), "Runtime belongs only in the distributable skill")
 
     def test_storage_type_selection_precedes_path(self):
         setup = (SOURCE / "references/setup.md").read_text()
