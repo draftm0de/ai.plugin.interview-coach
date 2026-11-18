@@ -50,7 +50,7 @@ class InstallationTests(unittest.TestCase):
         setup = (SOURCE / "references/setup.md").read_text()
         self.assertIn("selection first, details second", setup)
         self.assertIn("without requiring a path in that first reply", setup)
-        for choice in ("Lokales Verzeichnis", "Privates Git-Repository", "Dateien selbst verwalten"):
+        for choice in ("Lokales Verzeichnis", "Privates Git-Repository", "Dateien selbst verwalten", "Nicht speichern"):
             self.assertIn(choice, setup)
 
     def test_setup_confirmation_pattern(self):
