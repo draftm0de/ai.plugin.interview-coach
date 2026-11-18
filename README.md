@@ -219,3 +219,25 @@ Generated artifacts are kept under the repository-local ignored `.tmp/` director
 ```
 
 The runners create the directories on demand. The entire `.tmp/` tree is gitignored; test fixtures and source files remain versioned under `tests/`. Use `OUT=.tmp/tests/behavior/custom` to override the behavior output location.
+
+### Scripted multi-step coaching regression
+
+`make test-journey CLI=codex` (or `CLI=claude`) runs the fictional
+`teamlead_coaching` journey: three separate interview answers, an independent
+revision of answer one, then `stop` in explicit no-storage mode.
+
+Each step invokes the model afresh and **replays the prior user/assistant transcript**
+in the next prompt. This tests contextual coaching and end-of-session reasoning,
+**not** native CLI session continuity, real filesystem persistence or ChatGPT UI.
+It uses five model calls, so it may consume appreciable tokens.
+
+Artifacts are written under `.tmp/tests/journey/<cli>/<journey>/`:
+one answer and diagnostic file per step plus `result.json`.
+Checks are heuristic and inspect only the model answer, not stderr.
+Manually inspect the content before treating the journey as a release signal.
+
+```bash
+make test
+make test-journey CLI=codex
+make test-journey CLI=claude
+```
