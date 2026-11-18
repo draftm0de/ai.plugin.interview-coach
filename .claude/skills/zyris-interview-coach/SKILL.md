@@ -17,6 +17,10 @@ Use when a user requests interview preparation, realistic interview simulation, 
 
 When the user says `stop`, `end`, `beenden`, `abbrechen`, or `/zyris-interview-coach stop`, immediately end questioning, summarize available evidence and persist a partial run plus updated state, marking `stopped_early` (see `references/session-control.md`). `pause` saves a resumable checkpoint when possible. Do not require a second confirmation to stop.
 
+## No-storage mode
+
+When the user explicitly chooses **Nicht speichern**, run coaching without any skill-managed persistence: no workspace, files, CV copies, job research archive, run history or progress updates. Feedback and adaptation still happen in the active conversation. A new chat starts fresh unless the user provides context again. `stop` returns an in-chat summary only. This opt-out overrides the normal completion-write contract; platform-level chat retention is separate.
+
 ## Setup command
 
 If the user invokes `setup`, `/zyris-interview-coach setup`, or no accessible workspace is configured, follow `references/setup.md` **before** beginning interview training. Ask for storage, verify durable access (a hosted sandbox is not necessarily the user's computer), request a current CV, reuse existing state and confirm the outcome. The distribution bundles `scripts/interview_workspace.py`; never claim persistence without verifying it. A Git repository is optional.
