@@ -76,7 +76,8 @@ def main():
             code, output, diagnostics = 124, "TIMEOUT", "Timeout exceeded"
         errors = check(case, output, code)
         if args.output_dir:
-            (args.output_dir / (case["id"] + ".txt")).write_text(output, encoding="utf-8")\n            (args.output_dir / (case["id"] + ".stderr.txt")).write_text(diagnostics, encoding="utf-8")
+            (args.output_dir / (case["id"] + ".txt")).write_text(output, encoding="utf-8")
+            (args.output_dir / (case["id"] + ".stderr.txt")).write_text(diagnostics, encoding="utf-8")
         print(f"{'FAIL' if errors else 'PASS'} {case['id']}")
         for error in errors:
             print("  - " + error)
