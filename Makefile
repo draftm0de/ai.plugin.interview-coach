@@ -2,6 +2,9 @@ include docs.mk
 export PYTHONDONTWRITEBYTECODE := 1
 # Developer-only entry points. Not shipped in plugin/skill packages.
 PYTHON ?= python3
+TARGET ?= claude
+DRY_RUN ?= 0
+MARKETPLACE ?=
 CLI ?= codex
 CASE ?=
 OUT ?= .tmp/tests/behavior/$(CLI)
@@ -10,6 +13,7 @@ JOURNEY ?= teamlead_coaching
 .PHONY: help test test-unit test-regression test-behavior test-journey test-smoke test-list check-plugin sync-plugin
 
 help:
+	@echo "make install-local / update-local TARGET=claude|codex  Shared development marketplace"
 	@echo 'make check-docs-export / export-docs  Validate / build the website documentation bundle'
 	@echo "make test                  Unit + regression tests (no LLM, also in CI)"
 	@echo "make test-list             List behavior scenarios"
@@ -43,3 +47,7 @@ check-plugin:
 	$(PYTHON) scripts/plugin.py check
 sync-plugin:
 	$(PYTHON) scripts/plugin.py sync
+
+.PHONY: install-local update-local
+install-local update-local:
+	$(PYTHON) scripts/local_marketplace.py $@ --target "$(TARGET)" $(if $(MARKETPLACE),--marketplace "$(MARKETPLACE)",) $(if $(filter 1,$(DRY_RUN)),--dry-run,)

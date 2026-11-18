@@ -85,7 +85,7 @@ Journey checks normalize Markdown for pattern matching and check competence caut
 
 ## Packaging
 
-Repository imports need no plugin ZIPs. `plugin.mk`, legacy installation scripts and tag/release tooling are removed. Tests check committed manifests and a separately copied coaching runtime. The shared local development marketplace will be harmonized in a later step.
+Repository imports need no plugin ZIPs. `plugin.mk`, legacy installation scripts and tag/release tooling are removed. Tests check committed manifests and a separately copied coaching runtime. Local development uses the shared `draftmode-ai-plugins-dev` marketplace.
 
 ## CI and releases
 
@@ -103,3 +103,15 @@ Before a public directory submission, supply actual required publisher/privacy/t
 
 
 German defaults: `README.md`, `docs/de/`. Full English equivalents: `README.en.md`, `docs/en/`. Keep counterpart links, heading order and asset provenance aligned. `docs/documentation.json` stores source pointers and this repository’s documentation language policy (`documentation.languages`: `de`, `en`; `default_language`: `de`). Product facts remain in their canonical sources. Use the installed ZYRIS documentation update action, then validate and verify; plugin updates use the shared marketplace. Documentation prepared with ZYRIS Skill Manager.
+
+### Local development through the shared marketplace
+
+This machine is already mapped through Git-ignored `.local/marketplace.json`. On a new machine copy `local-marketplace.example.json` there and adjust the path to `ai.plugins`. Its `.local/marketplace.json` must map `sources.interview-coach` to this checkout. Alternatively pass `MARKETPLACE=/path/to/ai.plugins` to Make.
+
+```sh
+make install-local TARGET=claude
+# or TARGET=codex
+make update-local TARGET=claude
+```
+
+Both commands delegate to `ai.plugins` and include Manager and Coach in the same development catalog. No separate catalog or ZIP is created here. `DRY_RUN=1` creates shared snapshots without invoking a host. Open a new local session and enable only the intended development copy. Use the Manager plugin-verify action on this repository path for read-only verification.

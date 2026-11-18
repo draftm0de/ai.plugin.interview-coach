@@ -49,7 +49,7 @@ Native Abnahme bleibt separat: Installation, Auswahl, Berechtigungen, gespeicher
 
 ## Paketierung
 
-Repository-Import benötigt keine Plugin-ZIPs. `plugin.mk`, die alten Installationsskripte und die Tag-/Release-Werkzeuge sind entfernt. Tests prüfen die versionierten Manifeste und die unabhängig kopierte Coaching-Laufzeit. Ein gemeinsamer lokaler Entwicklungs-Marketplace wird erst im nächsten Schritt harmonisiert.
+Repository-Import benötigt keine Plugin-ZIPs. `plugin.mk`, die alten Installationsskripte und die Tag-/Release-Werkzeuge sind entfernt. Tests prüfen die versionierten Manifeste und die unabhängig kopierte Coaching-Laufzeit. Lokale Entwicklung verwendet den gemeinsamen Marketplace `draftmode-ai-plugins-dev`.
 
 ## CI und Releases
 
@@ -66,3 +66,15 @@ Deutsch: `README.md` und `docs/de/`; vollständiges Englisch: `README.en.md` und
 `docs/documentation.json` enthält Quellenzeiger und die Dokumentationssprachen dieses Repositories (`documentation.languages`: `de`, `en`; `default_language`: `de`). Produktfakten bleiben ausschließlich in ihren kanonischen Quellen. Quellen bei jeder Aktualisierung neu lesen. Die installierte ZYRIS-Dokumentationsaktion aktualisiert Dokumentation; Plugin-Updates erfolgen über den gemeinsamen Marketplace. Anschließend Dokumentationsvalidierung und Verify ausführen. Screenshots erst nach Prüfung auf private Inhalte ergänzen; siehe [Aufnahmecheckliste](screens.md).
 
 Dokumentation erstellt mit ZYRIS Skill Manager.
+
+### Lokal über den gemeinsamen Marketplace
+
+Die Zuordnung auf diesem Rechner steht bereits in der Git-ignorierten `.local/marketplace.json`. Für einen neuen Rechner `local-marketplace.example.json` dorthin kopieren und den Pfad zu `ai.plugins` anpassen. Dort muss `.local/marketplace.json` unter `sources.interview-coach` auf diesen Checkout zeigen. Alternativ lässt sich der Marketplace-Pfad mit `MARKETPLACE=/pfad/zu/ai.plugins` übergeben.
+
+```sh
+make install-local TARGET=claude
+# oder TARGET=codex
+make update-local TARGET=claude
+```
+
+Beide Befehle delegieren an `ai.plugins` und umfassen Manager und Coach im selben Entwicklungs-Katalog. Kein eigener Katalog und kein ZIP wird hier erstellt. `DRY_RUN=1` erstellt die gemeinsamen Snapshots ohne Host-Aufruf. Neue lokale Sitzung öffnen und nur die gewünschte Entwicklungskopie aktivieren. Die Prüfung erfolgt im Manager mit `plugin-verify` auf diesen Repository-Pfad; sie verändert keine Dateien.
