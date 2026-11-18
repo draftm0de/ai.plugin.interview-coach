@@ -1,0 +1,163 @@
+{
+  "id": "teamlead_coaching_journey",
+  "description": "Fiktiver Team-Lead-Coaching-Verlauf mit drei Antworten, verbessertem Versuch und Abbruch ohne Speicherung",
+  "context": "Du coachst eine fiktive Person für die Position Team Lead ERP Platform. Die Person hat ausdrücklich 'Nicht speichern' gewählt. Keine persönlichen Dateien, keine Persistenz. Jede Nutzerantwort ist eine spontane Äußerung; unterstelle keine weiteren Erfahrungen. Die drei Fragen sind getrennte Szenarien.",
+  "steps": [
+    {
+      "id": "priority",
+      "user": "Frage 1: Ein Fachbereich verlangt eine riskante Sofortänderung am ERP. Meine Antwort: Ich würde zuerst mit allen reden und dann gemeinsam eine Lösung suchen. Bitte bewerte meine Antwort.",
+      "must_contain_any": [
+        "Gesamtbewertung"
+      ],
+      "required_groups": [
+        [
+          "/10"
+        ],
+        [
+          "Einzelbewertung",
+          "Kriterium"
+        ],
+        [
+          "Risiko",
+          "Betrieb"
+        ],
+        [
+          "verbessern",
+          "Verbesserung"
+        ]
+      ],
+      "must_not_contain": [
+        "state.md aktualisiert"
+      ]
+    },
+    {
+      "id": "ownership",
+      "user": "Frage 2: Wer entscheidet bei Uneinigkeit zwischen Fachbereich und Betrieb? Meine Antwort: Ich lasse das Team die Optionen und Risiken bewerten, kläre die zuständigen Freigaben und entscheide innerhalb meines Mandats oder eskaliere mit einer Empfehlung. Bitte bewerte diese Antwort unabhängig von Frage 1.",
+      "must_contain_any": [
+        "Gesamtbewertung"
+      ],
+      "required_groups": [
+        [
+          "/10"
+        ],
+        [
+          "Entscheid",
+          "Freigabe",
+          "Verantwort"
+        ],
+        [
+          "Einzelbewertung",
+          "Kriterium"
+        ]
+      ],
+      "must_not_contain": [
+        "state.md aktualisiert"
+      ]
+    },
+    {
+      "id": "incident",
+      "user": "Frage 3: Ein kritischer Fehler blockiert Warenbewegungen. Meine Antwort: Ich würde zuerst prüfen, wie groß die Auswirkungen sind, einen Incident-Verantwortlichen benennen, parallel Ursachenanalyse und Wiederherstellung organisieren und die Fachbereiche regelmäßig informieren. Bitte bewerte diese Antwort.",
+      "must_contain_any": [
+        "Gesamtbewertung"
+      ],
+      "required_groups": [
+        [
+          "/10"
+        ],
+        [
+          "Incident",
+          "Betrieb",
+          "Wiederherstellung"
+        ],
+        [
+          "Einzelbewertung",
+          "Kriterium"
+        ]
+      ],
+      "must_not_contain": [
+        "state.md aktualisiert"
+      ]
+    },
+    {
+      "id": "revision",
+      "user": "Ich möchte Frage 1 jetzt selbst verbessern: Ich kläre zuerst den geschäftlichen Zeitdruck und die Risiken mit Fachbereich und Betrieb. Dann prüfe ich sichere Alternativen, lasse Auswirkungen bewerten und dokumentiere die Entscheidung mit Verantwortlichem und nächstem Termin. Vergleiche diese neue eigene Antwort mit meiner ursprünglichen Antwort zu Frage 1. Behaupte bitte keinen dauerhaft stabilen Kompetenzstatus.",
+      "must_contain_any": [
+        "verbesser",
+        "Fortschritt",
+        "konkreter"
+      ],
+      "required_groups": [
+        [
+          "ursprünglich",
+          "erste Antwort",
+          "vorher"
+        ],
+        [
+          "Risiko",
+          "Betrieb",
+          "Entscheid"
+        ],
+        [
+          "noch nicht",
+          "nicht stabil",
+          "weiter",
+          "erneut",
+          "nicht ausreichend",
+          "keine stabile"
+        ]
+      ],
+      "must_not_contain": [
+        "Kompetenz ist stabil",
+        "dauerhaft behoben",
+        "state.md aktualisiert"
+      ]
+    },
+    {
+      "id": "stop",
+      "user": "stop",
+      "must_contain_any": [
+        "beendet",
+        "stopped_early",
+        "abgebrochen",
+        "Abschluss"
+      ],
+      "required_groups": [
+        [
+          "nicht gespeichert",
+          "nichts gespeichert",
+          "ohne Speicherung",
+          "keine Dateien",
+          "keinen Workspace",
+          "nicht speicher"
+        ],
+        [
+          "drei Fragen",
+          "3 Fragen",
+          "drei Antworten",
+          "3 Antworten",
+          "drei ursprüngliche",
+          "3 ursprüngliche"
+        ],
+        [
+          "zweiter Versuch",
+          "überarbeitet",
+          "verbesserte Antwort",
+          "erneut",
+          "Wiederholung"
+        ],
+        [
+          "nicht stabil",
+          "nicht nachgewiesen",
+          "weiter üben",
+          "nicht ausreichend",
+          "kein stabiler"
+        ]
+      ],
+      "must_not_contain": [
+        "Nächste Frage:",
+        "state.md aktualisiert",
+        "gespeichert unter"
+      ]
+    }
+  ]
+}
