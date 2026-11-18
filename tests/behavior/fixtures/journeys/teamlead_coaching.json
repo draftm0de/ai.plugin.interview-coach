@@ -123,40 +123,31 @@
       ],
       "required_groups": [
         [
-          "nicht gespeichert",
-          "nichts gespeichert",
-          "ohne Speicherung",
-          "keine Dateien",
-          "keinen Workspace",
-          "nicht speicher"
-        ],
-        [
-          "drei Fragen",
-          "3 Fragen",
-          "drei Antworten",
-          "3 Antworten",
-          "drei ursprüngliche",
-          "3 ursprüngliche"
-        ],
-        [
           "zweiter Versuch",
           "überarbeitet",
           "verbesserte Antwort",
           "erneut",
           "Wiederholung"
-        ],
-        [
-          "nicht stabil",
-          "nicht nachgewiesen",
-          "weiter üben",
-          "nicht ausreichend",
-          "kein stabiler"
         ]
       ],
       "must_not_contain": [
         "Nächste Frage:",
         "state.md aktualisiert",
         "gespeichert unter"
+      ],
+      "required_regex_groups": [
+        [
+          "(?:nicht|nichts|keine?\\s+\\w*|ohne)\\s+(?:\\w+\\s+){0,5}(?:gespeichert|speicher\\w*|dateien|datei\\w*|persistenz|workspace|geschrieben)",
+          "(?:dateien|datei\\w*|workspace|lernstand)\\s+(?:\\w+\\s+){0,5}(?:nicht|keine|ohne)\\s+\\w*"
+        ],
+        [
+          "(?:drei|3)\\s+(?:\\w+\\s+){0,3}(?:fragen|antworten|szenarien)",
+          "(?:fragen|antworten)\\s*(?:1\\s*[-–]\\s*3|eins\\s+bis\\s+drei)"
+        ],
+        [
+          "(?:nicht|kein\\w*|noch\\s+nicht)\\s+(?:\\w+\\s+){0,5}(?:stabil\\w*|belegt|nachgewiesen|gefestigt|bestätigt)",
+          "(?:stabil\\w*|kompetenzstatus|fortschritt)\\s+(?:\\w+\\s+){0,5}(?:nicht|kein\\w*|offen|unbestätigt)"
+        ]
       ]
     }
   ]
