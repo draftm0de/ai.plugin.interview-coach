@@ -8,12 +8,12 @@ on:
       - "tests/**"
       - "pyproject.toml"
       - "Makefile"
-      - "plugin.mk"
       - "docs.mk"
       - "docs/**"
       - "README*.md"
       - "LICENSE"
-      - "install.sh"
+      - ".claude-plugin/**"
+      - ".codex-plugin/**"
       - "plugin.json"
       - "assets/**"
       - ".github/workflows/**"
@@ -25,12 +25,12 @@ on:
       - "tests/**"
       - "pyproject.toml"
       - "Makefile"
-      - "plugin.mk"
       - "docs.mk"
       - "docs/**"
       - "README*.md"
       - "LICENSE"
-      - "install.sh"
+      - ".claude-plugin/**"
+      - ".codex-plugin/**"
       - "plugin.json"
       - "assets/**"
 jobs:
@@ -45,10 +45,9 @@ jobs:
           python-version: "3.12"
       - name: Run stdlib tests
         run: make test
-      - name: Validate and build plugin distributions
+      - name: Validate repository import manifests
         run: |
           make check-plugin
-          make package
       - name: Validate and build documentation export
         run: |
           make check-docs-export

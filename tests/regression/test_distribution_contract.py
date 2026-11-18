@@ -2,43 +2,27 @@ import json
 import subprocess
 import tempfile
 from pathlib import Path
-import zipfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "skills/zyris-interview-coach"
 
 class InstallationTests(unittest.TestCase):
-    def test_plugin_metadata(self):
-        chatgpt = json.loads((ROOT / "plugin.json").read_text())
-        with tempfile.TemporaryDirectory() as td:
-            subprocess.run(['python3', str(ROOT / 'scripts/plugin.py'), 'build', '--output', td], check=True, capture_output=True)
-            with zipfile.ZipFile(Path(td) / 'zyris-interview-coach-claude-plugin.zip') as package:
-                claude = json.loads(package.read('.claude-plugin/plugin.json'))
-            expected = {str(p.relative_to(ROOT)): p.read_bytes() for p in SOURCE.rglob('*')
-                        if p.is_file() and '__pycache__' not in p.parts}
-            for archive in Path(td).glob('*.zip'):
-                with zipfile.ZipFile(archive) as package:
-                    runtime = {name: package.read(name) for name in package.namelist() if name.startswith('skills/')}
-                    self.assertEqual(expected, runtime, archive.name)
-                    self.assertFalse(any(name.startswith('.claude/skills/') for name in package.namelist()))
-        self.assertEqual('skills', chatgpt['extensions']['io.zyris.distribution']['skillRoot'])
-        self.assertFalse((ROOT / '.claude/skills').exists())
-        self.assertFalse((ROOT / '.codex-plugin/plugin.json').exists())
-        self.assertFalse((ROOT / '.claude-plugin/plugin.json').exists())
-        for manifest in (chatgpt, claude):
-            self.assertEqual(manifest["name"], "zyris-interview-coach")
-            self.assertEqual(manifest["author"]["name"], "Peter Fux")
-            self.assertEqual(manifest["author"]["url"], "https://draftmode.io")
-            self.assertIn("Job Coach", manifest["keywords"])
-        ui = chatgpt["extensions"]["com.openai"]["interface"]
-        self.assertEqual(ui["developerName"], "draftmode")
-        self.assertEqual(ui["websiteURL"], "https://draftmode.io")
-        self.assertTrue((ROOT / "assets/icon.png").is_file())
+
+    def test_repository_manifests_without_marketplace_or_version(self):
+        subprocess.run(['python3', str(ROOT/'scripts/plugin.py'), 'check'], check=True, capture_output=True)
+        for relative in ('plugin.json','.claude-plugin/plugin.json','.codex-plugin/plugin.json'):
+            manifest=json.loads((ROOT/relative).read_text())
+            self.assertEqual('interview-coach',manifest['name'])
+            self.assertNotIn('version',manifest)
+        self.assertEqual('Interview Coach',json.loads((ROOT/'.claude-plugin/plugin.json').read_text())['displayName'])
+        for relative in ('.claude-plugin/marketplace.json','.agents/plugins/marketplace.json'):
+            self.assertFalse((ROOT/relative).exists())
+        self.assertTrue((SOURCE/'SKILL.md').is_file())
 
     def test_user_entrypoint_is_separate_from_developer_installer(self):
         installer = ROOT / "install.sh"
-        self.assertTrue(installer.is_file())
+        self.assertFalse(installer.exists())
         readme = (ROOT / "README.md").read_text().lower()
         self.assertIn("docs/de/installation.md", readme)
         quickstart = readme.split("## schnellstart\n", 1)[1].split("\n## ", 1)[0]
@@ -46,17 +30,6 @@ class InstallationTests(unittest.TestCase):
         self.assertNotIn("bash install.sh", quickstart)
         self.assertNotIn("make install-", readme)
 
-    def test_portable_package_has_no_private_files(self):
-        with tempfile.TemporaryDirectory() as td:
-            dest = Path(td) / "zyris-interview-coach-chatgpt-plugin.zip"
-            subprocess.run(["python3", str(ROOT / "scripts/plugin.py"),
-                            "build", "--output", td], check=True, capture_output=True)
-            with zipfile.ZipFile(dest) as z:
-                names = z.namelist()
-                self.assertIn("skills/zyris-interview-coach/SKILL.md", names)
-                self.assertIn("skills/zyris-interview-coach/references/setup.md", names)
-                self.assertIn("skills/zyris-interview-coach/scripts/interview_workspace.py", names)
-                self.assertFalse(any("/candidate/" in n or "/runs/" in n or "/jobs/" in n for n in names))
 
     def test_workspace_cli_bundled_and_in_sync(self):
         bundled = SOURCE / "scripts/interview_workspace.py"

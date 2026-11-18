@@ -4,77 +4,56 @@
 
 [Home](../../README.en.md) · [Documentation](README.md) · [Install](installation.md) · [Use](usage.md) · [Examples](screens.md) · [FAQ](faq.md) · [Storage](storage.md) · [Development](development.md)
 
-## Choose your platform
+## Choose a platform
 
-**Preview, checked 2026-11-18. No public ZYRIS catalog or approved release yet.** A final catalog address will be supplied after publication. The source repository is not an installable catalog. A marketplace is a plugin catalog.
+This repository contains **Interview Coach** (`interview-coach`), with no marketplace of its own. Its bundled skill identity `zyris-interview-coach` is unchanged. Install through **Draftmode AI Plugins** (`draftmode-ai-plugins`): `https://github.com/draftm0de/ai.plugins`.
 
-| Surface | Requirements and evidence |
-|---|---|
-| Claude web / Desktop (Chat, Cowork) | Paid Claude account; organization must allow the catalog. German desktop path through the repository dialog evidenced by user screenshots; installation pending. Web in a supported browser; macOS/Windows desktop require separate verification. |
-| Claude Code | Configured Claude Code access. Local CLI 2.1.319 on macOS; CLI testing does not prove desktop behavior. |
-| Codex Desktop | Plugin-enabled account and permitted catalog. User reported a graphical path to add a catalog; installation remains pending. Organization policies may restrict installation. |
-| Codex CLI | Local 0.165.0 on macOS; isolated installation evidence on the development page. Other operating systems not natively tested. |
-| ChatGPT | Separate surface and account permissions. Not interchangeable with Codex; package upload acceptance remains open. |
-
-The intended catalog path needs no source checkout, Python or Make. A specific Codex plan is not promised without checking the actual account.
+Publish the new `ai.plugin.interview-coach` content first, then the `ai.plugins` catalog. Graphical acceptance of this new entry is still pending. Your account needs access to both repositories.
 
 ## Install
 
-### Claude graphical interface
+### Claude Desktop
 
-**Claude Desktop on macOS, German interface.**
-
-1. Open **Einstellungen** (Settings).
-2. Scroll to **Anpassungen** and select **Plugins**.
-3. Click **+ Hinzufügen → Marketplace hinzufügen**.
-4. Choose **Aus einem Repository hinzufügen**.
-5. Under **URL**, enter the published catalog address or use **Repository auswählen**. Supported format: GitHub `owner/repo` or a Git repository URL.
-6. Click **Synchronisieren**.
-
-[Official Claude plugin setup help](https://support.claude.com/en/articles/13837440-use-plugins-in-claude) · [Screenshots and verification status](screens.md#native-screenshots).
-
-### Claude Code
-
-After publication, enter `/plugin marketplace add` followed by the approved catalog address in a Claude Code session. Then open `/plugin install zyris-interview-coach@zyris`, review contents and scope, and confirm installation. No invented address is supplied here. [Official instructions](https://code.claude.com/docs/en/discover-plugins).
-
-Claude Code can select a catalog revision with `#TAG`. Official syntax example (not a ZYRIS address):
-
-```text
-/plugin marketplace add https://gitlab.example.com/your-group/your-marketplace.git#v1.0.0
-```
-
-The tag must exist in the **catalog repository** and contain an installable catalog. It is not automatically the plugin version. A fixed tag does not follow the latest catalog revision. [Official source formats](https://code.claude.com/docs/en/discover-plugins#add-a-marketplace).
+1. Open **Settings → Customizations → Plugins**.
+2. Select **+ Add → Add marketplace → Add from a repository**.
+3. Enter `https://github.com/draftm0de/ai.plugins` and select **Sync**.
+4. Select **Interview Coach** and install the plugin.
 
 ### Codex Desktop
 
-1. Open the **User Icon**.
-2. Select **Settings**.
-3. Open **Integration → Plugins**.
-4. Click **+ Add → A Marketplace**.
-5. Use the published catalog address in the following dialog.
+1. Open **User Icon → Settings → Integration → Plugins**.
+2. Select **+ Add → A Marketplace**.
+3. Enter `https://github.com/draftm0de/ai.plugins` and sync the marketplace.
+4. Select **Interview Coach** and install the plugin.
 
-Menu path reported by the user on 2026-11-18; the next input dialog and installation of our catalog remain to be checked. CLI registration is therefore no longer the default route in this guide.
+### Optional terminal installation
 
-[Official OpenAI plugin and catalog documentation](https://developers.openai.com/plugins/build/plugins) · [Verification status](release-evidence.md).
+Inside a Claude Code terminal session, not the Desktop Code tab input:
 
-### Permissions
+```text
+/plugin marketplace add https://github.com/draftm0de/ai.plugins
+/plugin install interview-coach@draftmode-ai-plugins
+```
 
-Both products bundle instructions and local helpers, without a separate ZYRIS service login. Allow file access only to the intended workspace. Research needs internet access; local helpers need a compatible Python runtime supplied by the host. This is a runtime requirement for those features, not a manual plugin installation step. Without it, persistent storage or document creation must not be reported as successful. Connected services and chat history have their own permissions and retention.
+For Codex CLI:
+
+```sh
+codex plugin marketplace add https://github.com/draftm0de/ai.plugins
+codex plugin add interview-coach@draftmode-ai-plugins
+```
+
+The technical plugin identity is `interview-coach`; the display name is **Interview Coach**. No ZIP, tag or separate catalog is required. ChatGPT account imports and organization permissions require separate acceptance.
 
 ## Update
 
-Claude Code: refresh the catalog and plugin through `/plugin`, then start a new session. Alternatively use `/plugin marketplace update zyris` and `/plugin update zyris-interview-coach@zyris`. Graphical Claude and Codex update controls have not been natively verified here; follow your host's plugin manager and check the displayed version.
-
-Codex CLI: `codex plugin marketplace upgrade zyris`, then `codex plugin add zyris-interview-coach@zyris`. This applies to the future Git catalog, not local test catalog delivery. Back up private data and check it in a new chat after updating. If an update fails, disable the plugin and await a corrected release. Rolling back the catalog does not guarantee that installed caches downgrade.
+Sync the shared marketplace in plugin settings and open a new session. The manifests do not pin a version. A push alone does not prove that a user installation has updated.
 
 ## Remove
 
-Remove the plugin in the host's plugin manager. CLI alternatives: `codex plugin remove zyris-interview-coach@zyris`, or `/plugin uninstall zyris-interview-coach@zyris` in Claude Code. Organization-required plugins may be locked. Removing a catalog is separate and does not replace uninstalling the plugin. Keep private training data, documents and projects outside plugin caches; delete them separately only if you want to.
+Remove **Interview Coach** in plugin settings. Keep private training data outside the installation. Do not remove the entire marketplace if you still want to use Plugin Manager.
 
 ## Verify first use
 
-Open a new chat, select the plugin and send **“Start interview coach setup”**. This prompt comes from `plugin.json`; it is not a claimed model response.
+Open a new chat and send **“Start interview coach setup”**. Select English and **Do not save**, practice with a fictional question and finish with `stop`. Persistent storage needs an authorized private workspace and a compatible Python runtime in the host; see [Storage](storage.md). Internet research requires internet access.
 
-Choose English and **Do not save**. Request a fictional interview question, answer it, then send `stop`. Check that the interview ends. Read [storage guidance](storage.md) before providing private CVs or persisting progress.
-
-If the catalog is missing, check its address, publication and admin approval. If the plugin is missing after installation, open a new chat or restart the app. Duplicate entries may come from an older development install; remove that separately only after successful testing. [Developer and release instructions](development.md).
+Check that both **Plugin Manager** and **Interview Coach** are offered by the marketplace. [Development](development.md) · [Evidence](release-evidence.md).

@@ -1,6 +1,6 @@
-# ZYRIS Interview Coach
+# Interview Coach
 
-[![Validate interview coach](https://github.com/draftm0de/zyris.skill.interview-coach/actions/workflows/validate.yml/badge.svg)](https://github.com/draftm0de/zyris.skill.interview-coach/actions/workflows/validate.yml)
+[![Validate interview coach](https://github.com/draftm0de/ai.plugin.interview-coach/actions/workflows/validate.yml/badge.svg)](https://github.com/draftm0de/ai.plugin.interview-coach/actions/workflows/validate.yml)
 [Deutsch](README.md) | [English](README.en.md)
 
 <img src="docs/assets/zyris-icon.png" width="48" alt="ZYRIS-Dokumentationssymbol">
@@ -9,7 +9,7 @@
 
 **[Installation](docs/de/installation.md) · [Nutzung](docs/de/usage.md) · [Beispiele](docs/de/screens.md) · [FAQ](docs/de/faq.md) · [Dokumentation](docs/de/README.md)**
 
-**Installationsvorschau:** [Claude](docs/de/installation.md#claude-grafischer-weg) · [Claude Code](docs/de/installation.md#claude-code) · [Codex Desktop](docs/de/installation.md#codex-desktop). Öffentliche Katalogadresse und GUI-Abnahme stehen noch aus.
+**Installationsvorschau:** [Claude](docs/de/installation.md#claude-desktop) · [Claude Code](docs/de/installation.md#optionale-terminal-installation) · [Codex Desktop](docs/de/installation.md#codex-desktop). Marketplace: `https://github.com/draftm0de/ai.plugins`. Die Veröffentlichung des neuen Eintrags und die GUI-Abnahme stehen noch aus.
 
 ## Für wen ist das gedacht?
 
@@ -69,7 +69,7 @@ Die lokale CLI unterstützt den Adapter `local` mit `init`, `status`, `finish`, 
 
 ## Projektstatus
 
-Öffentliches MVP mit Basisversion in `plugin.json` und inhaltsabhängigen Paketversionen. Lizenz: [MIT](LICENSE). Kein Kundenportal, Zahlungssystem oder Lizenzserver; eine Veröffentlichung in einem Plugin-Verzeichnis ist durch das Repository nicht belegt.
+MVP mit versionslosen Plugin-Manifesten und Repository-Import über Draftmode AI Plugins. Lizenz: [MIT](LICENSE). Kein Kundenportal, Zahlungssystem oder Lizenzserver; eine Veröffentlichung in einem Plugin-Verzeichnis ist durch das Repository nicht belegt.
 
 Lokale Speicherung und Paketierung besitzen deterministische Tests. CLI-Modellabläufe verwenden fiktive Daten und heuristische Prüfungen. Native Host-Abnahme bleibt separat; erfolgreiche Modelltests belegen weder Oberfläche noch Speicherintegration. Isolierte native CLI-Prüfungen sind im [Release-Nachweis](docs/de/release-evidence.md) dokumentiert; die GUI-Abnahme bleibt offen.
 
@@ -79,7 +79,7 @@ Website-Export aus denselben Quellen: `make check-docs-export` und `make export-
 
 ```bash
 make test          # Deterministische Unit- und Regressionstests ohne Modellaufrufe
-make package       # Drei Plugin-ZIPs und lokale Claude-/Codex-Kataloge bauen
+make check-plugin  # Versionslose Host-Manifeste prüfen
 ```
 
 Alternativ nach Installation von pytest: `python3 -m pytest -q`. Python 3.10+ ist für Paketierung und lokalen Speicherhelfer erforderlich. [Entwicklung und Tests](docs/de/development.md).

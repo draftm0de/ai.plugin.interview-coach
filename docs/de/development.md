@@ -6,11 +6,7 @@
 
 ## Kanonische Quelle
 
-Die [kanonische Quelle](../../skills/zyris-interview-coach/SKILL.md) liegt unter `skills/zyris-interview-coach/`, einschließlich Referenzen und `scripts/interview_workspace.py`. Nur diese Laufzeit wird ausgeliefert. Root-`scripts/` enthält den Build-Helfer `plugin.py`; Tests und Dokumentation sind Entwicklungsdateien.
-
-`plugin.json` legt Identität, Basisversion, MIT-Lizenz und Distribution fest. `Makefile` bindet `plugin.mk` ein; dieses und `install.sh` delegieren an den gemeinsamen Helfer. Die drei Installer-Dateien sind abgeleitete Kopien der ZYRIS-Dokumentationsvorlagen. Änderungen zuerst an den Vorlagen vornehmen und geprüft übertragen; Verify erkennt Abweichungen.
-
-Gemeinsame Ablageregeln: `.tmp/` entsteht erst für lokale Arbeitsdateien oder Diagnoseausgaben; `dist/` enthält erzeugte Pakete. `.DS_Store`, `.idea/`, Caches, Bytecode und Abhängigkeitsumgebungen werden ignoriert. Projektspezifische Ignore-Regeln und Diagnosen bleiben erhalten. Entwicklungswerkzeuge liegen in Root-`scripts/`, Laufzeit-Scripts beim jeweiligen Skill. Lokale Python-Imports sollen keinen Bytecode erzeugen; entpackte Pakete werden unabhängig vom Checkout getestet. Verify des Dokumentationsplugins prüft wirksame Ignore-Regeln, versionierte Ausgabedateien und statisch Python-Syntax/Imports im Paket; es führt keinen Zielcode aus und ersetzt keine Host-Abnahme.
+`skills/zyris-interview-coach/` enthält unverändert die Coaching-Laufzeit. `plugin.json` definiert das Plugin `interview-coach` mit Anzeigename **Interview Coach**. `make sync-plugin` leitet `.claude-plugin/plugin.json` und `.codex-plugin/plugin.json` ab; `make check-plugin` prüft Drift. Alle Manifeste bleiben versionslos. Der gemeinsame Marketplace liegt im separaten Repository `ai.plugins`; hier gibt es keinen eigenen Katalog.
 
 ## Prüfungen
 
@@ -48,29 +44,16 @@ Diese Tests senden Skill-Text und fiktive Prompts an Modelle und können Credits
 
 Ausgaben liegen ignoriert unter `.tmp/tests/behavior/<cli>/`, `.tmp/tests/smoke/<cli>/` und `.tmp/tests/journey/<cli>/<journey>/`. Journey-Artefakte enthalten Antwort, Diagnose pro Schritt und `result.json`. `OUT=.tmp/tests/behavior/custom` ändert den Behavior-Ausgabeort; deterministische Tests verwenden temporäre Verzeichnisse.
 
-`ZYRIS_TEST_CODEX_NATIVE=1 make test` aktiviert optional den echten Codex-Installations-, Wiederinstallations- und Update-Test in einem isolierten temporären Profil. Er wurde bei dieser Dokumentationsaktualisierung nicht ausgeführt.
 
 Native Abnahme bleibt separat: Installation, Auswahl, Berechtigungen, gespeicherte Stellenrecherche, Speichern am Ende und Wiederaufnahme im neuen Chat mit einem Wegwerf-Arbeitsbereich prüfen. CLI-Modelltests belegen diese Host-Funktionen nicht.
 
 ## Paketierung
 
-```bash
-make check-plugin
-make package
-```
-
-Es entstehen drei Plugin-ZIPs für ChatGPT, Claude und Codex sowie `dist/claude-marketplace` und `dist/codex-marketplace`. `package-chatgpt`, `package-claude-plugin` und `package-all` delegieren an denselben Builder; `package-claude-chat` endet mit einem Migrationshinweis. Die ältere Make-Hilfe „both“ ist überholt: Es werden drei ZIPs erzeugt.
-
-Host-Manifeste und Paketversionen mit Inhaltshash werden abgeleitet. Keine separat gepflegten Host-Manifeste im Checkout. `LICENSE` wird mitgeliefert; Dokumentation und Tests werden nicht paketiert.
+Repository-Import benötigt keine Plugin-ZIPs. `plugin.mk`, die alten Installationsskripte und die Tag-/Release-Werkzeuge sind entfernt. Tests prüfen die versionierten Manifeste und die unabhängig kopierte Coaching-Laufzeit. Ein gemeinsamer lokaler Entwicklungs-Marketplace wird erst im nächsten Schritt harmonisiert.
 
 ## CI und Releases
 
-[Release-Betrieb und Freigaben](release-operations.md) · [Prüfnachweis](release-evidence.md).
-
-
-[GitHub Actions](../../.github/workflows/validate.yml) führt deterministische Tests, Manifestprüfung und Paketierung aus. Modelltests bleiben optional. Die Pfadfilter berücksichtigen auch Dokumentation, README-Dateien, Lizenz und Export-Makefile; die CI prüft und baut den Dokumentationsexport.
-
-Ein lokaler Katalog oder ein ZIP veröffentlicht weder einen Verzeichniseintrag noch einen GitHub Release. Vor einer öffentlichen Einreichung sind tatsächliche Publisher-/Datenschutz-/Nutzungsmetadaten und Host-Abnahme erforderlich. Keine erfundenen rechtlichen URLs oder Veröffentlichungsbehauptungen.
+Die [CI](../../.github/workflows/validate.yml) führt `make test`, `make check-plugin` und die Website-Exportprüfung aus. Modelltests bleiben optional. Veröffentliche zuerst dieses Plugin-Repository und anschließend den neuen Eintrag in `ai.plugins`. Tags oder GitHub Releases sind dafür nicht erforderlich. [Ablauf](release-operations.md) · [Prüfstand](release-evidence.md).
 
 ## Dokumentation pflegen
 
@@ -80,6 +63,6 @@ Ein lokaler Katalog oder ein ZIP veröffentlicht weder einen Verzeichniseintrag 
 
 Deutsch: `README.md` und `docs/de/`; vollständiges Englisch: `README.en.md` und `docs/en/`. Beide Sprachfassungen beschreiben dieselben Befehle, Grenzen und Fakten. Gegenstücklinks, vorgegebene Überschriften und Medienherkunft erhalten. GitHub rendert Markdown direkt; keine zusätzliche Website, kein Wiki- oder Pages-Deployment nötig.
 
-`docs/documentation.json` enthält Quellenzeiger und die Dokumentationssprachen dieses Repositories (`documentation.languages`: `de`, `en`; `default_language`: `de`). Produktfakten bleiben ausschließlich in ihren kanonischen Quellen. Quellen bei jeder Aktualisierung neu lesen. Die installierte ZYRIS-Dokumentationsaktion aktualisiert Dokumentation; `make update` aktualisiert dagegen das installierte Coaching-Plugin. Anschließend Dokumentationsvalidierung und Verify ausführen. Screenshots erst nach Prüfung auf private Inhalte ergänzen; siehe [Aufnahmecheckliste](screens.md).
+`docs/documentation.json` enthält Quellenzeiger und die Dokumentationssprachen dieses Repositories (`documentation.languages`: `de`, `en`; `default_language`: `de`). Produktfakten bleiben ausschließlich in ihren kanonischen Quellen. Quellen bei jeder Aktualisierung neu lesen. Die installierte ZYRIS-Dokumentationsaktion aktualisiert Dokumentation; Plugin-Updates erfolgen über den gemeinsamen Marketplace. Anschließend Dokumentationsvalidierung und Verify ausführen. Screenshots erst nach Prüfung auf private Inhalte ergänzen; siehe [Aufnahmecheckliste](screens.md).
 
 Dokumentation erstellt mit ZYRIS Skill Manager.

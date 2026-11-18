@@ -1,6 +1,6 @@
-# ZYRIS Interview Coach
+# Interview Coach
 
-[![Validate interview coach](https://github.com/draftm0de/zyris.skill.interview-coach/actions/workflows/validate.yml/badge.svg)](https://github.com/draftm0de/zyris.skill.interview-coach/actions/workflows/validate.yml)
+[![Validate interview coach](https://github.com/draftm0de/ai.plugin.interview-coach/actions/workflows/validate.yml/badge.svg)](https://github.com/draftm0de/ai.plugin.interview-coach/actions/workflows/validate.yml)
 [Deutsch](README.md) | [English](README.en.md)
 
 <img src="docs/assets/zyris-icon.png" width="48" alt="ZYRIS documentation icon">
@@ -9,7 +9,7 @@ Practice job interviews with role-specific questions, concrete feedback and evid
 
 **[Install](docs/en/installation.md) · [Usage](docs/en/usage.md) · [Examples](docs/en/screens.md) · [FAQ](docs/en/faq.md) · [Documentation](docs/en/README.md)**
 
-**Installation preview:** [Claude](docs/en/installation.md#claude-graphical-interface) · [Claude Code](docs/en/installation.md#claude-code) · [Codex Desktop](docs/en/installation.md#codex-desktop). Public catalog address and UI acceptance are pending.
+**Installation preview:** [Claude](docs/en/installation.md#claude-desktop) · [Claude Code](docs/en/installation.md#optional-terminal-installation) · [Codex Desktop](docs/en/installation.md#codex-desktop). Marketplace: `https://github.com/draftm0de/ai.plugins`. Publication of the new entry and UI acceptance are pending.
 
 ## Who it is for
 
@@ -69,7 +69,7 @@ The local Python CLI supports `init`, `status`, `finish`, `resume`, `recover`, `
 
 ## Project status
 
-This is a public repository MVP with a base version in `plugin.json` and content-derived package versions. There is no customer portal, payment system, license server or published plugin-directory listing established by this repository.
+This MVP uses versionless plugin manifests and repository import through Draftmode AI Plugins. There is no customer portal, payment system, license server or published plugin-directory listing established by this repository.
 
 Local persistence and packaging have deterministic tests. CLI model journeys use fictional scenarios and heuristic checks. Native Claude/ChatGPT/Codex platform acceptance remains separate; a passing model test does not prove host UI or storage integration.
 
@@ -81,7 +81,6 @@ Website export from the same sources: `make check-docs-export` and `make export-
 
 ```bash
 make test          # deterministic unit and regression tests; no model calls
-make package       # generate three plugin ZIPs and local Claude/Codex marketplaces
 ```
 
 Optional alternative after installing pytest: `python3 -m pytest -q`. Python 3.10+ is required for packaging and the local workspace CLI. See [development and testing](docs/en/development.md) for model tests and repository boundaries.

@@ -18,7 +18,7 @@ The project is licensed under [MIT](../../LICENSE), as declared in [plugin.json]
 
 ### Do I need Git or Python to practise?
 
-The documented build/install path uses Git and Bash, with Python 3.10+ for packaging and the local storage helper. A person receiving an already-built ZIP does not need the repository to upload it. Host-side code execution and persistence capabilities vary. Git is not required for a local candidate workspace.
+Add `https://github.com/draftm0de/ai.plugins` as a marketplace and select Interview Coach. No ZIP or local checkout is needed. The local storage helper requires Python 3.10+, but not Git. Host-side execution and persistence capabilities still need verification.
 
 ## Privacy and persistence
 
@@ -38,15 +38,15 @@ No. Keep all real candidate data in a separate private workspace or supply it pr
 
 ### Why does the skill not appear?
 
-Check the selected installation target and printed destination. Claude Code, Claude Chat skill upload and plugin ZIP upload are different workflows. Start a new host session after installation. Check permissions and the [installation guide](installation.md); do not assume a local install is visible on the web.
+Check the Draftmode AI Plugins marketplace, repository access and permissions. Sync the catalog, select Interview Coach and start a new session. See [Installation](installation.md); local CLI installation does not establish web or account UI visibility.
 
 ### Why can I not upload a ChatGPT plugin?
 
-Upload availability depends on account, workspace and permissions. Building the ZIP cannot grant upload access. Ask the workspace administrator to check the host's documented plugin controls. See [installation](installation.md).
+This workflow uses a repository marketplace instead of upload. If marketplace import is unavailable, ask your administrator to check account and workspace permissions. See [Installation](installation.md).
 
 ### Why am I still using an old version?
 
-Local copies and manual ZIP uploads do not update when the repository changes. Pull the intended source, reinstall or rebuild, upload the new package as required, and start a new session. The MVP does not configure automatic marketplace updates.
+Sync the shared marketplace in the host and start a new session. A repository push alone does not prove that installed content has refreshed. Verify the actual behavior after updating.
 
 ### What if saving reports “busy”, “stale state” or “pending transaction”?
 

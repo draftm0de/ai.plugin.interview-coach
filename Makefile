@@ -1,5 +1,4 @@
 include docs.mk
-include plugin.mk
 export PYTHONDONTWRITEBYTECODE := 1
 # Developer-only entry points. Not shipped in plugin/skill packages.
 PYTHON ?= python3
@@ -8,7 +7,7 @@ CASE ?=
 OUT ?= .tmp/tests/behavior/$(CLI)
 JOURNEY ?= teamlead_coaching
 
-.PHONY: help test test-unit test-regression test-behavior test-journey test-smoke test-list package-chatgpt package-claude-plugin package-claude-chat package-all
+.PHONY: help test test-unit test-regression test-behavior test-journey test-smoke test-list check-plugin sync-plugin
 
 help:
 	@echo 'make check-docs-export / export-docs  Validate / build the website documentation bundle'
@@ -17,10 +16,6 @@ help:
 	@echo "make test-behavior         LLM simulations (CLI=codex|claude; optional CASE=id)"
 	@echo "make test-journey          Scripted multi-step coaching test (CLI=codex|claude)"
 	@echo "make test-smoke            Legacy LLM smoke checks (CLI=codex|claude)"
-	@echo "make package-chatgpt       Build ChatGPT plugin ZIP"
-	@echo "make package-claude-plugin Build Claude Code plugin ZIP"
-	@echo "make install/update TARGET=claude|chatgpt|codex  Native plugin workflow"
-	@echo "make package-all           Build all three plugin ZIPs"
 
 test: test-unit test-regression
 
@@ -42,8 +37,9 @@ test-journey:
 test-smoke:
 	$(PYTHON) tests/behavior/run_smoke.py --cli $(CLI) --output-dir .tmp/tests/smoke/$(CLI)
 
-# Compatibility package aliases all delegate to the shared plugin builder.
-package-chatgpt package-claude-plugin package-all: package
-package-claude-chat:
-	@echo 'Standalone skill packages retired; use make package for plugin ZIPs.' >&2
-	@exit 2
+# Repository import metadata; no per-plugin marketplace or ZIP builds.
+.SUFFIXES:
+check-plugin:
+	$(PYTHON) scripts/plugin.py check
+sync-plugin:
+	$(PYTHON) scripts/plugin.py sync

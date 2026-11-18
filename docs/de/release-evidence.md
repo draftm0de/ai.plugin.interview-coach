@@ -1,5 +1,8 @@
 # Release-Prüfnachweis
 
+Aktueller Umbau am 19.11.2026: Plugin `interview-coach`, Anzeigename Interview Coach, Repository-Import über `ai.plugins`. Frühere ZIP-/Release-Nachweise unten betreffen den alten Aufbau und belegen nicht den neuen grafischen Import. Die lokale Prüfung der neuen Kataloge installierte beide Plugins in isolierten Claude-/Codex-Profilen; die GitHub-URL des Coaches wurde dabei ausschließlich für den Test auf eine temporäre Git-Kopie umgeleitet. Der veröffentlichte GitHub-/GUI-Test steht noch aus.
+
+
 ## Aktueller Stand: Skill Manager
 
 18.11.2026: Manager-Umbenennung und publish-Fähigkeit lokal umgesetzt. Manager: 86 Tests, davon 85 bestanden und ein optionaler Test übersprungen. Interview-Coach: 97 Tests, davon 96 bestanden und ein optionaler Test übersprungen. Die 18 neuen Publish-Tests sind enthalten: konkrete Freigabe, Versions-/Dateikonflikte, unveränderte fremde Arbeit, Journalsperre, Wiederaufnahme und Nutzung aus dem extrahierten Paket. Test-Commits entstehen nur in wegwerfbaren fiktiven Testrepositories; keine Commits in den Produkt-Repositories.

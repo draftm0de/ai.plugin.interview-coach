@@ -6,14 +6,7 @@
 
 ## Source of truth
 
-The [canonical skill](../../skills/zyris-interview-coach/SKILL.md) contains runtime instructions, references and the bundled workspace CLI. Root `scripts/` contains packaging tools only. Keep documentation and demo assets under `docs/`; they are not shipped in plugin ZIPs.
-
-- `skills/zyris-interview-coach/`: **shipped runtime**, including `SKILL.md`, references and the one canonical `scripts/interview_workspace.py`.
-- Root `scripts/`: **development/build-only**, with the sole manifest-driven builder `plugin.py`; these are not shipped as runtime.
-- Root `tests/`: **development/test-only**: `unit/test_<source_module>.py` for source-oriented unit tests, `regression/test_<behavior>.py` for contracts and cross-component regressions, and `behavior/run.py`, `behavior/run_smoke.py`, `behavior/fixtures/` for opt-in LLM simulations; never shipped.
-- `Makefile` includes `plugin.mk`; it and `install.sh` delegate to `scripts/plugin.py`. These installer files are generated snapshots of the documentation plugin templates. Update the templates first and propagate reviewed changes; the documentation verify action detects drift.
-
-Shared hygiene: `.tmp/` is created only when local scratch work or diagnostic output needs it; `dist/` contains generated packages. `.DS_Store`, `.idea/`, caches, bytecode and dependency environments are ignored. Preserve project-specific ignore rules and diagnostic evidence. Development scripts belong in root `scripts/`; runtime scripts belong with their skill. Use bytecode suppression for local Python imports and test extracted packages independently of the checkout. Documentation-plugin verify checks effective ignore rules, tracked generated files and static packaged-Python syntax/imports; it does not run target code or prove host acceptance.
+`skills/zyris-interview-coach/` retains the coaching runtime. `plugin.json` defines `interview-coach` with display name **Interview Coach**. `make sync-plugin` derives `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`; `make check-plugin` detects drift. All manifests remain versionless. The shared marketplace lives in the separate `ai.plugins` repository; this plugin has no catalog of its own.
 
 ## Checks
 
@@ -45,7 +38,6 @@ make test-list                    # list fictional behavior scenarios
 make test-behavior CLI=codex      # opt-in model tests, may use credits
 make test-behavior CLI=claude CASE=lead_feedback
 make test-smoke CLI=codex         # older smoke suite
-make package                  # all distribution ZIPs
 ```
 
 Test results from LLMs must be reviewed; the checks are heuristic and cannot validate ChatGPT's native UI. All three model runners separate the model's stdout from diagnostic stderr to avoid false passes from echoed prompts or CLI warnings.
@@ -93,18 +85,11 @@ Journey checks normalize Markdown for pattern matching and check competence caut
 
 ## Packaging
 
-`make package` produces ChatGPT, Claude and Codex plugin ZIPs plus `dist/claude-marketplace` and `dist/codex-marketplace`. `make check-plugin` validates the manifest. Package aliases `package-chatgpt`, `package-claude-plugin` and `package-all` delegate to the same builder; `package-claude-chat` exits with migration guidance. The legacy help text saying “both” is outdated: three ZIPs are built.
-
-`plugin.json` owns identity, base version, MIT license and distribution configuration. Generated host manifests and versions with content hashes are derived. The builder includes `LICENSE`; docs and tests are excluded. No host manifest is maintained separately in the checkout.
+Repository imports need no plugin ZIPs. `plugin.mk`, legacy installation scripts and tag/release tooling are removed. Tests check committed manifests and a separately copied coaching runtime. The shared local development marketplace will be harmonized in a later step.
 
 ## CI and releases
 
-[Release operations and approval gates](release-operations.md) · [Verification evidence](release-evidence.md).
-
-
-[GitHub Actions](../../.github/workflows/validate.yml) runs deterministic tests, manifest validation and plugin packaging. Model tests remain opt-in. The builder generates a local Claude marketplace under `dist/claude-marketplace`; it does not publish a directory listing or GitHub Release. `plugin.json` owns the base version; host package versions include a content hash.
-
-The workflow path filters do not include documentation-only changes. Local documentation validation remains necessary.
+[CI](../../.github/workflows/validate.yml) runs `make test`, `make check-plugin` and website export validation. Model tests remain optional. Publish this plugin repository first, then the new `ai.plugins` entry. No tag or GitHub Release is required. [Workflow](release-operations.md) · [Evidence](release-evidence.md).
 
 ## Maintain documentation
 
@@ -116,6 +101,5 @@ Edit Markdown and relative links directly in this repository. GitHub renders the
 
 Before a public directory submission, supply actual required publisher/privacy/terms metadata and perform the host's platform acceptance. Do not invent legal URLs or describe a generated ZIP as a published plugin.
 
-Native Codex installer integration can be tested with `ZYRIS_TEST_CODEX_NATIVE=1 make test`. It uses a temporary isolated Codex profile to verify installation, reinstallation and content updates without changing the personal profile. This native integration test was not run during this documentation update.
 
-German defaults: `README.md`, `docs/de/`. Full English equivalents: `README.en.md`, `docs/en/`. Keep counterpart links, heading order and asset provenance aligned. `docs/documentation.json` stores source pointers and this repository’s documentation language policy (`documentation.languages`: `de`, `en`; `default_language`: `de`). Product facts remain in their canonical sources. Use the installed ZYRIS documentation update action, then validate and verify; `make update` updates the installed coaching plugin instead. Documentation prepared with ZYRIS Skill Manager.
+German defaults: `README.md`, `docs/de/`. Full English equivalents: `README.en.md`, `docs/en/`. Keep counterpart links, heading order and asset provenance aligned. `docs/documentation.json` stores source pointers and this repository’s documentation language policy (`documentation.languages`: `de`, `en`; `default_language`: `de`). Product facts remain in their canonical sources. Use the installed ZYRIS documentation update action, then validate and verify; plugin updates use the shared marketplace. Documentation prepared with ZYRIS Skill Manager.

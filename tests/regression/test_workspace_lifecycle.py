@@ -6,7 +6,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
-import zipfile
+import shutil
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / 'skills/zyris-interview-coach'
@@ -17,12 +17,7 @@ class WorkspaceLifecycleTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.base = Path(temporary.name)
-        archive = self.base / 'zyris-interview-coach-chatgpt-plugin.zip'
-        subprocess.run([sys.executable, str(ROOT / 'scripts/plugin.py'),
-                        'build', '--output', str(self.base)],
-                       check=True, capture_output=True, text=True)
-        with zipfile.ZipFile(archive) as package:
-            package.extractall(self.base / 'installed')
+        shutil.copytree(SOURCE, self.base/'installed/skills/zyris-interview-coach', ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
         self.cli = self.base / 'installed/skills/zyris-interview-coach/scripts/interview_workspace.py'
         self.config = self.base / 'config.json'
         self.workspace = self.base / 'fictional-workspace'

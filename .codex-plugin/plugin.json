@@ -1,0 +1,40 @@
+{
+  "name": "interview-coach",
+  "description": "Adaptive job interview coaching with role-specific practice, feedback, interviewer research and private training progress.",
+  "author": {
+    "name": "Peter Fux",
+    "url": "https://draftmode.io"
+  },
+  "homepage": "https://draftmode.io",
+  "repository": "https://github.com/draftm0de/ai.plugin.interview-coach",
+  "license": "MIT",
+  "keywords": [
+    "Personal Training",
+    "Job Coach",
+    "Jobs",
+    "interviews",
+    "career"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Interview Coach",
+    "shortDescription": "Prepare for job interviews",
+    "longDescription": "Practice role-specific interviews with constructive feedback, research publicly documented employers and interviewers, and maintain private training progress when a writable workspace is available. Developed by Peter Fux at draftmode.",
+    "developerName": "draftmode",
+    "category": "Productivity",
+    "capabilities": [
+      "Interview coaching",
+      "Role-specific preparation",
+      "Public interviewer research",
+      "Training feedback"
+    ],
+    "websiteURL": "https://draftmode.io",
+    "defaultPrompt": [
+      "Start interview coach setup",
+      "Practice for a specific job interview",
+      "Review my interview answers"
+    ],
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png"
+  }
+}

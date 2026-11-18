@@ -16,7 +16,7 @@ Ein Plugin mit Coaching-Skill und lokalem Python-Helfer. Es bringt weder ein eig
 
 ## Voraussetzungen
 
-Zum Bauen und Installieren brauchst du Git für den Clone, Bash und Python 3.10+; Make ist optional. Ein bereits gebautes ZIP kannst du ohne Repository hochladen, sofern dein Host das erlaubt. Der lokale Speicherhelfer benötigt Python, aber kein Git. Host-Ausführung und dauerhafte Speicherung müssen verfügbar und geprüft sein.
+Für die Installation füge den Marketplace `https://github.com/draftm0de/ai.plugins` hinzu und wähle Interview Coach. Kein ZIP oder lokaler Checkout ist nötig. Der lokale Speicherhelfer benötigt Python 3.10+, aber kein Git. Host-Ausführung und dauerhafte Speicherung müssen verfügbar und geprüft sein.
 
 ## Datenschutz und Speicherung
 
@@ -36,11 +36,11 @@ In einen separaten privaten Arbeitsbereich oder als privat bereitgestellte Datei
 
 ### Plugin fehlt oder alte Version aktiv?
 
-Prüfe Zielhost, ausgegebenen Installationsort und Berechtigungen. Plugin-Upload, frühere Einzel-Skills und lokale Projektquellen sind verschiedene Wege. Öffne eine neue Sitzung und folge der [Installation](installation.md). Eine lokale Installation erscheint nicht automatisch im Web. Aktualisiere den gewünschten Quellstand unter Erhalt eigener Änderungen, baue/installiere erneut beziehungsweise lade das neue ZIP hoch. Das MVP richtet keine automatischen Katalog-Updates ein.
+Prüfe den Marketplace Draftmode AI Plugins, Repository-Zugriff und Berechtigungen. Synchronisiere den Katalog, wähle Interview Coach und öffne eine neue Sitzung. Siehe [Installation](installation.md). Eine lokale CLI-Installation belegt keine Sichtbarkeit in der Web- oder Kontooberfläche.
 
 ### ChatGPT-Upload fehlt?
 
-Die Option hängt von Konto, Arbeitsbereich und Berechtigungen ab. Ein ZIP-Build schaltet sie nicht frei; prüfe die offiziellen Host-Hinweise mit deiner Administration.
+Für diesen Installationsweg wird kein Upload verwendet. Füge das Marketplace-Repository hinzu; ist diese Option gesperrt, kläre die Konto- und Arbeitsbereichsfreigaben mit deiner Administration.
 
 ### „busy“, „stale state“ oder „pending transaction“?
 

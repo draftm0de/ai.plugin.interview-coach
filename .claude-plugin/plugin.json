@@ -1,0 +1,19 @@
+{
+  "name": "interview-coach",
+  "description": "Adaptive job interview coaching with role-specific practice, feedback, interviewer research and private training progress.",
+  "author": {
+    "name": "Peter Fux",
+    "url": "https://draftmode.io"
+  },
+  "homepage": "https://draftmode.io",
+  "repository": "https://github.com/draftm0de/ai.plugin.interview-coach",
+  "license": "MIT",
+  "keywords": [
+    "Personal Training",
+    "Job Coach",
+    "Jobs",
+    "interviews",
+    "career"
+  ],
+  "displayName": "Interview Coach"
+}
