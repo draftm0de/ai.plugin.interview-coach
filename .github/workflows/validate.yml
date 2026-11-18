@@ -7,6 +7,10 @@ on:
       - "scripts/**"
       - "tests/**"
       - "pyproject.toml"
+      - "install.sh"
+      - "plugin.json"
+      - ".claude-plugin/**"
+      - "assets/**"
       - ".github/workflows/validate.yml"
   pull_request:
     paths:
@@ -14,6 +18,10 @@ on:
       - "scripts/**"
       - "tests/**"
       - "pyproject.toml"
+      - "install.sh"
+      - "plugin.json"
+      - ".claude-plugin/**"
+      - "assets/**"
 jobs:
   test:
     runs-on: ubuntu-latest
