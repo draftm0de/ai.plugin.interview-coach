@@ -2,7 +2,7 @@
 PYTHON ?= python3
 CLI ?= codex
 CASE ?=
-OUT ?= /tmp/zyris-quality
+OUT ?= .tmp/tests/behavior/$(CLI)
 
 .PHONY: help test test-unit test-regression test-behavior test-smoke test-list package-chatgpt package-claude-plugin package-claude-chat package-all
 
@@ -28,10 +28,10 @@ test-list:
 	$(PYTHON) tests/behavior/run.py --list
 
 test-behavior:
-	$(PYTHON) tests/run_behavior.py --cli $(CLI) $(if $(CASE),--case $(CASE),) --output-dir $(OUT)
+	$(PYTHON) tests/behavior/run.py --cli $(CLI) $(if $(CASE),--case $(CASE),) --output-dir $(OUT)
 
 test-smoke:
-	$(PYTHON) tests/behavior/run_smoke.py --cli $(CLI)
+	$(PYTHON) tests/behavior/run_smoke.py --cli $(CLI) --output-dir .tmp/tests/smoke/$(CLI)
 
 package-chatgpt:
 	bash install.sh chatgpt
