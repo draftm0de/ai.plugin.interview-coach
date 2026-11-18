@@ -42,6 +42,14 @@ def build_prompt(context, introduction, history, current_user):
     )
 
 
+def check_step(step, answer, code=0):
+    errors = check(step, answer, code)
+    for group in step.get('required_regex_groups', []):
+        if not any(re.search(pattern, answer, flags=re.IGNORECASE | re.DOTALL) for pattern in group):
+            errors.append('missing semantic pattern: ' + ' | '.join(group))
+    return errors
+
+
 def execute_journey(journey, cli, output_dir, timeout, runner=run):
     output_dir.mkdir(parents=True, exist_ok=True)
     history = []
@@ -55,10 +63,7 @@ def execute_journey(journey, cli, output_dir, timeout, runner=run):
             code, answer, diagnostics = 124, "", "TIMEOUT"
         except __import__("subprocess").TimeoutExpired:
             code, answer, diagnostics = 124, "", "TIMEOUT"
-        errors = check(step, answer, code)
-        for group in step.get('required_regex_groups', []):
-            if not any(re.search(pattern, answer, flags=re.IGNORECASE | re.DOTALL) for pattern in group):
-                errors.append('missing semantic pattern: ' + ' | '.join(group))
+        errors = check_step(step, answer, code)
         prefix = f"{index:02d}-{step['id']}"
         (output_dir / (prefix + ".txt")).write_text(answer, encoding="utf-8")
         (output_dir / (prefix + ".stderr.txt")).write_text(diagnostics, encoding="utf-8")
