@@ -58,7 +58,7 @@ Default to `targeted` when a concrete vacancy is present, otherwise `general`; `
 
 1. Briefly identify the selected interview type, 2–3 prioritized learning goals and evidence gaps.
 2. In coached modes ask **one question at a time**, wait for the user's own answer; do not pre-answer it.
-3. After **each** answer, assess strengths, important omissions, actionable improvements and a natural spoken model answer **without inventing professional experiences**.
+3. After **each** answer in coached modes, give a role-relative **Gesamtbewertung x/10**, a short breakdown by relevant criteria, concrete strengths, specific improvements and (when useful) a natural spoken model answer **without inventing professional experiences**. Choose criteria freely for the question and seniority; see `references/evaluation.md`. In uninterrupted `mock`, evaluate only at the end.
 4. Require a second independently worded attempt when an important weakness recurs, and compare it with the first.
 5. Adapt subsequent questions to observed performance and target role; do not recycle prior questions verbatim.
 6. For situational answers favor: **goal/context → 2–3 concrete steps → decision/owner → stakeholder communication → intended or evidenced effect**.
