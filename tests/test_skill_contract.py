@@ -42,6 +42,14 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("Always ask who will conduct the interview", main)
         self.assertIn("role and seniority", training)
 
+    def test_structured_role_aware_answer_feedback(self):
+        evaluation = (SKILL / "references/evaluation.md").read_text()
+        training = (SKILL / "references/training.md").read_text()
+        for phrase in ("Gesamtbewertung", "Einzelbewertung", "Was besonders gut war", "Was ich verbessern würde", "mock"):
+            self.assertIn(phrase, evaluation)
+        self.assertIn("Gesamtbewertung x/10", training)
+        self.assertIn("role-adapted", training)
+
     def test_neutral_first_run(self):
         setup = (SKILL / 'references/setup.md').read_text().lower()
         self.assertIn('do not silently select a default private repository', setup)
