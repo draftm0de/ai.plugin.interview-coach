@@ -181,3 +181,22 @@ python3 tests/run_behavior.py --cli claude --output-dir /tmp/zyris-quality
 The behavior suite checks role-aware score structure, feedback, no-storage stop behavior and interviewer uncertainty. It sends skill/reference text and fictional prompts to the selected model, may consume API/CLI credits, and uses **heuristic** text checks. Review generated outputs manually; a passing score does not prove good coaching or UI behavior. It does not read private candidate workspaces. Run it explicitly, not automatically on every commit.
 
 **Platform acceptance remains manual:** Install the new ChatGPT plugin or Claude Chat skill and verify native selection controls, permissions, durable workspace reuse across a new chat, saved job research and end-of-run persistence. A CLI simulation cannot validate those host-specific interactions. Use a disposable workspace for acceptance tests; do not overwrite a real candidate's data.
+
+## Repository boundaries and Make targets
+
+- `.claude/skills/zyris-interview-coach/`: **shipped runtime**, including `SKILL.md`, references and the one canonical `scripts/interview_workspace.py`.
+- Root `scripts/`: **development/build-only**, with `package_skill.py` and `package_plugin.py`; these are not shipped as runtime.
+- Root `tests/`: **development/test-only**, including `test_*.py`, `fixtures/`, `run_behavior.py` and `run_smoke.py`; not shipped.
+- `Makefile`: developer convenience commands; `install.sh` remains the user-facing installer.
+
+```bash
+make help
+make test                         # deterministic, no LLM costs
+make test-list                    # list fictional behavior scenarios
+make test-behavior CLI=codex      # opt-in model tests, may use credits
+make test-behavior CLI=claude CASE=lead_feedback
+make test-smoke CLI=codex         # older smoke suite
+make package-all                  # all distribution ZIPs
+```
+
+Test results from LLMs must be reviewed; the checks are heuristic and cannot validate ChatGPT's native UI. The behavior runner now separates the model's stdout from diagnostic stderr to avoid false passes from echoed prompts or CLI warnings.
