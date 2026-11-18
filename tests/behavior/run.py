@@ -62,6 +62,8 @@ def main():
     if not shutil.which(args.cli):
         parser.error(f"{args.cli} CLI not installed")
     context = skill_context()
+    if args.output_dir is None and args.cli:
+        args.output_dir = ROOT / ".tmp" / "tests" / "behavior" / args.cli
     if args.output_dir:
         args.output_dir.mkdir(parents=True, exist_ok=True)
     failures = 0
