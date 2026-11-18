@@ -20,13 +20,7 @@
 
 ## Coached turn
 
-1. Evaluate the spontaneous answer against the target role and the actual question. Use a score or compact table when it genuinely helps, not automatically.
-2. Name one or two things that were done well.
-3. Name **specific gaps**, phrased as things the candidate can change.
-4. Offer a natural improved spoken answer when helpful, at an appropriate length for the role and question, faithful to documented candidate evidence.
-5. If weak in a prioritized skill, ask for own second try first; otherwise continue with next distinct question.
-6. Do not claim an action, success, metric or chronology the candidate has not established.
-7. Track initial and independent second-attempt quality separately from polished example quality.
+After each candidate answer in coached modes, use the role-adapted feedback structure in `references/evaluation.md`: **Gesamtbewertung x/10**, relevant **Einzelbewertungen**, **Was war gut?**, **Was würde ich verbessern?**, and a stronger natural spoken answer when helpful. Be specific and evidence-based; avoid a rigid universal rubric or formulaic verbosity. Adapt follow-up questions to the gaps actually observed, and invite a second independent attempt where it adds learning value. Never invent experience, outcomes, metrics or chronology. Keep original-answer evidence distinct from model suggestions.
 
 ## Early stop, pause and language
 
