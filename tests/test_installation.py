@@ -49,13 +49,13 @@ class InstallationTests(unittest.TestCase):
     def test_storage_type_selection_precedes_path(self):
         setup = (SOURCE / "references/setup.md").read_text()
         self.assertIn("selection first, details second", setup)
-        self.assertIn("without requiring a path in that first reply", setup)
+        self.assertIn("Do not require a path in the first reply", setup)
         for choice in ("Lokales Verzeichnis", "Privates Git-Repository", "Dateien selbst verwalten", "Nicht speichern"):
             self.assertIn(choice, setup)
 
     def test_setup_confirmation_pattern(self):
         text = (SOURCE / "references/setup.md").read_text()
-        for phrase in ("Ja, verwenden", "Nein, anderen Wert angeben", "Wait for confirmation", "plain text chat"):
+        for phrase in ("native choice/question tool", "weiterverwenden", "Wait for permission", "natural-language question"):
             self.assertIn(phrase, text)
 
     def test_setup_contract_present(self):
