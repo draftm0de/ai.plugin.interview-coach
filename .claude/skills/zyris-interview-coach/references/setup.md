@@ -15,28 +15,15 @@ For first-time setup, **offer a storage-type choice before requesting a path or 
 - **Dateien selbst verwalten** — downloadable workspace files and manual re-upload on return, without implying automatic persistence.
 - **Nicht speichern** — start an ephemeral interview without creating, updating, exporting or requesting workspace files. The coach can still give feedback and adapt questions **within the current conversation**, but does not retain training history, research or progress for future sessions. Each new chat starts from scratch unless the user independently supplies prior information.
 
-If native controls are unavailable, show the same four options as a short numbered selection, **without requiring a path in that first reply**. After selection, propose/ask for the concrete location and close that decision with a clear confirmation. For **Nicht speichern**, no path or repository is requested; briefly confirm that the session is temporary and begin coaching. Do not ask for CV upload unless it is needed for the requested interview type; never persist an uploaded CV in this mode. If a workspace is already connected, first offer **Vorhandenen Workspace verwenden / Speicherort wechseln**, rather than repeating setup. Never assume the UI can render custom controls merely because the skill requests them.
+If native controls are unavailable, state the four choices briefly in natural language and accept the option name as a reply; use numbered choices only if the host has no selection UI and numbering genuinely helps. **Do not require a path in the first reply**. After selection, propose/ask for the concrete location and close that decision with a clear confirmation. For **Nicht speichern**, no path or repository is requested; briefly confirm that the session is temporary and begin coaching. Do not ask for CV upload unless it is needed for the requested interview type; never persist an uploaded CV in this mode. If a workspace is already connected, first offer **Vorhandenen Workspace verwenden / Speicherort wechseln**, rather than repeating setup. Never assume the UI can render custom controls merely because the skill requests them.
 
-## Interaction pattern: confirm a proposed value
+## Interaction pattern: prefer real choices, not simulated buttons
 
-When a storage option, folder, repository, CV source or training mode has a sensible proposed value, **close the decision in the same message**. Do not merely suggest a value and leave the user to guess how to respond.
+When a proposed value or an existing workspace needs confirmation, **use the host's native choice/question tool if actually available**. Present clear labels such as "Bestehenden Workspace verwenden" and "Anderen Speicherort auswählen"; allow a different path or repository only when that option is selected. The skill itself cannot create native controls if the host has no such tool.
 
-- Ask **one decision per turn**, with a concise question, a concrete proposed value and two explicit choices: **"Ja, verwenden"** and **"Nein, anderen Wert angeben"**.
-- When supported by the host, use a native selection control with an optional text input for the alternative. Never promise that a skill can force UI widgets to appear.
-- In plain text chat, use a compact fallback such as:
-  ```text
-  Soll ich diesen Ordner für deine privaten Interviewdaten verwenden?
-  ~/ai/interview-workspace
+If no native choice tool is available, ask a short natural-language question and accept replies such as "weiterverwenden" or "anderen wählen" without requiring numeric input. Do not claim a native control was displayed. Avoid rigid scripted lists, mandatory "1/2" answers, or statements like "the setup guide requires this selection". Only ask one decision at a time.
 
-  1. Ja, diesen Ordner verwenden
-  2. Nein, anderen Ordner angeben (bitte Pfad nennen)
-  ```
-- Only show an input field or request an alternative value **after** "Nein" is chosen, unless the host offers a compact conditional input.
-- Do not claim to know the user's folder structure, permissions or file contents unless they were actually inspected with an authorized tool. A proposed folder is only a suggestion.
-- **Wait for confirmation before creating folders, changing a storage pointer, writing files or requesting access**. Then verify access and continue to the CV step without re-asking the same question.
-- If the user already gave an exact folder or repository, do not propose a different default. Confirm the supplied location only when authorization or ambiguity requires it.
-- Apply the same decision pattern to an existing workspace ("Weiterverwenden / Anderen auswählen"), a known CV ("Vorhandenen verwenden / Neuen hochladen") and interview mode ("Allgemein / Stellenbezogen"), with wording suited to the choice.
-- Keep explanations of access and persistence brief, and provide additional detail only if requested or necessary for informed consent.
+For a known existing workspace, show its verified path and the fact that it contains existing data, then ask whether to reuse it. Never silently replace the pointer or delete existing data. Wait for permission before writing. For a new location, suggest an editable path but do not pretend it exists until checked. Apply the same interaction principles to CV choice and interview mode.
 
 ## Bundled local workspace tool and persistence boundaries
 
