@@ -35,6 +35,21 @@ class BehaviorHarnessTests(unittest.TestCase):
                 "must_not_contain": ["state.md aktualisiert"], "required_groups": []}
         self.assertTrue(module.check(case, "Zusammenfassung. state.md aktualisiert."))
 
+    def test_stop_accepts_valid_completion_without_summary_heading(self):
+        cases = json.loads((ROOT / "tests/behavior/fixtures/quality-cases.json").read_text())
+        case = next(c for c in cases if c["id"] == "stop_without_storage")
+        answer = ("Das Interview ist beendet (stopped_early). Es wurde genau eine Frage "
+                  "beantwortet. Der Wortlaut fehlt, daher keine Bewertung möglich. "
+                  "Es wurden keine Dateien erstellt und nichts gespeichert.")
+        self.assertEqual(module.check(case, answer), [])
+
+    def test_stop_rejects_false_persistence_claim(self):
+        cases = json.loads((ROOT / "tests/behavior/fixtures/quality-cases.json").read_text())
+        case = next(c for c in cases if c["id"] == "stop_without_storage")
+        answer = ("Das Interview ist beendet. Genau eine Frage beantwortet. "
+                  "Nicht gespeichert. state.md aktualisiert.")
+        self.assertTrue(module.check(case, answer))
+
     def test_skill_context_includes_evaluation_and_research(self):
         context = module.skill_context()
         self.assertIn("Gesamtbewertung", context)
