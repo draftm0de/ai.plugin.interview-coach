@@ -6,6 +6,7 @@ This checks cross-turn reasoning, NOT native CLI session persistence or host UI.
 """
 import argparse
 import json
+import re
 from pathlib import Path
 import shutil
 import sys
@@ -55,6 +56,9 @@ def execute_journey(journey, cli, output_dir, timeout, runner=run):
         except __import__("subprocess").TimeoutExpired:
             code, answer, diagnostics = 124, "", "TIMEOUT"
         errors = check(step, answer, code)
+        for group in step.get('required_regex_groups', []):
+            if not any(re.search(pattern, answer, flags=re.IGNORECASE | re.DOTALL) for pattern in group):
+                errors.append('missing semantic pattern: ' + ' | '.join(group))
         prefix = f"{index:02d}-{step['id']}"
         (output_dir / (prefix + ".txt")).write_text(answer, encoding="utf-8")
         (output_dir / (prefix + ".stderr.txt")).write_text(diagnostics, encoding="utf-8")
