@@ -66,7 +66,7 @@ No CV, job ad, interviewer research or user training history belongs here. A sep
 - [Evaluation](.claude/skills/zyris-interview-coach/references/evaluation.md)
 - [Storage](.claude/skills/zyris-interview-coach/references/storage.md)
 
-## Portable skill completeness and storage caveat\n\nBoth `bash install.sh claude` and `bash install.sh claude-chat` include `scripts/interview_workspace.py` in the installed folder or ZIP. The script is copied from the single canonical development source `scripts/interview_workspace.py`. No repository checkout is required to run the bundled script after installation.\n\n**Important:** A hosted Claude Chat sandbox is not automatically the user's Mac. A folder created there may disappear between sessions. Cross-chat persistence is guaranteed only when the chosen storage is demonstrably durable and accessible on the next session (for example a connected private repository). Do not treat a home-directory pointer in an ephemeral container as a durable personal setting.\n\n## First-time setup and storage
+## Portable skill completeness and storage caveat\n\nBoth `bash install.sh claude` and `bash install.sh claude-chat` include `scripts/interview_workspace.py` in the installed folder or ZIP. The script is the canonical runtime source inside the skill directory. No repository checkout is required to run the bundled script after installation.\n\n**Important:** A hosted Claude Chat sandbox is not automatically the user's Mac. A folder created there may disappear between sessions. Cross-chat persistence is guaranteed only when the chosen storage is demonstrably durable and accessible on the next session (for example a connected private repository). Do not treat a home-directory pointer in an ephemeral container as a durable personal setting.\n\n## First-time setup and storage
 
 ### Local workspace (no Git required)
 
@@ -83,7 +83,7 @@ The local pointer is stored in `~/.config/zyris/zyris-interview-coach/config.jso
 At the end of a run, prepare a complete Markdown run file and updated state file, then save both:
 
 ```bash
-python3 scripts/interview_workspace.py finish \
+python3 <installed-skill-directory>/scripts/interview_workspace.py finish \
   --run-id 2026-11-17-example \
   --run-file /path/to/new-run.md \
   --state-file /path/to/new-state.md
@@ -115,8 +115,8 @@ python3 -m unittest discover -s tests -v
 **Optional local model smoke tests (may incur usage costs):**
 
 ```bash
-python3 scripts/run_llm_smoke.py --cli claude
-python3 scripts/run_llm_smoke.py --cli codex
+python3 tests/run_smoke.py --cli claude
+python3 tests/run_smoke.py --cli codex
 ```
 
 Prerequisites: installed and authenticated `claude` or `codex` CLI, suitable permissions and model quota. The smoke harness uses `claude -p` and `codex exec` with read-only sandbox where supported. It only tests selected output heuristics, not complete interview quality or storage integration. Run manually, review outputs and avoid placing private CVs in public fixtures. CLI flags may change with installed versions; check `claude --help` / `codex exec --help`.
@@ -172,10 +172,10 @@ python3 -m unittest discover -s tests -v
 Run **opt-in model behavior simulations** locally with an authenticated Codex CLI or Claude Code CLI. They use fictional candidates and do not need the ChatGPT UI:
 
 ```bash
-python3 scripts/test_interview_behavior.py --list
-python3 scripts/test_interview_behavior.py --cli codex --output-dir /tmp/zyris-quality
+python3 tests/run_behavior.py --list
+python3 tests/run_behavior.py --cli codex --output-dir /tmp/zyris-quality
 # or:
-python3 scripts/test_interview_behavior.py --cli claude --output-dir /tmp/zyris-quality
+python3 tests/run_behavior.py --cli claude --output-dir /tmp/zyris-quality
 ```
 
 The behavior suite checks role-aware score structure, feedback, no-storage stop behavior and interviewer uncertainty. It sends skill/reference text and fictional prompts to the selected model, may consume API/CLI credits, and uses **heuristic** text checks. Review generated outputs manually; a passing score does not prove good coaching or UI behavior. It does not read private candidate workspaces. Run it explicitly, not automatically on every commit.
