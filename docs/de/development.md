@@ -65,6 +65,9 @@ Host-Manifeste und Paketversionen mit Inhaltshash werden abgeleitet. Keine separ
 
 ## CI und Releases
 
+[Release-Betrieb und Freigaben](release-operations.md) · [Prüfnachweis](release-evidence.md).
+
+
 [GitHub Actions](../../.github/workflows/validate.yml) führt deterministische Tests, Manifestprüfung und Paketierung aus. Modelltests bleiben optional. Die Pfadfilter berücksichtigen auch Dokumentation, README-Dateien, Lizenz und Export-Makefile; die CI prüft und baut den Dokumentationsexport.
 
 Ein lokaler Katalog oder ein ZIP veröffentlicht weder einen Verzeichniseintrag noch einen GitHub Release. Vor einer öffentlichen Einreichung sind tatsächliche Publisher-/Datenschutz-/Nutzungsmetadaten und Host-Abnahme erforderlich. Keine erfundenen rechtlichen URLs oder Veröffentlichungsbehauptungen.
@@ -79,4 +82,4 @@ Deutsch: `README.md` und `docs/de/`; vollständiges Englisch: `README.en.md` und
 
 `docs/documentation.json` enthält Quellenzeiger und die Dokumentationssprachen dieses Repositories (`documentation.languages`: `de`, `en`; `default_language`: `de`). Produktfakten bleiben ausschließlich in ihren kanonischen Quellen. Quellen bei jeder Aktualisierung neu lesen. Die installierte ZYRIS-Dokumentationsaktion aktualisiert Dokumentation; `make update` aktualisiert dagegen das installierte Coaching-Plugin. Anschließend Dokumentationsvalidierung und Verify ausführen. Screenshots erst nach Prüfung auf private Inhalte ergänzen; siehe [Aufnahmecheckliste](screens.md).
 
-Dokumentation erstellt mit ZYRIS Skill Documentation.
+Dokumentation erstellt mit ZYRIS Skill Manager.

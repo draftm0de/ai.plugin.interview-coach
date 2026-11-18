@@ -27,4 +27,4 @@
 
 [Plugin manifest](../../plugin.json) · [MIT license](../../LICENSE)
 
-Documentation prepared with ZYRIS Skill Documentation.
+Documentation prepared with ZYRIS Skill Manager.

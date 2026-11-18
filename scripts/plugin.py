@@ -77,7 +77,7 @@ def configuration(root=None):
     return manifest, source, market, extra
 
 
-def payload():
+def payload(release_version=None):
     manifest, skill_root, market, extra = configuration()
     # Host metadata is derived from the portable manifest; no duplicate version source.
     claude = {key: manifest[key] for key in ('name', 'version', 'description', 'author', 'homepage', 'repository', 'license', 'keywords') if key in manifest}
@@ -128,7 +128,9 @@ def payload():
     fingerprint = hashlib.sha256(json.dumps(manifest, sort_keys=True).encode())
     for name, content in sorted({**files, **commands}.items()):
         fingerprint.update(name.encode() + b'\0' + content + b'\0')
-    version = manifest['version'] + '-dev.h' + fingerprint.hexdigest()[:12]
+    version = release_version or manifest['version'] + '-dev.h' + fingerprint.hexdigest()[:12]
+    if release_version and not re.fullmatch(re.escape(manifest['version']) + r'(?:-(?:rc|beta|alpha)\.(?:0|[1-9]\d*))?', release_version):
+        raise ValueError('Release version must match manifest base version (optional alpha/beta/rc.N)')
     manifest['version'] = claude['version'] = version
     # Local build configuration is not a runtime host extension.
     if 'extensions' in manifest:
@@ -156,6 +158,7 @@ def archive(path, files):
         with zipfile.ZipFile(temporary, 'w', compression=zipfile.ZIP_DEFLATED) as output:
             for name, content in sorted(files.items()):
                 info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+                info.create_system = 3
                 info.compress_type = zipfile.ZIP_DEFLATED
                 info.external_attr = 0o100644 << 16
                 output.writestr(info, content)

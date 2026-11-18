@@ -6,61 +6,75 @@
 
 ## Plattform auswählen
 
-Du brauchst Python 3.10+, Bash und optional Make. Für native Installation muss die CLI des gewählten Hosts verfügbar sein. Führe Befehle im Repository-Stamm aus. Das Plugin bündelt den Coaching-Skill; es ist keine eigene Chat-Anwendung.
+**Vorschau, geprüft am 18.11.2026. Noch kein öffentlicher ZYRIS-Katalog und kein freigegebenes Release.** Die endgültige Katalogadresse fehlt bis zur Veröffentlichung. Verwende nicht die Quellrepository-Adresse als Katalog. Ein Marketplace ist ein Plugin-Katalog.
 
-Offizielle Host-Anleitungen, geprüft am 18.11.2026: [Claude Code](https://code.claude.com/docs/en/plugins/install), [ChatGPT-Upload und Zugang](https://help.openai.com/en/articles/20001256-plugins-in-chatgpt), [OpenAI-Plugins](https://learn.chatgpt.com/docs/plugins). Verfügbarkeit und Berechtigungen hängen vom Konto ab. Diese Quellen belegen keine Abnahme dieses konkreten Pakets.
+| Oberfläche | Voraussetzungen und Prüfstatus |
+|---|---|
+| Claude Web / Desktop (Chat, Cowork) | Bezahlter Claude-Zugang; Organisation muss den Katalog erlauben. Deutscher Desktop-Menüpfad bis zum Repository-Dialog durch Nutzer-Screenshots belegt; Installation offen. Web im unterstützten Browser; Desktop auf macOS/Windows separat prüfen. |
+| Claude Code | Eingerichteter Claude-Code-Zugang. Lokale CLI: 2.1.319 auf macOS. CLI-Test ist keine Desktop-Abnahme. |
+| Codex Desktop | Konto mit Plugin-Zugang und erlaubtem Katalog. Menüpfad zum Hinzufügen eines Katalogs vom Nutzer mitgeteilt; Installation noch offen. Organisationsrichtlinien können Installation verhindern. |
+| Codex CLI | Lokale Version 0.165.0 auf macOS; isolierter Installationstest, siehe Entwicklungsseite. Andere Betriebssysteme nicht nativ geprüft. |
+| ChatGPT | Eigenständige Oberfläche und Kontofreigaben. Kein Ersatz für Codex; Upload dieses Pakets bleibt separat abzunehmen. |
+
+Du brauchst für den vorgesehenen Katalogweg keinen Quellcheckout, Python oder Make. Es wird kein bestimmter Tarif für Codex versprochen, solange der konkrete Account nicht geprüft ist.
 
 ## Installieren
 
-```bash
-git clone https://github.com/draftm0de/zyris.skill.interview-coach.git
-cd zyris.skill.interview-coach
-```
+### Claude: grafischer Weg
 
-| Aktion | Make | Gleichwertiger Bash-Befehl |
-|---|---|---|
-| Drei ZIPs und lokale Kataloge bauen | `make package` | `bash install.sh build` |
-| Codex installieren | `make install TARGET=codex` | `bash install.sh install --target codex` |
-| Claude Code installieren | `make install TARGET=claude` | `bash install.sh install --target claude` |
-| Claude-Installation vorbereiten | `make install TARGET=claude DRY_RUN=1` | `bash install.sh install --target claude --dry-run` |
-| ChatGPT-Upload vorbereiten | `make install TARGET=chatgpt` | `bash install.sh install --target chatgpt` |
+**Claude Desktop auf macOS, deutsche Oberfläche.**
 
-Ein Dry Run baut Dateien und zeigt Befehle, ruft aber den Host nicht auf. ChatGPT-Befehle bauen immer nur; sie laden nichts hoch.
+1. Öffne **Einstellungen**.
+2. Scrolle links zum Abschnitt **Anpassungen** und wähle **Plugins**.
+3. Klicke **+ Hinzufügen → Marketplace hinzufügen**.
+4. Wähle **Aus einem Repository hinzufügen**.
+5. Gib unter **URL** die veröffentlichte Katalogadresse ein beziehungsweise wähle sie über **Repository auswählen**. Unterstütztes Format: GitHub `owner/repo` oder eine Git-Repository-URL.
+6. Klicke auf **Synchronisieren**.
 
-### Codex
-
-Der Installer verwendet `codex plugin marketplace add` und `codex plugin add`. Der generierte Katalog liegt in `dist/codex-marketplace`, das Host-Manifest im Paket unter `.codex-plugin/plugin.json`. Öffne danach einen neuen Chat; starte Codex gegebenenfalls neu. Das Repository muss für spätere Updates verfügbar bleiben. Frühere Dokumentation nennt einen Test mit Codex CLI 0.165.0; dieser native Test wurde bei dieser Aktualisierung nicht wiederholt. Andere Plugins und private Arbeitsbereiche werden nicht entfernt.
+[Offizielle Claude-Hilfe zur Einrichtung von Plugins](https://support.claude.com/en/articles/13837440-use-plugins-in-claude) · [Screenshots und Prüfstand](screens.md#echte-screenshots).
 
 ### Claude Code
 
-Der Helfer baut und registriert `dist/claude-marketplace` und installiert über die native Plugin-Verwaltung. Starte Claude Code neu und fordere die Einrichtung an. Bewahre den Checkout für Updates auf. Checkout und Host-Pakete verwenden denselben neutralen Laufzeitpfad `skills/zyris-interview-coach`. Die Host-Manifeste entstehen beim Build. Teste das installierte Plugin aus einem anderen Projekt, um das installierte Paket unabhängig vom Quellcheckout zu prüfen.
+Nach Veröffentlichung in einer Claude-Code-Sitzung zunächst `/plugin marketplace add` gefolgt von der freigegebenen Katalogadresse eingeben. Danach `/plugin install zyris-interview-coach@zyris` öffnen, Umfang und Inhalt prüfen und die Installation bestätigen. Der Platzhalter ist absichtlich kein ausführbarer Installationsbefehl. [Offizielle Anleitung](https://code.claude.com/docs/en/discover-plugins).
 
-### Frühere Einzelinstallationen
+Ein bestimmter Katalogstand lässt sich in Claude Code mit `#TAG` auswählen. Offizielles Syntaxbeispiel (keine ZYRIS-Adresse):
 
-`claude-chat`, `claude-plugin`, `all` und `--yes` sind eingestellt und liefern Migrationshinweise. `bash install.sh claude` installiert nun das Plugin, `bash install.sh chatgpt` bereitet den Upload vor, `bash install.sh codex` installiert nativ. Alte Skill-Kopien bleiben erhalten. Prüfe sie nach erfolgreicher Plugin-Installation auf Dopplungen und entferne sie bei Bedarf gesondert. Eine Installation gilt nur für den gewählten Host.
+```text
+/plugin marketplace add https://gitlab.example.com/your-group/your-marketplace.git#v1.0.0
+```
 
-### ChatGPT
+Der Tag muss im **Katalogrepository** existieren und dort einen installierbaren Katalog enthalten. Er ist nicht automatisch die Plugin-Version. Ein fest gewählter Tag folgt nicht dem neuesten Katalogstand. [Offizielle Quellenformate](https://code.claude.com/docs/en/discover-plugins#add-a-marketplace).
 
-Lade `dist/zyris-interview-coach-chatgpt-plugin.zip` über die für dein Konto verfügbare Plugin-Verwaltung hoch und aktiviere das Plugin. Das Paket enthält den Skill und den Python-Helfer, keinen entfernten MCP-Speicherdienst. Ein gebautes ZIP belegt weder Host-Abnahme noch Speicherung über Chat-Grenzen hinweg.
+### Codex Desktop
+
+1. Öffne das **User Icon**.
+2. Wähle **Settings**.
+3. Öffne **Integration → Plugins**.
+4. Klicke **+ Add → A Marketplace**.
+5. Verwende die veröffentlichte Katalogadresse im folgenden Dialog.
+
+Menüpfad vom Nutzer am 18.11.2026 mitgeteilt; der folgende Eingabedialog und die Installation unseres Katalogs sind noch zu prüfen. Eine CLI-Einrichtung ist damit nicht mehr der Standardweg dieser Anleitung.
+
+[Offizielle OpenAI-Dokumentation zu Plugins und Katalogen](https://developers.openai.com/plugins/build/plugins) · [Prüfstand](release-evidence.md).
+
+### Berechtigungen
+
+Beide Produkte bündeln Anweisungen und lokale Helfer, keine zusätzliche Anmeldung an einen ZYRIS-Dienst. Erlaube Dateizugriffe nur auf den gewünschten Arbeitsbereich. Recherche benötigt Internetzugang; lokale Helfer benötigen eine passende Python-Laufzeit im Host. Das ist eine Laufzeitvoraussetzung für diese Funktionen, keine manuelle Installationsaufgabe. Fehlt sie, darf dauerhafte Speicherung beziehungsweise Dokumenterzeugung nicht als erfolgreich gelten. Verbundene Dienste und Host-Chatverlauf haben eigene Berechtigungen und Aufbewahrung.
 
 ## Aktualisieren
 
-Erhalte lokale Änderungen, bevor du deinen Checkout aktualisierst. Wähle danach deinen Host:
+Claude Code: Unter `/plugin` den Katalog aktualisieren, anschließend das Plugin aktualisieren; neue Sitzung starten. Alternativ `/plugin marketplace update zyris` und `/plugin update zyris-interview-coach@zyris`. Grafische Claude- und Codex-Update-Schaltflächen sind hier noch nicht nativ geprüft; folge der Plugin-Verwaltung deines Hosts und kontrolliere die angezeigte Version.
 
-| Host | Make | Bash |
-|---|---|---|
-| Codex | `make update TARGET=codex` | `bash install.sh update --target codex` |
-| Claude Code | `make update TARGET=claude` | `bash install.sh update --target claude` |
-| ChatGPT | `make update TARGET=chatgpt` | `bash install.sh update --target chatgpt` |
-
-Codex baut und installiert die neue Inhaltsversion erneut. Claude benötigt eine vorherige Installation des lokalen Katalogs. Bei ChatGPT lädst du das neue ZIP manuell hoch. Prüfe Einrichtung und privaten Speicher in einer neuen Sitzung.
-
-`plugin.json` enthält die Basisversion; Paketversionen erhalten einen deterministischen Inhaltshash. Die Befehle erstellen keinen Commit, pushen und veröffentlichen nichts. Automatische Marketplace-Updates werden durch dieses MVP nicht konfiguriert.
+Codex CLI: `codex plugin marketplace upgrade zyris`, danach `codex plugin add zyris-interview-coach@zyris`. Das gilt für den späteren Git-Katalog; lokale Testkataloge werden anders bereitgestellt. Prüfe nach dem Update einen neuen Chat und vorhandene private Daten. Sichere diese Daten vor einem Wechsel. Bei Fehlern Plugin deaktivieren und eine korrigierte Version abwarten. Ein Katalog-Rollback garantiert keinen Downgrade bereits installierter Caches.
 
 ## Entfernen
 
-Deaktiviere oder entferne das Plugin über die Plugin-Verwaltung des Hosts. Frühere Einzelkopien und die Projektquelle sind davon getrennt. Private Trainingsdaten und der lokale Konfigurationszeiger werden nicht gelöscht.
+Entferne das Plugin in der Plugin-Verwaltung. CLI-Alternative: `codex plugin remove zyris-interview-coach@zyris` beziehungsweise `/plugin uninstall zyris-interview-coach@zyris` in Claude Code. Organisationsweit vorgeschriebene Plugins können gesperrt sein. Das Entfernen des Katalogs ist ein eigener Schritt und ersetzt die Plugin-Deinstallation nicht. Private Trainingsdaten, Dokumente und Projektdateien außerhalb des Plugin-Caches behalten; lösche sie nur separat auf eigenen Wunsch.
 
 ## Erste Nutzung prüfen
 
-Starte die Einrichtung, bestätige deine Sprache und wähle **Nicht speichern**. Beantworte eine fiktive Frage, prüfe rollenbezogenes Feedback und beende mit `stop`. Siehe [Nutzung](usage.md) und [Beispiele](screens.md). Native Installation und vollständiger Host-Ablauf bleiben gesonderte Abnahmeprüfungen.
+Öffne einen neuen Chat, wähle das Plugin und sende: **„Start interview coach setup“**. Diese Beispielanfrage stammt aus `plugin.json`; sie ist keine behauptete Modellantwort.
+
+Wähle Deutsch und **Nicht speichern**. Bitte um eine fiktive Interviewfrage, beantworte sie und beende mit `stop`. Prüfe, dass die Sitzung beendet wird. Für private Lebensläufe und dauerhaften Lernstand zuerst die [Speicherhinweise](storage.md) lesen.
+
+Fehlt der Katalog, prüfe Adresse, Veröffentlichung und Admin-Freigabe. Fehlt das Plugin nach Installation, öffne einen neuen Chat beziehungsweise starte die App neu. Doppelte Einträge können von einer früheren Entwicklungsinstallation stammen; diese erst nach erfolgreichem Test separat entfernen. [Entwickler- und Release-Anleitung](development.md).

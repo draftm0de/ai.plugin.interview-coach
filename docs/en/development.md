@@ -99,6 +99,9 @@ Journey checks normalize Markdown for pattern matching and check competence caut
 
 ## CI and releases
 
+[Release operations and approval gates](release-operations.md) · [Verification evidence](release-evidence.md).
+
+
 [GitHub Actions](../../.github/workflows/validate.yml) runs deterministic tests, manifest validation and plugin packaging. Model tests remain opt-in. The builder generates a local Claude marketplace under `dist/claude-marketplace`; it does not publish a directory listing or GitHub Release. `plugin.json` owns the base version; host package versions include a content hash.
 
 The workflow path filters do not include documentation-only changes. Local documentation validation remains necessary.
@@ -115,4 +118,4 @@ Before a public directory submission, supply actual required publisher/privacy/t
 
 Native Codex installer integration can be tested with `ZYRIS_TEST_CODEX_NATIVE=1 make test`. It uses a temporary isolated Codex profile to verify installation, reinstallation and content updates without changing the personal profile. This native integration test was not run during this documentation update.
 
-German defaults: `README.md`, `docs/de/`. Full English equivalents: `README.en.md`, `docs/en/`. Keep counterpart links, heading order and asset provenance aligned. `docs/documentation.json` stores source pointers and this repository’s documentation language policy (`documentation.languages`: `de`, `en`; `default_language`: `de`). Product facts remain in their canonical sources. Use the installed ZYRIS documentation update action, then validate and verify; `make update` updates the installed coaching plugin instead. Documentation prepared with ZYRIS Skill Documentation.
+German defaults: `README.md`, `docs/de/`. Full English equivalents: `README.en.md`, `docs/en/`. Keep counterpart links, heading order and asset provenance aligned. `docs/documentation.json` stores source pointers and this repository’s documentation language policy (`documentation.languages`: `de`, `en`; `default_language`: `de`). Product facts remain in their canonical sources. Use the installed ZYRIS documentation update action, then validate and verify; `make update` updates the installed coaching plugin instead. Documentation prepared with ZYRIS Skill Manager.

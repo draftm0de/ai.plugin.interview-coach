@@ -9,6 +9,8 @@ Practice job interviews with role-specific questions, concrete feedback and evid
 
 **[Install](docs/en/installation.md) · [Usage](docs/en/usage.md) · [Examples](docs/en/screens.md) · [FAQ](docs/en/faq.md) · [Documentation](docs/en/README.md)**
 
+**Installation preview:** [Claude](docs/en/installation.md#claude-graphical-interface) · [Claude Code](docs/en/installation.md#claude-code) · [Codex Desktop](docs/en/installation.md#codex-desktop). Public catalog address and UI acceptance are pending.
+
 ## Who it is for
 
 Use this when you want to prepare for a specific vacancy, practise clearer answers, rehearse a realistic interview or review what to improve before the next conversation. Technical roles can include coding, debugging, code review and system design exercises.
@@ -41,15 +43,7 @@ Research uses available public professional sources and marks uncertainty. Emplo
 
 ## Quick start
 
-Clone this public repository and choose an installation target:
-
-```bash
-git clone https://github.com/draftm0de/zyris.skill.interview-coach.git
-cd zyris.skill.interview-coach
-bash install.sh install --target claude
-```
-
-The installer and Makefile delegate to one manifest-driven plugin helper. Claude Code and Codex use native plugin management (`TARGET=claude` or `TARGET=codex`); ChatGPT uses manual plugin ZIP upload. Existing standalone skill installations are left untouched. Building a ZIP does not install or publish it. See the [platform-specific installation and update guide](docs/en/installation.md).
+Open the [installation guide](docs/en/installation.md) and choose Claude or Codex. The public catalog address is not approved yet; instructions are a preview. After installation, select the plugin in a new chat and send the documented first prompt. This user path does not require a source checkout.
 
 ## Usage
 
@@ -79,7 +73,7 @@ This is a public repository MVP with a base version in `plugin.json` and content
 
 Local persistence and packaging have deterministic tests. CLI model journeys use fictional scenarios and heuristic checks. Native Claude/ChatGPT/Codex platform acceptance remains separate; a passing model test does not prove host UI or storage integration.
 
-License: [MIT](LICENSE). Native installation tests were not repeated for this documentation update.
+License: [MIT](LICENSE). Isolated native CLI checks are recorded in the [release evidence](docs/en/release-evidence.md); graphical acceptance remains pending.
 
 ## Development
 
@@ -96,4 +90,4 @@ The [canonical skill](skills/zyris-interview-coach/SKILL.md) is the single runti
 
 Publisher: **draftmode** · [draftmode.io](https://draftmode.io) · Author: **Peter Fux**.
 
-Documentation prepared with ZYRIS Skill Documentation.
+Documentation prepared with ZYRIS Skill Manager.

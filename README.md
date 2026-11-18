@@ -9,6 +9,8 @@
 
 **[Installation](docs/de/installation.md) · [Nutzung](docs/de/usage.md) · [Beispiele](docs/de/screens.md) · [FAQ](docs/de/faq.md) · [Dokumentation](docs/de/README.md)**
 
+**Installationsvorschau:** [Claude](docs/de/installation.md#claude-grafischer-weg) · [Claude Code](docs/de/installation.md#claude-code) · [Codex Desktop](docs/de/installation.md#codex-desktop). Öffentliche Katalogadresse und GUI-Abnahme stehen noch aus.
+
 ## Für wen ist das gedacht?
 
 Für Bewerber, die sich auf eine konkrete Stelle vorbereiten, klarer antworten, ein realistisches Interview proben oder gezielt Schwächen trainieren möchten. Technische Rollen können Coding, Debugging, Code Review und Systemdesign üben.
@@ -41,15 +43,7 @@ Recherche nutzt verfügbare öffentliche berufliche Quellen und kennzeichnet Uns
 
 ## Schnellstart
 
-Klone das öffentliche Repository und wähle deinen Host:
-
-```bash
-git clone https://github.com/draftm0de/zyris.skill.interview-coach.git
-cd zyris.skill.interview-coach
-bash install.sh install --target claude
-```
-
-Installer und Makefile verwenden denselben manifestgesteuerten Helfer. Claude Code und Codex nutzen native Plugin-Verwaltung (`TARGET=claude` oder `TARGET=codex`); ChatGPT verwendet manuellen ZIP-Upload. Alte Einzel-Skills bleiben erhalten. Ein Build installiert oder veröffentlicht nichts. Siehe [Installation und Updates](docs/de/installation.md).
+Öffne die [Installationsanleitung](docs/de/installation.md) und wähle Claude oder Codex. Die öffentliche Katalogadresse ist noch nicht freigegeben; die Anleitung ist eine Vorschau. Nach Installation in einem neuen Chat das Plugin auswählen und die dort genannte erste Anfrage senden. Für diesen Nutzerweg ist kein Quellcheckout erforderlich.
 
 ## Nutzung
 
@@ -77,7 +71,7 @@ Die lokale CLI unterstützt den Adapter `local` mit `init`, `status`, `finish`, 
 
 Öffentliches MVP mit Basisversion in `plugin.json` und inhaltsabhängigen Paketversionen. Lizenz: [MIT](LICENSE). Kein Kundenportal, Zahlungssystem oder Lizenzserver; eine Veröffentlichung in einem Plugin-Verzeichnis ist durch das Repository nicht belegt.
 
-Lokale Speicherung und Paketierung besitzen deterministische Tests. CLI-Modellabläufe verwenden fiktive Daten und heuristische Prüfungen. Native Host-Abnahme bleibt separat; erfolgreiche Modelltests belegen weder Oberfläche noch Speicherintegration. Native Installationstests wurden bei dieser Dokumentationsaktualisierung nicht wiederholt.
+Lokale Speicherung und Paketierung besitzen deterministische Tests. CLI-Modellabläufe verwenden fiktive Daten und heuristische Prüfungen. Native Host-Abnahme bleibt separat; erfolgreiche Modelltests belegen weder Oberfläche noch Speicherintegration. Isolierte native CLI-Prüfungen sind im [Release-Nachweis](docs/de/release-evidence.md) dokumentiert; die GUI-Abnahme bleibt offen.
 
 ## Entwicklung
 
@@ -94,4 +88,4 @@ Die [kanonische Skill-Quelle](skills/zyris-interview-coach/SKILL.md) definiert d
 
 Herausgeber: **draftmode** · [draftmode.io](https://draftmode.io) · Autor: **Peter Fux**.
 
-Dokumentation erstellt mit ZYRIS Skill Documentation.
+Dokumentation erstellt mit ZYRIS Skill Manager.

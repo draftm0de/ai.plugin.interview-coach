@@ -16,10 +16,10 @@ on:
       - "install.sh"
       - "plugin.json"
       - "assets/**"
-      - ".github/workflows/validate.yml"
+      - ".github/workflows/**"
   pull_request:
     paths:
-      - ".github/workflows/validate.yml"
+      - ".github/workflows/**"
       - "skills/**"
       - "scripts/**"
       - "tests/**"

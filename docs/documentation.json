@@ -44,12 +44,22 @@
       "development": {
         "de": "docs/de/development.md",
         "en": "docs/en/development.md"
+      },
+      "release-operations": {
+        "de": "docs/de/release-operations.md",
+        "en": "docs/en/release-operations.md"
+      },
+      "release-evidence": {
+        "de": "docs/de/release-evidence.md",
+        "en": "docs/en/release-evidence.md"
       }
     },
     "assets": [
       "docs/assets/zyris-icon.png",
       "docs/assets/de/coaching-preview.svg",
-      "docs/assets/en/coaching-preview.svg"
+      "docs/assets/en/coaching-preview.svg",
+      "docs/assets/de/claude-desktop-marketplace-source.png",
+      "docs/assets/de/claude-desktop-marketplace-repository.png"
     ]
   }
 }

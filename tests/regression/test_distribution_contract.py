@@ -36,11 +36,14 @@ class InstallationTests(unittest.TestCase):
         self.assertEqual(ui["websiteURL"], "https://draftmode.io")
         self.assertTrue((ROOT / "assets/icon.png").is_file())
 
-    def test_bash_installer_is_primary(self):
+    def test_user_entrypoint_is_separate_from_developer_installer(self):
         installer = ROOT / "install.sh"
         self.assertTrue(installer.is_file())
         readme = (ROOT / "README.md").read_text().lower()
-        self.assertIn("bash install.sh", readme)
+        self.assertIn("docs/de/installation.md", readme)
+        quickstart = readme.split("## schnellstart\n", 1)[1].split("\n## ", 1)[0]
+        self.assertNotIn("git clone", quickstart)
+        self.assertNotIn("bash install.sh", quickstart)
         self.assertNotIn("make install-", readme)
 
     def test_portable_package_has_no_private_files(self):
