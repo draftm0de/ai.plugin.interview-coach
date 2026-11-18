@@ -10,7 +10,8 @@ Usage: bash install.sh [claude|claude-chat|claude-plugin|codex|chatgpt|all] [--y
 Without a target, the installer asks interactively.
   claude   Install for Claude Code to ~/.claude/skills/zyris-interview-coach/
   claude-chat  Build ZIP for upload to claude.ai Customize > Skills
-  claude-plugin  Build a Claude Code plugin ZIP\n  codex    Install to ~/.agents/skills/zyris-interview-coach/
+  claude-plugin  Build a Claude Code plugin ZIP
+  codex    Install to ~/.agents/skills/zyris-interview-coach/
   chatgpt  Build dist/zyris-interview-coach-chatgpt-plugin.zip
   all      Install Claude Code and Codex skills; build both plugins and Claude Chat skill ZIP
 --yes skips overwrite confirmation (useful for scripted upgrades).
@@ -75,12 +76,15 @@ package_plugin() {
 case "$TARGET" in
   claude) copy_skill "${CLAUDE_HOME:-$HOME/.claude}/skills/$NAME" ;;
   codex) copy_skill "${CODEX_HOME:-$HOME/.agents}/skills/$NAME" ;;
-  chatgpt) package_plugin chatgpt ;;\n  claude-plugin) package_plugin claude ;;
+  chatgpt) package_plugin chatgpt ;;
+  claude-plugin) package_plugin claude ;;
   claude-chat) package_claude_chat; echo "Upload ZIP in claude.ai: Customize > Skills > + > Create skill > Upload a skill; enable it." ;;
   all)
     copy_skill "${CLAUDE_HOME:-$HOME/.claude}/skills/$NAME"
     copy_skill "${CODEX_HOME:-$HOME/.agents}/skills/$NAME"
-    package_claude_chat\n    package_plugin claude\n    package_plugin chatgpt
+    package_claude_chat
+    package_plugin claude
+    package_plugin chatgpt
     ;;
 esac
 echo "Next: in Claude Code use /zyris-interview-coach setup; in Claude Chat upload the ZIP first; in ChatGPT install the plugin and run its onboarding skill."
