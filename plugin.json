@@ -36,7 +36,9 @@
           "Start interview coach setup",
           "Practice for a specific job interview",
           "Review my interview answers"
-        ]
+        ],
+        "composerIcon": "./assets/icon.png",
+        "logo": "./assets/icon.png"
       }
     }
   }
