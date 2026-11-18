@@ -38,7 +38,7 @@ def run(cli, prompt, timeout):
     else:
         cmd = ["claude", "-p", prompt, "--output-format", "text"]
     result = subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True, timeout=timeout, check=False)
-    return result.returncode, result.stdout + "\n" + result.stderr
+    return result.returncode, result.stdout, result.stderr
 
 def main():
     parser = argparse.ArgumentParser()
@@ -71,12 +71,12 @@ def main():
                   "Do not access or write private files. Answer in German.\n\n"
                   + context + "\n\nSCENARIO:\n" + case["prompt"])
         try:
-            code, output = run(args.cli, prompt, args.timeout)
+            code, output, diagnostics = run(args.cli, prompt, args.timeout)
         except subprocess.TimeoutExpired:
-            code, output = 124, "TIMEOUT"
+            code, output, diagnostics = 124, "TIMEOUT", "Timeout exceeded"
         errors = check(case, output, code)
         if args.output_dir:
-            (args.output_dir / (case["id"] + ".txt")).write_text(output, encoding="utf-8")
+            (args.output_dir / (case["id"] + ".txt")).write_text(output, encoding="utf-8")\n            (args.output_dir / (case["id"] + ".stderr.txt")).write_text(diagnostics, encoding="utf-8")
         print(f"{'FAIL' if errors else 'PASS'} {case['id']}")
         for error in errors:
             print("  - " + error)
