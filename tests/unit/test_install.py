@@ -1,0 +1,70 @@
+import os
+from pathlib import Path
+import subprocess
+import tempfile
+import unittest
+import zipfile
+
+ROOT = Path(__file__).resolve().parents[2]
+INSTALLER = ROOT / "install.sh"
+
+class BashInstallerTests(unittest.TestCase):
+    def test_bash_syntax(self):
+        subprocess.run(["bash", "-n", str(INSTALLER)], check=True)
+
+    def test_claude_install_and_idempotent_upgrade(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            env = dict(os.environ, CLAUDE_HOME=str(Path(tmp) / "claude"))
+            subprocess.run(["bash", str(INSTALLER), "claude", "--yes"], env=env, check=True, capture_output=True)
+            dest = Path(tmp) / "claude/skills/zyris-interview-coach"
+            self.assertTrue((dest / "SKILL.md").exists())
+            self.assertTrue((dest / "references/setup.md").exists())
+            self.assertTrue((dest / "scripts/interview_workspace.py").exists())
+            (dest / "obsolete.txt").write_text("old")
+            subprocess.run(["bash", str(INSTALLER), "claude", "--yes"], env=env, check=True, capture_output=True)
+            self.assertFalse((dest / "obsolete.txt").exists())
+
+    def test_codex_install(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            env = dict(os.environ, CODEX_HOME=str(Path(tmp) / "agents"))
+            subprocess.run(["bash", str(INSTALLER), "codex", "--yes"], env=env, check=True, capture_output=True)
+            self.assertTrue((Path(tmp) / "agents/skills/zyris-interview-coach/SKILL.md").exists())
+
+    def test_claude_chat_package(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            # Work on an isolated copy to avoid writing to the checkout.
+            import shutil
+            work = Path(tmp) / "repo"
+            shutil.copytree(ROOT / ".claude", work / ".claude")
+            shutil.copytree(ROOT / "scripts", work / "scripts")
+            shutil.copy2(INSTALLER, work / "install.sh")
+            subprocess.run(["bash", str(work / "install.sh"), "claude-chat"], check=True, capture_output=True)
+            package = work / "dist/zyris-interview-coach.zip"
+            self.assertTrue(package.is_file())
+            with zipfile.ZipFile(package) as z:
+                self.assertIn("zyris-interview-coach/SKILL.md", z.namelist())
+                self.assertIn("zyris-interview-coach/scripts/interview_workspace.py", z.namelist())
+
+    def test_plugin_packages(self):
+        import shutil
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp) / "repo"
+            for folder in (".claude", ".claude-plugin", "scripts", "assets"):
+                shutil.copytree(ROOT / folder, work / folder)
+            for filename in ("plugin.json", "install.sh"):
+                shutil.copy2(ROOT / filename, work / filename)
+            for platform in ("chatgpt", "claude-plugin"):
+                subprocess.run(["bash", str(work / "install.sh"), platform], check=True, capture_output=True)
+            for platform in ("chatgpt", "claude"):
+                archive = work / f"dist/zyris-interview-coach-{platform}-plugin.zip"
+                self.assertTrue(archive.is_file())
+                with zipfile.ZipFile(archive) as z:
+                    names = z.namelist()
+                    self.assertIn("skills/zyris-interview-coach/SKILL.md", names)
+                    self.assertIn("skills/zyris-interview-coach/scripts/interview_workspace.py", names)
+                    self.assertIn("assets/icon.png", names)
+                    self.assertIn("plugin.json" if platform == "chatgpt" else ".claude-plugin/plugin.json", names)
+
+    def test_noninteractive_without_target_rejected(self):
+        cp = subprocess.run(["bash", str(INSTALLER)], input="", text=True, capture_output=True)
+        self.assertEqual(cp.returncode, 2)
