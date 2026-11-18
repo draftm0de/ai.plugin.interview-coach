@@ -45,6 +45,26 @@ class BashInstallerTests(unittest.TestCase):
                 self.assertIn("zyris-interview-coach/SKILL.md", z.namelist())
                 self.assertIn("zyris-interview-coach/scripts/interview_workspace.py", z.namelist())
 
+    def test_plugin_packages(self):
+        import shutil
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp) / "repo"
+            for folder in (".claude", ".claude-plugin", "scripts", "assets"):
+                shutil.copytree(ROOT / folder, work / folder)
+            for filename in ("plugin.json", "install.sh"):
+                shutil.copy2(ROOT / filename, work / filename)
+            for platform in ("chatgpt", "claude-plugin"):
+                subprocess.run(["bash", str(work / "install.sh"), platform], check=True, capture_output=True)
+            for platform in ("chatgpt", "claude"):
+                archive = work / f"dist/zyris-interview-coach-{platform}-plugin.zip"
+                self.assertTrue(archive.is_file())
+                with zipfile.ZipFile(archive) as z:
+                    names = z.namelist()
+                    self.assertIn("skills/zyris-interview-coach/SKILL.md", names)
+                    self.assertIn("skills/zyris-interview-coach/scripts/interview_workspace.py", names)
+                    self.assertIn("assets/icon.png", names)
+                    self.assertIn("plugin.json" if platform == "chatgpt" else ".claude-plugin/plugin.json", names)
+
     def test_noninteractive_without_target_rejected(self):
         cp = subprocess.run(["bash", str(INSTALLER)], input="", text=True, capture_output=True)
         self.assertEqual(cp.returncode, 2)
