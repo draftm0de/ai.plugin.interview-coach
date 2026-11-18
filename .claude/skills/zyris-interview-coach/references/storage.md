@@ -60,3 +60,14 @@ Historical reconstructions must be marked. Never represent paraphrases as verbat
 ## Git hygiene
 
 Keep immutable run records; avoid overwriting historical runs, append a suffix to a collision. Preserve candidate privacy. Do not create public issues containing candidate details. No secrets, interview recordings or private email addresses in public repository. Prefer a coherent atomic commit for run + state when supported; otherwise verify both writes and document any partial state.
+
+## Local transaction and checkpoint protocol
+
+1. Read `status` (or `resume --run-id ID` for an explicitly selected paused checkpoint) before preparing a replacement state. Retain the returned `state_sha256` from that read; never refresh the hash alone to bypass a stale-state error.
+2. Save with `finish --run-id NEW_ID --run-file RUN.md --state-file STATE.md --expected-state-sha256 HASH --status completed|paused|stopped_early --answered-count N [--planned-count TOTAL] [--resume-from CHECKPOINT_ID]`. Counts are cumulative for the interview; unasked/unanswered questions are not evidence. A known plan must be fully answered for `completed`.
+3. A successful CLI result verifies both immutable run and canonical state. The two files are not jointly atomic to outside readers. On failure, do not claim success or create a second run ID as a workaround. Use `recover` to finish the recorded intent. Conflicting external edits require manual reconciliation; preserve `.zyris/pending.json` until resolved.
+4. A busy workspace fails immediately; retry after the other process finishes. A stale state requires re-reading and reconciling the actual state with the proposed update. OS locks are automatically released on process exit. Never delete `.zyris/lock` to bypass a writer.
+5. New runs carry a versioned lifecycle metadata comment. `resume` returns the exact supplied report body, current state and hash without modifying the checkpoint. Saving a continuation requires a new immutable run and `--resume-from`; a checkpoint already continued cannot be forked implicitly. Legacy Markdown records are preserved and require manual inspection rather than inferred lifecycle metadata.
+6. Existing candidate profiles, research, preferences and legacy runs are preserved by `init`, including `--force`. Managed symlinks and invalid path types are rejected. Configuration must be outside the candidate workspace. Local-filesystem and cooperating-CLI guarantees do not extend to direct external edits or network/cloud-synchronized filesystem semantics.
+
+In **Nicht speichern** mode none of these CLI operations should run: no initialization, lock, journal, run, checkpoint, preference or export is created by the skill. Test harness artifacts are separate fictional developer data, not candidate persistence.

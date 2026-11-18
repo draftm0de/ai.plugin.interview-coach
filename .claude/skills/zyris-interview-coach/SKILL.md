@@ -83,7 +83,7 @@ For every completed session:
 
 ## Validation
 
-The public repository provides `python -m unittest discover -s tests -v` for deterministic tests and `python tests/run_smoke.py --cli claude|codex` for opt-in local CLI smoke tests. The latter may consume tokens and is heuristic, not a proof of correctness. Never claim that tests passed without actual execution.
+The public repository provides `python -m unittest discover -s tests -v` for deterministic tests and `python tests/behavior/run_smoke.py --cli claude|codex` for opt-in local CLI smoke tests. The latter may consume tokens and is heuristic, not a proof of correctness. Never claim that tests passed without actual execution.
 
 ## Workspace boundary
 

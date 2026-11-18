@@ -24,3 +24,5 @@ Interpret `stop`, `end`, `finish`, `abbrechen`, `beenden`, `Interview beenden` a
 ## Resume and concurrency
 
 Do not assume that a new chat is a continuation of an in-progress interview simply because a targeted job exists. Check for a persisted `paused` or `in_progress` checkpoint, explain it, and offer "Fortsetzen / Neu beginnen". Do not infer a completed run from an empty runs directory. Separate session completion from job preparation state.
+
+For local persistence, implement pause and stop via the transaction protocol in `storage.md`: retain the original state hash, save a new immutable run with explicit lifecycle status and cumulative answered/planned counts, and verify success. Resume only an explicitly selected `paused` checkpoint with `resume --run-id`; it returns transcript and state without changing them. Save a continuation under a new ID with `--resume-from`. Never mark an unfinished known plan completed or treat a stopped run as a resumable pause. If the user chose **Nicht speichern**, give only the in-chat summary and invoke no workspace CLI commands.

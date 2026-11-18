@@ -7,6 +7,7 @@ on:
       - "scripts/**"
       - "tests/**"
       - "pyproject.toml"
+      - "Makefile"
       - "install.sh"
       - "plugin.json"
       - ".claude-plugin/**"
@@ -14,10 +15,12 @@ on:
       - ".github/workflows/validate.yml"
   pull_request:
     paths:
+      - ".github/workflows/validate.yml"
       - ".claude/skills/**"
       - "scripts/**"
       - "tests/**"
       - "pyproject.toml"
+      - "Makefile"
       - "install.sh"
       - "plugin.json"
       - ".claude-plugin/**"
@@ -33,4 +36,4 @@ jobs:
         with:
           python-version: "3.12"
       - name: Run stdlib tests
-        run: python -m unittest discover -s tests -p 'test_*.py' -v
+        run: make test

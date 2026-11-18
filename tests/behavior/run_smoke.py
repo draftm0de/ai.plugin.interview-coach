@@ -7,16 +7,11 @@ import shutil
 import subprocess
 import sys
 
-ROOT = Path(__file__).resolve().parents[2]
+# Share answer/diagnostic separation with behavior and journey tests.
+from run import ROOT, run as run_case, check
+
 CASES = json.loads((ROOT / "tests/behavior/fixtures/behavior-cases.json").read_text())
 SKILL = (ROOT / ".claude/skills/zyris-interview-coach/SKILL.md").read_text()
-def run_case(cli, prompt, timeout):
-    if cli == "claude":
-        cmd = ["claude", "-p", prompt, "--output-format", "text"]
-    else:
-        cmd = ["codex", "exec", "--skip-git-repo-check", "--sandbox", "read-only", prompt]
-    cp = subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True, timeout=timeout, check=False)
-    return cp.returncode, (cp.stdout + "\n" + cp.stderr)
 
 def main():
     p = argparse.ArgumentParser()
@@ -33,11 +28,12 @@ def main():
     for case in CASES:
         prompt = "Follow these interview skill instructions:\n" + SKILL + "\n\n" + case["prompt"] + "\nAnswer in German."
         try:
-            code, output = run_case(args.cli, prompt, args.timeout)
+            code, output, diagnostics = run_case(args.cli, prompt, args.timeout)
         except subprocess.TimeoutExpired:
-            code, output = 124, "TIMEOUT"
+            code, output, diagnostics = 124, "", "TIMEOUT"
         (output_dir / (case["id"] + ".txt")).write_text(output, encoding="utf-8")
-        ok = code == 0 and any(s.lower() in output.lower() for s in case["must_contain_any"]) and not any(s.lower() in output.lower() for s in case["must_not_contain"])
+        (output_dir / (case["id"] + ".stderr.txt")).write_text(diagnostics, encoding="utf-8")
+        ok = not check(case, output, code)
         print(f"{'PASS' if ok else 'FAIL'} {case['id']} (exit={code})")
         if not ok:
             print(output[:1000])

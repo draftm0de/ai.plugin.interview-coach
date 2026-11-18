@@ -96,21 +96,12 @@
           "Risiko",
           "Betrieb",
           "Entscheid"
-        ],
-        [
-          "noch nicht",
-          "nicht stabil",
-          "weiter",
-          "erneut",
-          "nicht ausreichend",
-          "keine stabile"
         ]
       ],
       "must_not_contain": [
-        "Kompetenz ist stabil",
-        "dauerhaft behoben",
         "state.md aktualisiert"
-      ]
+      ],
+      "require_progress_caution": true
     },
     {
       "id": "stop",
@@ -143,12 +134,9 @@
         [
           "(?:drei|3)\\s+(?:\\w+\\s+){0,3}(?:fragen|antworten|szenarien)",
           "(?:fragen|antworten)\\s*(?:1\\s*[-–]\\s*3|eins\\s+bis\\s+drei)"
-        ],
-        [
-          "(?:nicht|kein\\w*|noch\\s+nicht)\\s+(?:\\w+\\s+){0,5}(?:stabil\\w*|belegt|nachgewiesen|gefestigt|bestätigt)",
-          "(?:stabil\\w*|kompetenzstatus|fortschritt)\\s+(?:\\w+\\s+){0,5}(?:nicht|kein\\w*|offen|unbestätigt)"
         ]
-      ]
+      ],
+      "require_progress_caution": true
     }
   ]
 }
