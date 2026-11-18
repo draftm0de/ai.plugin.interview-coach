@@ -1,0 +1,15 @@
+{
+  "name": "zyris-interview-coach",
+  "version": "0.1.0",
+  "description": "Role-aware interview coaching, employer and interviewer research, and private training progress.",
+  "author": {
+    "name": "Peter Fux",
+    "url": "https://draftmode.io"
+  },
+  "homepage": "https://draftmode.io",
+  "keywords": [
+    "Personal Training",
+    "Job Coach",
+    "Jobs"
+  ]
+}
