@@ -22,10 +22,13 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--cli", choices=["claude","codex"], required=True)
     p.add_argument("--timeout", type=int, default=180)
+    p.add_argument("--output-dir", type=Path, default=None)
     args = p.parse_args()
     if not shutil.which(args.cli):
         print(f"CLI not found: {args.cli}", file=sys.stderr)
         return 2
+    output_dir = args.output_dir or ROOT / ".tmp" / "tests" / "smoke" / args.cli
+    output_dir.mkdir(parents=True, exist_ok=True)
     failures = 0
     for case in CASES:
         prompt = "Follow these interview skill instructions:\n" + SKILL + "\n\n" + case["prompt"] + "\nAnswer in German."
@@ -33,6 +36,7 @@ def main():
             code, output = run_case(args.cli, prompt, args.timeout)
         except subprocess.TimeoutExpired:
             code, output = 124, "TIMEOUT"
+        (output_dir / (case["id"] + ".txt")).write_text(output, encoding="utf-8")
         ok = code == 0 and any(s.lower() in output.lower() for s in case["must_contain_any"]) and not any(s.lower() in output.lower() for s in case["must_not_contain"])
         print(f"{'PASS' if ok else 'FAIL'} {case['id']} (exit={code})")
         if not ok:
