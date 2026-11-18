@@ -48,6 +48,21 @@ class JourneyRunnerTests(unittest.TestCase):
             self.assertTrue((Path(d) / "result.json").exists())
             self.assertTrue((Path(d) / "05-stop.txt").exists())
 
+    def test_stop_accepts_realistic_codex_wording(self):
+        stop = module.load_journey("teamlead_coaching")["steps"][-1]
+        answer = ("Das Interview ist beendet (stopped_early). Bearbeitet wurden "
+                  "drei unterschiedliche Fragen und eine Wiederholung von Frage 1. "
+                  "Ein stabiler Kompetenzstatus ist nicht belegt. "
+                  "Keine privaten Dateien gelesen oder geschrieben, "
+                  "nichts durch den Skill gespeichert.")
+        self.assertEqual(module.check_step(stop, answer), [])
+
+    def test_stop_rejects_missing_no_storage_or_stability(self):
+        stop = module.load_journey("teamlead_coaching")["steps"][-1]
+        answer = ("Interview beendet. Drei Fragen und eine Wiederholung. "
+                  "C01 ist jetzt dauerhaft stabil.")
+        self.assertTrue(module.check_step(stop, answer))
+
     def test_missing_stop_constraints_fail(self):
         j = module.load_journey("teamlead_coaching")
         from run import check
