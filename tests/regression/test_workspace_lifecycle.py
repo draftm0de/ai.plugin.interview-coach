@@ -17,13 +17,13 @@ class WorkspaceLifecycleTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.base = Path(temporary.name)
-        archive = self.base / 'skill.zip'
-        subprocess.run([sys.executable, str(ROOT / 'scripts/package_skill.py'),
-                        '--source', str(SOURCE), '--output', str(archive)],
+        archive = self.base / 'zyris-interview-coach-chatgpt-plugin.zip'
+        subprocess.run([sys.executable, str(ROOT / 'scripts/plugin.py'),
+                        'build', '--output', str(self.base)],
                        check=True, capture_output=True, text=True)
         with zipfile.ZipFile(archive) as package:
             package.extractall(self.base / 'installed')
-        self.cli = self.base / 'installed/zyris-interview-coach/scripts/interview_workspace.py'
+        self.cli = self.base / 'installed/skills/zyris-interview-coach/scripts/interview_workspace.py'
         self.config = self.base / 'config.json'
         self.workspace = self.base / 'fictional-workspace'
         self.call('init', '--path', str(self.workspace))

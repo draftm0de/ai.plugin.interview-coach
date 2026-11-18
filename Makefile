@@ -1,3 +1,5 @@
+include docs.mk
+include plugin.mk
 # Developer-only entry points. Not shipped in plugin/skill packages.
 PYTHON ?= python3
 CLI ?= codex
@@ -8,6 +10,7 @@ JOURNEY ?= teamlead_coaching
 .PHONY: help test test-unit test-regression test-behavior test-journey test-smoke test-list package-chatgpt package-claude-plugin package-claude-chat package-all
 
 help:
+	@echo 'make check-docs-export / export-docs  Validate / build the website documentation bundle'
 	@echo "make test                  Unit + regression tests (no LLM, also in CI)"
 	@echo "make test-list             List behavior scenarios"
 	@echo "make test-behavior         LLM simulations (CLI=codex|claude; optional CASE=id)"
@@ -15,8 +18,8 @@ help:
 	@echo "make test-smoke            Legacy LLM smoke checks (CLI=codex|claude)"
 	@echo "make package-chatgpt       Build ChatGPT plugin ZIP"
 	@echo "make package-claude-plugin Build Claude Code plugin ZIP"
-	@echo "make package-claude-chat   Build Claude Chat skill ZIP"
-	@echo "make package-all           Build all ZIPs"
+	@echo "make install/update TARGET=claude|chatgpt|codex  Native plugin workflow"
+	@echo "make package-all           Build all three plugin ZIPs"
 
 test: test-unit test-regression
 
@@ -38,16 +41,8 @@ test-journey:
 test-smoke:
 	$(PYTHON) tests/behavior/run_smoke.py --cli $(CLI) --output-dir .tmp/tests/smoke/$(CLI)
 
-package-chatgpt:
-	bash install.sh chatgpt
-
-package-claude-plugin:
-	bash install.sh claude-plugin
-
+# Compatibility package aliases all delegate to the shared plugin builder.
+package-chatgpt package-claude-plugin package-all: package
 package-claude-chat:
-	bash install.sh claude-chat
-
-package-all:
-	bash install.sh chatgpt
-	bash install.sh claude-plugin
-	bash install.sh claude-chat
+	@echo 'Standalone skill packages retired; use make package for plugin ZIPs.' >&2
+	@exit 2

@@ -11,7 +11,11 @@ SOURCE = ROOT / ".claude/skills/zyris-interview-coach"
 class InstallationTests(unittest.TestCase):
     def test_plugin_metadata(self):
         chatgpt = json.loads((ROOT / "plugin.json").read_text())
-        claude = json.loads((ROOT / ".claude-plugin/plugin.json").read_text())
+        with tempfile.TemporaryDirectory() as td:
+            subprocess.run(['python3', str(ROOT / 'scripts/plugin.py'), 'build', '--output', td], check=True, capture_output=True)
+            with zipfile.ZipFile(Path(td) / 'zyris-interview-coach-claude-plugin.zip') as package:
+                claude = json.loads(package.read('.claude-plugin/plugin.json'))
+        self.assertFalse((ROOT / '.claude-plugin/plugin.json').exists())
         for manifest in (chatgpt, claude):
             self.assertEqual(manifest["name"], "zyris-interview-coach")
             self.assertEqual(manifest["author"]["name"], "Peter Fux")
@@ -31,14 +35,14 @@ class InstallationTests(unittest.TestCase):
 
     def test_portable_package_has_no_private_files(self):
         with tempfile.TemporaryDirectory() as td:
-            dest = Path(td) / "skill.zip"
-            subprocess.run(["python3", str(ROOT / "scripts/package_skill.py"),
-                            "--source", str(SOURCE), "--output", str(dest)], check=True, capture_output=True)
+            dest = Path(td) / "zyris-interview-coach-chatgpt-plugin.zip"
+            subprocess.run(["python3", str(ROOT / "scripts/plugin.py"),
+                            "build", "--output", td], check=True, capture_output=True)
             with zipfile.ZipFile(dest) as z:
                 names = z.namelist()
-                self.assertIn("zyris-interview-coach/SKILL.md", names)
-                self.assertIn("zyris-interview-coach/references/setup.md", names)
-                self.assertIn("zyris-interview-coach/scripts/interview_workspace.py", names)
+                self.assertIn("skills/zyris-interview-coach/SKILL.md", names)
+                self.assertIn("skills/zyris-interview-coach/references/setup.md", names)
+                self.assertIn("skills/zyris-interview-coach/scripts/interview_workspace.py", names)
                 self.assertFalse(any("/candidate/" in n or "/runs/" in n or "/jobs/" in n for n in names))
 
     def test_workspace_cli_bundled_and_in_sync(self):

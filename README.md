@@ -1,267 +1,97 @@
 # ZYRIS Interview Coach
 
-## Quick install (recommended)
+[![Validate interview coach](https://github.com/draftm0de/zyris.skill.interview-coach/actions/workflows/validate.yml/badge.svg)](https://github.com/draftm0de/zyris.skill.interview-coach/actions/workflows/validate.yml)
+[Deutsch](README.md) | [English](README.en.md)
 
-Clone this public repository and run the interactive installer:
+<img src="docs/assets/zyris-icon.png" width="48" alt="ZYRIS-Dokumentationssymbol">
+
+Übe Vorstellungsgespräche mit rollenbezogenen Fragen, konkretem Feedback und einem durch eigene Antworten belegten Lernstand – in Claude, ChatGPT oder Codex.
+
+**[Installation](docs/de/installation.md) · [Nutzung](docs/de/usage.md) · [Beispiele](docs/de/screens.md) · [FAQ](docs/de/faq.md) · [Dokumentation](docs/de/README.md)**
+
+## Für wen ist das gedacht?
+
+Für Bewerber, die sich auf eine konkrete Stelle vorbereiten, klarer antworten, ein realistisches Interview proben oder gezielt Schwächen trainieren möchten. Technische Rollen können Coding, Debugging, Code Review und Systemdesign üben.
+
+Fragen und Kriterien richten sich nach Rolle und Erfahrungsniveau. Der Coach trennt eigene Antworten von Formulierungsvorschlägen und erfindet keine Berufserfahrung oder Erfolge.
+
+## So sieht es aus
+
+![Fiktiver Coaching-Ablauf mit erster Antwort, Überarbeitung und Stopp](docs/assets/de/coaching-preview.svg)
+
+*Gerenderte Auszüge eines fiktiven Codex-CLI-Tests, kein Host-Screenshot. Noten bewerten einzelne Antworten und versprechen kein Ergebnis. [Herkunft und vollständiger Ablauf](docs/de/screens.md).*
+
+1. Sprache, Trainingsziel und Speicherwahl festlegen.
+2. Im begleiteten Modus jeweils eine Frage beantworten.
+3. Gesamtbewertung, relevante Kriterien, Stärken und Verbesserungen erhalten.
+4. In eigenen Worten erneut versuchen; eine Überarbeitung belegt noch keine stabile Kompetenz.
+5. Mit `stop` jederzeit beenden.
+
+## Funktionen und Modi
+
+| Modus | Zweck | Beispiel |
+|---|---|---|
+| `general` | Allgemeines Training | „Übe Interviewfragen für eine Senior-Entwicklerrolle.“ |
+| `targeted` | Konkrete Stelle und Arbeitgeber | „Nutze meinen Lebenslauf und diese Stellenanzeige.“ |
+| `drill` | Einzelne Lernlücke | „Hilf mir, konkreter zu antworten.“ |
+| `mock` | Ununterbrochene Simulation | „Gib Feedback erst am Ende.“ |
+| `briefing` | Kompakte Vorbereitung | „Fasse die wichtigsten Fakten und Rückfragen zusammen.“ |
+
+Recherche nutzt verfügbare öffentliche berufliche Quellen und kennzeichnet Unsicherheit. Arbeitgeber- und Interviewerrecherche braucht Browserzugriff. [Details](docs/de/usage.md).
+
+## Schnellstart
+
+Klone das öffentliche Repository und wähle deinen Host:
 
 ```bash
 git clone https://github.com/draftm0de/zyris.skill.interview-coach.git
 cd zyris.skill.interview-coach
-bash install.sh
+bash install.sh install --target claude
 ```
 
-Choose **Claude Code**, **Claude Chat**, **Codex CLI**, **ChatGPT plugin ZIP**, **Claude Code plugin ZIP**, or **all**. For automation use `bash install.sh claude-chat` (Claude Chat ZIP), `bash install.sh claude --yes`, `bash install.sh codex --yes`, or `bash install.sh chatgpt` / `bash install.sh claude-plugin`. Existing CLI installations require confirmation before replacement (or explicit `--yes`). Only public skill files are installed; no private CV, state or runs are accessed. The ChatGPT target builds a portable plugin ZIP for import/submission, not an automatically installed skill.
+Installer und Makefile verwenden denselben manifestgesteuerten Helfer. Claude Code und Codex nutzen native Plugin-Verwaltung (`TARGET=claude` oder `TARGET=codex`); ChatGPT verwendet manuellen ZIP-Upload. Alte Einzel-Skills bleiben erhalten. Ein Build installiert oder veröffentlicht nichts. Siehe [Installation und Updates](docs/de/installation.md).
 
-After installation, start `/zyris-interview-coach setup` in Claude Code. For ChatGPT, install the plugin from a supported source and use its onboarding workflow.
+## Nutzung
 
+Nach der Installation:
 
-Portable interview coaching skill with targeted research on a vacancy, employer and publicly documented professional interviewers; evidence-based interview practice; and persistence of learning progress.
+> Nutze zyris-interview-coach und starte die Einrichtung. Ich möchte für eine Team-Lead-Rolle üben. Verwende Deutsch. Nicht speichern.
 
-## Canonical skill source
+Für gezielte Vorbereitung stelle dein bestätigtes Profil und die Stellenanzeige privat bereit. Unbekannte Interviewer verhindern das Training nicht.
 
-**[.claude/skills/zyris-interview-coach/SKILL.md](.claude/skills/zyris-interview-coach/SKILL.md)** is the single authoritative implementation. All supporting references are in its own `references/` directory.
+| Steuerung | Ergebnis |
+|---|---|
+| `stop` / `beenden` | Fragen sofort beenden und vorhandene Antworten zusammenfassen |
+| `pause` | Fortsetzbaren Checkpoint bei bestätigtem Speicher anfordern |
+| `Nicht speichern` | Keine Skill-Dateien, Arbeitsbereiche, Exporte oder gespeicherter Lernstand |
 
-## Claude Chat (claude.ai browser)
+Im Modus `mock` erfolgt Feedback erst am Ende. Chat-Aufbewahrung wird separat vom Host geregelt.
 
-**Claude Chat and Claude Code are separate installation targets.** The local `~/.claude/skills/` folder is read by Claude Code, **not** by Claude Chat in your browser. To use this skill on claude.ai:
+## Speicherung und Datenschutz
+
+Training funktioniert ohne Speicherung. Für Lernen über mehrere Sitzungen nutze einen separaten privaten Arbeitsbereich und einen geprüften Speicherzugang. Cloud-Sandbox oder Anhang garantieren keine Dauerhaftigkeit.
+
+Die lokale CLI unterstützt den Adapter `local` mit `init`, `status`, `finish`, `resume`, `recover`, `validate` und Spracheinstellungen. Sie schützt unveränderliche Berichte, erkennt veraltete Zustände und unterstützt Wiederherstellung nach Teilfehlern. [Speicherung und Grenzen](docs/de/storage.md).
+
+## Projektstatus
+
+Öffentliches MVP mit Basisversion in `plugin.json` und inhaltsabhängigen Paketversionen. Lizenz: [MIT](LICENSE). Kein Kundenportal, Zahlungssystem oder Lizenzserver; eine Veröffentlichung in einem Plugin-Verzeichnis ist durch das Repository nicht belegt.
+
+Lokale Speicherung und Paketierung besitzen deterministische Tests. CLI-Modellabläufe verwenden fiktive Daten und heuristische Prüfungen. Native Host-Abnahme bleibt separat; erfolgreiche Modelltests belegen weder Oberfläche noch Speicherintegration. Native Installationstests wurden bei dieser Dokumentationsaktualisierung nicht wiederholt.
+
+## Entwicklung
+
+Website-Export aus denselben Quellen: `make check-docs-export` und `make export-docs`. Details stehen in der [Entwicklungsdokumentation](docs/de/development.md).
 
 ```bash
-bash install.sh claude-chat
+make test          # Deterministische Unit- und Regressionstests ohne Modellaufrufe
+make package       # Drei Plugin-ZIPs und lokale Claude-/Codex-Kataloge bauen
 ```
 
-This creates `dist/zyris-interview-coach.zip`. In claude.ai, ensure file creation/code execution is enabled in Settings > Capabilities, then go to **Customize > Skills > + > Create skill > Upload a skill**, select the ZIP and enable the uploaded skill. Start a new chat and ask **"Use zyris-interview-coach and run setup"**. This is a chat instruction, not a guaranteed slash command. The upload is manual and must be repeated for updates. See [Anthropic documentation](https://support.claude.com/en/articles/12512180-use-skills-in-claude).
+Alternativ nach Installation von pytest: `python3 -m pytest -q`. Python 3.10+ ist für Paketierung und lokalen Speicherhelfer erforderlich. [Entwicklung und Tests](docs/de/development.md).
 
-## Claude Code
+Die [kanonische Skill-Quelle](.claude/skills/zyris-interview-coach/SKILL.md) definiert das Laufzeitverhalten. Nutzerdokumentation liegt unter [docs/de/](docs/de/README.md) und wird direkt auf GitHub dargestellt.
 
-**Project-local:** Clone the repository and launch Claude Code from its root. Claude Code discovers the skill in `.claude/skills/zyris-interview-coach/` and can invoke `/zyris-interview-coach`.
+Herausgeber: **draftmode** · [draftmode.io](https://draftmode.io) · Autor: **Peter Fux**.
 
-**Globally installed:** Copy the entire skill directory (including `references/`) to:
-
-```text
-~/.claude/skills/zyris-interview-coach/
-  SKILL.md
-  references/
-```
-
-Use `bash install.sh claude` from the cloned repository.
-
-A repository containing `.claude/skills/` does not automatically install the skill in unrelated projects. For global availability, use the user-level directory.
-
-## ChatGPT plugin / Codex / other agents
-
-ChatGPT uses the portable Agent Plugins package generated by `bash install.sh chatgpt`; it includes `plugin.json`, `skills/zyris-interview-coach/` and the draftmode icon. The plugin is skills-only: no MCP server is bundled, and durable cross-chat storage still requires an accessible private workspace. For Codex project discovery, copy or link the folder into `.agents/skills/zyris-interview-coach/` (Codex supports symlinked skill directories). <https://learn.chatgpt.com/docs/build-skills>
-
-Do not maintain duplicate instruction copies across clients; copy or link from the canonical directory.
-
-## Private workspace
-
-No CV, job ad, interviewer research or user training history belongs here. A separate private workspace (for example, your own private repository) holds `state.md`, `candidate/profile.md`, `jobs/` and immutable `runs/`. It can alternatively be a local folder or supported ChatGPT project files.
-
-## How to start
-
-> Use the zyris-interview-coach skill. My persistent workspace is <your private workspace path or repository>. Read my CV/profile, state.md, prior runs and target vacancy. Research the employer and known interviewers, then start an adaptive targeted interview. After completion write a run report and update state.md.
-
-## Contracts
-
-- [Research](.claude/skills/zyris-interview-coach/references/research.md)
-- [Training](.claude/skills/zyris-interview-coach/references/training.md)
-- [Evaluation](.claude/skills/zyris-interview-coach/references/evaluation.md)
-- [Storage](.claude/skills/zyris-interview-coach/references/storage.md)
-
-## Portable skill completeness and storage caveat
-
-Both `bash install.sh claude` and `bash install.sh claude-chat` include `scripts/interview_workspace.py` in the installed folder or ZIP. The script is the canonical runtime source inside the skill directory. No repository checkout is required to run the bundled script after installation.
-
-**Important:** A hosted Claude Chat sandbox is not automatically the user's Mac. A folder created there may disappear between sessions. Cross-chat persistence is guaranteed only when the chosen storage is demonstrably durable and accessible on the next session (for example a connected private repository). Do not treat a home-directory pointer in an ephemeral container as a durable personal setting.
-
-## First-time setup and storage
-
-### Local workspace (no Git required)
-
-Requires Python 3.10+ and a writable local directory:
-
-```bash
-python3 <installed-skill-directory>/scripts/interview_workspace.py init --path ~/interview-workspace
-python3 <installed-skill-directory>/scripts/interview_workspace.py status
-python3 <installed-skill-directory>/scripts/interview_workspace.py validate
-```
-
-The local pointer is stored in `~/.config/zyris/zyris-interview-coach/config.json` (or `$XDG_CONFIG_HOME/zyris/zyris-interview-coach/config.json`). The `init` command preserves existing files. To intentionally change workspace, use `init --path NEW_PATH --force`. This configuration is local to the machine and **does not synchronize to ChatGPT**.
-
-Before preparing an updated state, run `status` and retain its `state_sha256` with the state you read. At the end of a run, prepare a complete Markdown run file and updated state file, then save both. The snapshot hash and lifecycle arguments are now required (older `finish` invocations must be updated):
-
-```bash
-python3 <installed-skill-directory>/scripts/interview_workspace.py finish \
-  --run-id 2026-11-17-example \
-  --expected-state-sha256 <hash-from-status-before-editing> \
-  --status stopped_early --answered-count 2 --planned-count 3 \
-  --run-file /path/to/new-run.md \
-  --state-file /path/to/new-state.md
-```
-
-The CLI serializes cooperating writers with an OS file lock and rejects stale prepared states. Runs are published without replacing an existing file. Unique temporary files are flushed before publication; existing file permissions are preserved. Candidate files and legacy runs are never migrated or rewritten by initialization, and `--force` only switches the workspace pointer. Configuration must be outside the candidate workspace; symlinks in managed workspace paths are refused.
-
-Run and state remain separate files, so this is **not a multi-file atomic transaction**. A private `.zyris/pending.json` records recovery intent before publication. On any incomplete save, do not claim success: run `python3 <installed-skill-directory>/scripts/interview_workspace.py recover`. Recovery verifies existing contents and completes the same transaction; conflicts require manual reconciliation and are never overwritten. Until recovery, other writes and `status`/`resume` fail explicitly. Keep the journal until recovery succeeds; do not delete the persistent lock file to bypass a busy writer. OS locks are released automatically when a process exits or crashes.
-
-For a checkpoint, save with `--status paused`, then use:
-
-```bash
-python3 <installed-skill-directory>/scripts/interview_workspace.py resume --run-id <checkpoint-id>
-```
-
-`resume` reads the checkpoint transcript, lifecycle metadata and current state/hash without consuming the checkpoint. Continue with a **new** run ID and `--resume-from <checkpoint-id>`; use `paused`, `stopped_early` or `completed` as appropriate. Answer counts are cumulative for that interview; the planned count is preserved. Completed/stopped checkpoints and checkpoints already continued cannot be resumed. Legacy Markdown runs remain readable manually but are not automatically treated as resumable checkpoints. New runs include a small machine-readable HTML comment before the supplied Markdown; the original answer text remains in the body.
-
-These guarantees apply to cooperating CLI processes on a local filesystem. Direct external edits do not acquire the lock, and network/cloud-synchronized filesystems are not a supported transactional backend. The automated storage tests exercise real processes, interrupted writes, recovery and the packaged CLI with fictional data; they do not establish hosted-platform persistence. In **Nicht speichern** mode, do not call any workspace command or create a checkpoint.
-
-### Private GitHub / GitLab workspace
-
-Use the agent's authenticated Git connector or a separately authenticated Git CLI to read the private workspace manifest, runs and state. Git writes must be explicitly performed and verified. The Python workspace CLI currently **does not** implement remote Git storage. Do not put private candidate data in this public repository.
-
-### ChatGPT with supplied files
-
-Provide the CV, vacancy and workspace files as attachments or Project files. Where no writable persistent file interface exists, the agent must return complete updated files for the user to save. An attached file is not automatically a persistent writeable state.
-
-## Technical and coding interviews
-
-The skill supports developer/engineering role question types in [technical-interview.md](.claude/skills/zyris-interview-coach/references/technical-interview.md): coding, debugging, code review, system design, SQL, testing and reliability. Execute untrusted candidate code only in an isolated sandbox; if no runner is available, mark review as static and unverified by execution.
-
-## Testing
-
-**Deterministic checks (no model calls):**
-
-```bash
-python3 -m unittest discover -s tests -p 'test_*.py' -v
-# or: python3 -m pip install pytest && python3 -m pytest -q
-```
-
-**Optional local model smoke tests (may incur usage costs):**
-
-```bash
-python3 tests/behavior/run_smoke.py --cli claude
-python3 tests/behavior/run_smoke.py --cli codex
-```
-
-Prerequisites: installed and authenticated `claude` or `codex` CLI, suitable permissions and model quota. The smoke harness uses `claude -p` and `codex exec` with read-only sandbox where supported. It only tests selected output heuristics, not complete interview quality or storage integration. Run manually, review outputs and avoid placing private CVs in public fixtures. CLI flags may change with installed versions; check `claude --help` / `codex exec --help`.
-
-**CI:** GitHub Actions runs only deterministic Python tests on changes to skill/tests/scripts. No automatic paid model calls.
-
-## Verification checklist
-
-1. Unit tests pass locally and in GitHub Actions.
-2. Local `init/status/validate/finish` succeeds in a disposable directory.
-3. Claude and Codex CLI smoke tests are run manually and reviewed.
-4. End-to-end trial uses a **fictional** CV and vacancy; check research claims, question quality, repeated answers, immutable run and state update.
-5. Private workspace is used for real candidate interviews; no private artifacts leak into this public repository.
-
-
-### Guided setup
-
-In Claude Code after installation, invoke `/zyris-interview-coach setup`. In ChatGPT with the skill instructions available, say **"zyris-interview-coach setup"**. The coach asks conversationally for storage (local, private Git or ChatGPT files), verifies authorized access, requests your current CV and optionally a job posting, then reuses or initializes the state. It does **not** overwrite existing data.
-
-Local-only command alternative: `python3 .claude/skills/zyris-interview-coach/scripts/interview_workspace.py init --path ~/interview-workspace`.
-
-See [setup contract](.claude/skills/zyris-interview-coach/references/setup.md). LinkedIn import is **planned**, not implemented; a user-authorized profile export may later supplement an approved CV.
-
-## Language and interview controls
-
-During `setup`, the coach confirms the user's preferred **interface language** and optionally a different **interview language**. The confirmed choice is stored privately in `preferences.json` and reloaded at the start of each session. For a persistent local workspace the bundled CLI can update it with `python3 <skill-directory>/scripts/interview_workspace.py set-language --interface de --interview de`. No language is preselected for new users.
-
-During an interview, say `stop`, `end` or `beenden` to stop immediately, receive a summary and save a partial run plus updated state. Say `pause` to request a resumable checkpoint. A stopped interview is marked `stopped_early`, never `completed`. These are conversational commands; availability of automatic persistence depends on verified storage access.
-
-## Plugin distribution and publisher
-
-The canonical skill remains `.claude/skills/zyris-interview-coach/`. Two plugin packages are built from it without maintaining a second instruction copy:
-
-```bash
-bash install.sh chatgpt       # dist/zyris-interview-coach-chatgpt-plugin.zip
-bash install.sh claude-plugin # dist/zyris-interview-coach-claude-plugin.zip
-```
-
-The ChatGPT package uses portable Agent Plugins `plugin.json`; the Claude Code plugin package uses `.claude-plugin/plugin.json`. The existing `bash install.sh claude-chat` continues to build a Claude Chat **skill** ZIP for its separate Skills upload workflow. A Claude Code plugin is not the same as a Claude Chat skill.
-
-Publisher: **draftmode** · https://draftmode.io · Author: **Peter Fux**. Keywords: Personal Training, Job Coach, Jobs. OpenAI's directory category is `Productivity` because the directory uses predefined categories; the user-provided terms remain searchable keywords. Icon: the supplied draftmode favicon.
-
-**Legal metadata pending:** Do not invent a privacy policy or terms of service URL. Add the actual published HTTPS links to `plugin.json` before public submission. Public listing, developer verification and approval are separate from building a valid ZIP. The package is not automatically published.
-
-## Regression testing and release confidence
-
-Run deterministic unit, packaging and workspace checks after every change:
-
-```bash
-python3 -m unittest discover -s tests -p 'test_*.py' -v
-```
-
-Run **opt-in model behavior simulations** locally with an authenticated Codex CLI or Claude Code CLI. They use fictional candidates and do not need the ChatGPT UI:
-
-```bash
-python3 tests/behavior/run.py --list
-python3 tests/behavior/run.py --cli codex --output-dir .tmp/tests/behavior/codex
-# or:
-python3 tests/behavior/run.py --cli claude --output-dir .tmp/tests/behavior/claude
-```
-
-The behavior suite checks role-aware score structure, feedback, no-storage stop behavior and interviewer uncertainty. It sends skill/reference text and fictional prompts to the selected model, may consume API/CLI credits, and uses **heuristic** text checks. Review generated outputs manually; a passing score does not prove good coaching or UI behavior. It does not read private candidate workspaces. Run it explicitly, not automatically on every commit.
-
-**Platform acceptance remains manual:** Install the new ChatGPT plugin or Claude Chat skill and verify native selection controls, permissions, durable workspace reuse across a new chat, saved job research and end-of-run persistence. A CLI simulation cannot validate those host-specific interactions. Use a disposable workspace for acceptance tests; do not overwrite a real candidate's data.
-
-## Repository boundaries and Make targets
-
-- `.claude/skills/zyris-interview-coach/`: **shipped runtime**, including `SKILL.md`, references and the one canonical `scripts/interview_workspace.py`.
-- Root `scripts/`: **development/build-only**, with `package_skill.py` and `package_plugin.py`; these are not shipped as runtime.
-- Root `tests/`: **development/test-only**: `unit/test_<source_module>.py` for source-oriented unit tests, `regression/test_<behavior>.py` for contracts and cross-component regressions, and `behavior/run.py`, `behavior/run_smoke.py`, `behavior/fixtures/` for opt-in LLM simulations; never shipped.
-- `Makefile`: developer convenience commands; `install.sh` remains the user-facing installer.
-
-```bash
-make help
-make test                         # unit + regression, no LLM costs
-make test-unit                    # only source-oriented unit tests
-make test-regression              # only regression/contract tests
-make test-list                    # list fictional behavior scenarios
-make test-behavior CLI=codex      # opt-in model tests, may use credits
-make test-behavior CLI=claude CASE=lead_feedback
-make test-smoke CLI=codex         # older smoke suite
-make package-all                  # all distribution ZIPs
-```
-
-Test results from LLMs must be reviewed; the checks are heuristic and cannot validate ChatGPT's native UI. All three model runners separate the model's stdout from diagnostic stderr to avoid false passes from echoed prompts or CLI warnings.
-
-### Local test output layout
-
-Generated artifacts are kept under the repository-local ignored `.tmp/` directory, never the system `/tmp`:
-
-```text
-.tmp/
-  tests/
-    behavior/
-      codex/       # scenario answers and stderr diagnostics
-      claude/
-    smoke/
-      codex/       # legacy smoke outputs
-      claude/
-```
-
-The runners create the directories on demand. The entire `.tmp/` tree is gitignored; test fixtures and source files remain versioned under `tests/`. Use `OUT=.tmp/tests/behavior/custom` to override the behavior output location.
-
-### Scripted multi-step coaching regression
-
-`make test-journey CLI=codex` (or `CLI=claude`) runs the fictional
-`teamlead_coaching` journey: three separate interview answers, an independent
-revision of answer one, then `stop` in explicit no-storage mode.
-
-Each step invokes the model afresh and **replays the prior user/assistant transcript**
-in the next prompt. This tests contextual coaching and end-of-session reasoning,
-**not** native CLI session continuity, real filesystem persistence or ChatGPT UI.
-It uses five model calls, so it may consume appreciable tokens.
-
-Artifacts are written under `.tmp/tests/journey/<cli>/<journey>/`:
-one answer and diagnostic file per step plus `result.json`.
-Checks are heuristic and inspect only the model answer, not stderr.
-Manually inspect the content before treating the journey as a release signal.
-
-```bash
-make test
-make test-journey CLI=codex
-make test-journey CLI=claude
-```
-
-Journey checks normalize Markdown for pattern matching and check competence caution separately from affirmative stability claims. They remain German-language heuristics: passing checks cannot establish factual correctness, and valid alternative wording may still require review. Diagnose failures as product, runner or scenario issues before changing checks.
+Dokumentation erstellt mit ZYRIS Skill Documentation.

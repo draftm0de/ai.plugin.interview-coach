@@ -40,6 +40,10 @@
         "composerIcon": "./assets/icon.png",
         "logo": "./assets/icon.png"
       }
+    },
+    "io.zyris.distribution": {
+      "skillRoot": ".claude/skills"
     }
-  }
+  },
+  "license": "MIT"
 }

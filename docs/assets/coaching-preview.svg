@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="740" viewBox="0 0 1080 740" role="img" aria-labelledby="title description">
+  <title id="title">ZYRIS Interview Coach — fictional coaching walkthrough</title>
+  <desc id="description">Rendered excerpts from a fictional Codex CLI test, not a host UI screenshot. A vague answer receives 3 out of 10. A candidate-written revision receives 7 out of 10 but does not establish stable competence. Stop ends the interview without saving.</desc>
+  <rect width="1080" height="740" rx="20" fill="#101b2d"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <text x="40" y="49" fill="#87ddc6" font-size="14" font-weight="700" letter-spacing="1.5">ZYRIS INTERVIEW COACH</text>
+    <text x="40" y="91" fill="#ffffff" font-size="30" font-weight="700">From a vague answer to a clearer next attempt</text>
+    <text x="40" y="123" fill="#bccbdf" font-size="16">Fictional Team Lead ERP scenario · Codex CLI test · 2026-11-18</text>
+
+    <rect x="32" y="151" width="1016" height="162" rx="12" fill="#f4f7fc"/>
+    <text x="56" y="183" fill="#456079" font-size="13" font-weight="700" letter-spacing="1">01 / ORIGINAL ANSWER</text>
+    <text x="56" y="220" fill="#13243a" font-size="20">„Ich würde zuerst mit allen reden und dann gemeinsam eine Lösung suchen.“</text>
+    <rect x="56" y="244" width="79" height="42" rx="8" fill="#f9e8c6"/>
+    <text x="72" y="272" fill="#704914" font-size="23" font-weight="700">3/10</text>
+    <text x="154" y="263" fill="#243b53" font-size="17">Cooperative intent; risk, ownership and concrete steps are missing.</text>
+    <text x="154" y="286" fill="#52677e" font-size="14">Editorial summary of the role-specific feedback.</text>
+
+    <rect x="32" y="329" width="1016" height="196" rx="12" fill="#f4f7fc"/>
+    <text x="56" y="361" fill="#456079" font-size="13" font-weight="700" letter-spacing="1">02 / CANDIDATE-WRITTEN REVISION AFTER COACHING</text>
+    <text x="56" y="398" fill="#13243a" font-size="20">„Ich kläre zuerst den geschäftlichen Zeitdruck und die Risiken</text>
+    <text x="56" y="426" fill="#13243a" font-size="20">mit Fachbereich und Betrieb.“</text>
+    <rect x="56" y="453" width="79" height="42" rx="8" fill="#ccefe4"/>
+    <text x="72" y="481" fill="#155442" font-size="23" font-weight="700">7/10</text>
+    <text x="154" y="470" fill="#243b53" font-size="17">A clearer answer; the decision authority still needs clarification.</text>
+    <text x="154" y="495" fill="#52677e" font-size="14">A coached revision is not independent evidence of stable competence.</text>
+
+    <rect x="32" y="541" width="1016" height="137" rx="12" fill="#f4f7fc"/>
+    <text x="56" y="573" fill="#456079" font-size="13" font-weight="700" letter-spacing="1">03 / STOP · NO-STORAGE MODE</text>
+    <text x="56" y="610" fill="#13243a" font-size="20">„Das Interview ist beendet (stopped_early).“</text>
+    <text x="56" y="644" fill="#243b53" font-size="17">„Wie vereinbart wird nichts gespeichert“ · No further interview question.</text>
+    <text x="40" y="715" fill="#bccbdf" font-size="14">Transcript excerpts and editorial summaries · Not a screenshot of a host interface · Scores are illustrative</text>
+  </g>
+</svg>

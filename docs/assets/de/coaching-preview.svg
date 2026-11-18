@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="740" viewBox="0 0 1080 740" role="img" aria-labelledby="title description">
+  <title id="title">ZYRIS Interview Coach — fiktiver Coaching-Ablauf</title>
+  <desc id="description">Gerenderte Auszüge eines fiktiven Codex-CLI-Tests, kein Host-Screenshot. Erste Antwort: 3 von 10. Überarbeitung: 7 von 10, kein Nachweis stabiler Kompetenz. Stopp beendet ohne Speicherung.</desc>
+  <rect width="1080" height="740" rx="20" fill="#101b2d"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <text x="40" y="49" fill="#87ddc6" font-size="14" font-weight="700" letter-spacing="1.5">ZYRIS INTERVIEW COACH</text>
+    <text x="40" y="91" fill="#ffffff" font-size="30" font-weight="700">Von einer vagen Antwort zum klareren zweiten Versuch</text>
+    <text x="40" y="123" fill="#bccbdf" font-size="16">Fiktives ERP-Teamlead-Szenario · Codex-CLI-Test · 18.11.2026</text>
+
+    <rect x="32" y="151" width="1016" height="162" rx="12" fill="#f4f7fc"/>
+    <text x="56" y="183" fill="#456079" font-size="13" font-weight="700" letter-spacing="1">01 / ERSTE ANTWORT</text>
+    <text x="56" y="220" fill="#13243a" font-size="20">„Ich würde zuerst mit allen reden und dann gemeinsam eine Lösung suchen.“</text>
+    <rect x="56" y="244" width="79" height="42" rx="8" fill="#f9e8c6"/>
+    <text x="72" y="272" fill="#704914" font-size="23" font-weight="700">3/10</text>
+    <text x="154" y="263" fill="#243b53" font-size="17">Kooperativ; Risiken, Verantwortung und konkrete Schritte fehlen.</text>
+    <text x="154" y="286" fill="#52677e" font-size="14">Redaktionelle Zusammenfassung des rollenbezogenen Feedbacks.</text>
+
+    <rect x="32" y="329" width="1016" height="196" rx="12" fill="#f4f7fc"/>
+    <text x="56" y="361" fill="#456079" font-size="13" font-weight="700" letter-spacing="1">02 / EIGENE ÜBERARBEITUNG NACH COACHING</text>
+    <text x="56" y="398" fill="#13243a" font-size="20">„Ich kläre zuerst den geschäftlichen Zeitdruck und die Risiken</text>
+    <text x="56" y="426" fill="#13243a" font-size="20">mit Fachbereich und Betrieb.“</text>
+    <rect x="56" y="453" width="79" height="42" rx="8" fill="#ccefe4"/>
+    <text x="72" y="481" fill="#155442" font-size="23" font-weight="700">7/10</text>
+    <text x="154" y="470" fill="#243b53" font-size="17">Klarere Antwort; die Entscheidungsbefugnis bleibt offen.</text>
+    <text x="154" y="495" fill="#52677e" font-size="14">Überarbeitung nach Coaching belegt keine stabile Kompetenz.</text>
+
+    <rect x="32" y="541" width="1016" height="137" rx="12" fill="#f4f7fc"/>
+    <text x="56" y="573" fill="#456079" font-size="13" font-weight="700" letter-spacing="1">03 / STOPP · NICHT SPEICHERN</text>
+    <text x="56" y="610" fill="#13243a" font-size="20">„Das Interview ist beendet (stopped_early).“</text>
+    <text x="56" y="644" fill="#243b53" font-size="17">„Wie vereinbart wird nichts gespeichert“ · Keine weitere Interviewfrage.</text>
+    <text x="40" y="715" fill="#bccbdf" font-size="14">Transkriptauszüge und redaktionelle Zusammenfassungen · Kein Host-Screenshot · Beispielnoten</text>
+  </g>
+</svg>
