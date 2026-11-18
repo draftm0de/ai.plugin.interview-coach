@@ -173,9 +173,9 @@ Run **opt-in model behavior simulations** locally with an authenticated Codex CL
 
 ```bash
 python3 tests/behavior/run.py --list
-python3 tests/behavior/run.py --cli codex --output-dir /tmp/zyris-quality
+python3 tests/behavior/run.py --cli codex --output-dir .tmp/tests/behavior/codex
 # or:
-python3 tests/behavior/run.py --cli claude --output-dir /tmp/zyris-quality
+python3 tests/behavior/run.py --cli claude --output-dir .tmp/tests/behavior/codex
 ```
 
 The behavior suite checks role-aware score structure, feedback, no-storage stop behavior and interviewer uncertainty. It sends skill/reference text and fictional prompts to the selected model, may consume API/CLI credits, and uses **heuristic** text checks. Review generated outputs manually; a passing score does not prove good coaching or UI behavior. It does not read private candidate workspaces. Run it explicitly, not automatically on every commit.
@@ -202,3 +202,20 @@ make package-all                  # all distribution ZIPs
 ```
 
 Test results from LLMs must be reviewed; the checks are heuristic and cannot validate ChatGPT's native UI. The behavior runner now separates the model's stdout from diagnostic stderr to avoid false passes from echoed prompts or CLI warnings.
+
+### Local test output layout
+
+Generated artifacts are kept under the repository-local ignored `.tmp/` directory, never the system `/tmp`:
+
+```text
+.tmp/
+  tests/
+    behavior/
+      codex/       # scenario answers and stderr diagnostics
+      claude/
+    smoke/
+      codex/       # legacy smoke outputs
+      claude/
+```
+
+The runners create the directories on demand. The entire `.tmp/` tree is gitignored; test fixtures and source files remain versioned under `tests/`. Use `OUT=.tmp/tests/behavior/custom` to override the behavior output location.
