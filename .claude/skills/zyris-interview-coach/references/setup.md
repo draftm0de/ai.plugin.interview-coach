@@ -27,7 +27,7 @@ For a known existing workspace, show its verified path and the fact that it cont
 
 ## Bundled local workspace tool and persistence boundaries
 
-The distributed ZIP and Claude Code installation include `scripts/interview_workspace.py` **inside the skill package**, alongside `SKILL.md` and `references/`. The source of truth in the development repository is `scripts/interview_workspace.py`; the installer and packager copy it during distribution. Locate the script relative to the installed skill folder, not relative to the user's current working directory.
+The distributed ZIP and Claude Code installation include `scripts/interview_workspace.py` **inside the skill package**, alongside `SKILL.md` and `references/`. The canonical runtime implementation is `scripts/interview_workspace.py` inside this skill directory; installers and packagers include it directly. Locate the script relative to the installed skill folder, not relative to the user's current working directory.
 
 When the host provides an authorized **persistent local filesystem and Python runtime**, execute `python3 <skill-directory>/scripts/interview_workspace.py init --path <confirmed-path>` and verify with `status` and `validate`. The CLI writes a machine-local pointer; only claim future-session reuse when the same persistent filesystem is actually available.
 
@@ -45,7 +45,7 @@ Ask **one question at a time** (do not dump a questionnaire):
 
 1. **Storage:** Present the three storage-type choices from the section above, preferably as native options. Ask for the exact local path or Git repository **only after** the user selects that type; never request tokens/passwords.
 2. **Access verification:** For local, check directory read/write authorization before creating files. For Git, check authenticated repository read and permitted write capabilities; do not make a test commit without approval. For ChatGPT files, verify attached/Project files are readable and clearly state whether writes are supported. If inaccessible, stop and offer a different storage mode.
-3. **Initialize or reuse:** If existing `state.md` and `runs/` exist, **reuse**, never overwrite. For local, after permission use `python scripts/interview_workspace.py init --path PATH`; for Git use available authorized connector or Git CLI and `workspace.yaml` as reference. Never claim a local pointer is a universal ChatGPT setting.
+3. **Initialize or reuse:** If existing `state.md` and `runs/` exist, **reuse**, never overwrite. For local, after permission use `python3 <skill-directory>/scripts/interview_workspace.py init --path PATH`; for Git use available authorized connector or Git CLI and `workspace.yaml` as reference. Never claim a local pointer is a universal ChatGPT setting.
 4. **CV:** Ask "Bitte lade deinen aktuellen Lebenslauf (PDF/DOCX/Markdown) hoch oder gib mir den Pfad zu einer bereits zugänglichen Datei." Verify file is actually readable. Store original **only with user permission** in private workspace; otherwise store a provenance-aware reference and a derived, user-confirmed profile. If CV is missing, allow general practice but mark targeted preparation as blocked.
 5. **Optional target job:** Ask for job ad text/link or existing application record. Company/interviewer research only when a concrete target exists; preserve source provenance.
 6. **Confirm:** Show storage location and write capability, CV source/version, existing training state, missing inputs and next action. Ask whether to begin `general` or `targeted` training.
