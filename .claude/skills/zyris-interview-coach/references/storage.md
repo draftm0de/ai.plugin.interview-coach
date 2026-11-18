@@ -5,7 +5,9 @@
 - **local**: Write real files when agent has authorized filesystem access. Otherwise generate downloadable Markdown/JSON and ask user to place them locally.
 - **git**: Use connected GitHub/GitLab repository, verify read/write permissions, fetch before updates and verify committed changes. Never embed personal state in a public skill repository.
 - **chatgpt-files**: Use explicitly attached/available Project or Library files where supported. An uploaded file or old chat is not a writable transactional store. Generate updated state/run files when direct overwrite is unavailable.
-- **ephemeral**: Allow practice without persistence but explicitly flag at start/end that next sessions won't automatically inherit state.
+- **ephemeral / Nicht speichern**: Explicit opt-out of all skill-managed persistence. Do not create a workspace, write state, run files, preferences, CV copies, job research, or downloadable export automatically. Feedback and adaptive coaching still work during the current conversation; no accumulated learning state or prior-job knowledge is available in later chats unless the user supplies it anew. Explain this briefly before beginning. The chat platform may retain conversation history under its own separate settings; do not promise that the conversation itself is unrecorded.
+
+In explicit **Nicht speichern** mode, `stop` and `end` give an in-chat summary only, and `pause` cannot offer a persisted checkpoint. Do not invoke the normal completion-write contract unless the user later explicitly opts into storage.
 
 Never claim a successful write until tool response confirms it. Saving the run and updating state are separate operations; report partial failures and how to reconcile.
 
