@@ -61,6 +61,11 @@
     "mode": "general",
     "prompt": "Der Nutzer hat ausdrücklich 'Nicht speichern' gewählt. Es gab genau eine Frage und eine Antwort. Jetzt schreibt der Nutzer: stop. Beende das Interview und gib eine Zusammenfassung. Keine Speicherung, keine weitere Interviewfrage.",
     "must_contain_any": [
+      "Interview ist beendet",
+      "Interview beendet",
+      "stopped_early",
+      "Training beendet",
+      "Sitzung beendet",
       "Zusammenfassung",
       "Resümee",
       "Rückblick"
@@ -74,7 +79,18 @@
       [
         "nicht gespeichert",
         "ohne Speicherung",
-        "nicht speicher"
+        "nicht speicher",
+        "keine Dateien",
+        "nichts gespeichert",
+        "keinen Lernstand gespeichert"
+      ],
+      [
+        "eine Frage",
+        "genau eine Frage",
+        "1 Frage",
+        "eine Antwort",
+        "genau eine Antwort",
+        "1 Antwort"
       ]
     ]
   },
