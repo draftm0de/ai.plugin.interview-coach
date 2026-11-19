@@ -109,5 +109,36 @@
       "Anna Beispiel arbeitet im Recruiting"
     ],
     "required_groups": []
+  },
+  {
+    "id": "setup_four_storage_choices",
+    "mode": "setup",
+    "prompt": "Fiktiver Erststart: Es gibt keinen konfigurierten Workspace und keine Speicherentscheidung. Nutzer: Ich möchte ein Interview üben. Antworte nur mit dem ersten Einrichtungsschritt; frage noch keinen konkreten Pfad oder Repository-Link ab.",
+    "must_contain_any": [
+      "speichern",
+      "Speicher"
+    ],
+    "must_not_contain": [
+      "Wie lautet der Pfad",
+      "Wie lautet die Repository-URL"
+    ],
+    "required_groups": [
+      [
+        "Lokales Verzeichnis",
+        "lokal"
+      ],
+      [
+        "Privates Git-Repository",
+        "privates Repository"
+      ],
+      [
+        "Dateien selbst verwalten",
+        "Dateien selbst"
+      ],
+      [
+        "Nicht speichern",
+        "nicht speichern"
+      ]
+    ]
   }
 ]

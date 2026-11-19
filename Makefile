@@ -1,4 +1,3 @@
-include docs.mk
 export PYTHONDONTWRITEBYTECODE := 1
 # Developer-only entry points. Not shipped in plugin/skill packages.
 PYTHON ?= python3
@@ -10,24 +9,22 @@ CASE ?=
 OUT ?= .tmp/tests/behavior/$(CLI)
 JOURNEY ?= teamlead_coaching
 
-.PHONY: help test test-unit test-regression test-behavior test-journey test-smoke test-list check-plugin sync-plugin
+.PHONY: help test test-unit test-contracts test-behavior test-journey test-smoke test-list check-plugin sync-plugin
 
 help:
+	@echo 'Tests: test (unit + integration + contracts), test-unit, test-integration, test-contracts, test-native, test-behavior'
 	@echo "make install-local / update-local TARGET=claude|codex  Shared development marketplace"
-	@echo 'make check-docs-export / export-docs  Validate / build the website documentation bundle'
-	@echo "make test                  Unit + regression tests (no LLM, also in CI)"
+	@echo "make test                  Unit + integration + contract tests (no LLM, also in CI)"
 	@echo "make test-list             List behavior scenarios"
 	@echo "make test-behavior         LLM simulations (CLI=codex|claude; optional CASE=id)"
 	@echo "make test-journey          Scripted multi-step coaching test (CLI=codex|claude)"
-	@echo "make test-smoke            Legacy LLM smoke checks (CLI=codex|claude)"
+	@echo "make test-smoke            Basic LLM smoke checks (CLI=codex|claude)"
 
-test: test-unit test-regression
-
-test-unit:
-	$(PYTHON) -m unittest discover -s tests/unit -p 'test_*.py' -v
-
-test-regression:
-	$(PYTHON) -m unittest discover -s tests/regression -p 'test_*.py' -v
+# Test layers: deterministic checks by default; native/model tests are explicit.
+TEST_GROUP ?=
+.PHONY: test test-unit test-integration test-contracts test-native test-behavior
+test test-unit test-integration test-contracts test-native:
+	$(PYTHON) -B scripts/run_tests.py --kind $(if $(filter test,$@),deterministic,$(patsubst test-%,%,$@)) $(if $(TEST_GROUP),--group "$(TEST_GROUP)",)
 
 test-list:
 	$(PYTHON) tests/behavior/run.py --list

@@ -12,7 +12,7 @@ The interview language may differ (e.g. English practice). Announce any switch b
 
 ## Commands
 
-Interpret `stop`, `end`, `finish`, `abbrechen`, `beenden`, `Interview beenden` and `/zyris-interview-coach stop` or `/zyris-interview-coach end` as session control **only when issued as user commands**, not when quoted as part of an interview answer or job posting.
+Interpret `stop`, `end`, `finish`, `abbrechen`, `beenden`, `Interview beenden` and `/interview-coach stop` or `/interview-coach end` as session control **only when issued as user commands**, not when quoted as part of an interview answer or job posting.
 
 - `stop` / `end`: Immediately stop asking interview questions. Produce a concise summary of answered questions, demonstrated strengths, weaknesses, evidence and next practice. Persist an immutable **partial** run and update canonical state, including completion status `stopped_early`, answered count and planned count. Do not claim the entire interview was completed or promote a competency without adequate evidence.
 - `finish`: Same early-stop behavior when questions remain; after the planned final answer, status is `completed`.

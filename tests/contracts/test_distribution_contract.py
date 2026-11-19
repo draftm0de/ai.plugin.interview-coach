@@ -4,8 +4,8 @@ import tempfile
 from pathlib import Path
 import unittest
 
-ROOT = Path(__file__).resolve().parents[2]
-SOURCE = ROOT / "skills/zyris-interview-coach"
+ROOT = next(p for p in Path(__file__).resolve().parents if (p / 'Makefile').is_file())
+SOURCE = ROOT / "skills/interview-coach"
 
 class InstallationTests(unittest.TestCase):
 
@@ -19,6 +19,9 @@ class InstallationTests(unittest.TestCase):
         for relative in ('.claude-plugin/marketplace.json','.agents/plugins/marketplace.json'):
             self.assertFalse((ROOT/relative).exists())
         self.assertTrue((SOURCE/'SKILL.md').is_file())
+        self.assertFalse((ROOT/'skills/zyris-interview-coach').exists())
+        self.assertEqual('./skills/interview-coach/SKILL.md',
+                         json.loads((ROOT/'plugin.json').read_text())['extensions']['com.openai']['onboardingSkill'])
 
     def test_user_entrypoint_is_separate_from_developer_installer(self):
         installer = ROOT / "install.sh"

@@ -1,13 +1,31 @@
 # Release-Prüfnachweis
 
+## Aktuelle Formatgrenze (19.11.2026)
+
+Es gilt ausschließlich das aktuelle Regelwerk: keine Altformat-Unterstützung, Ersatzpfade oder automatische Migration. Frühere Prüfstände unten sind historische Nachweise und keine Zusage heutiger Kompatibilität. Benutzerdaten bleiben bei Ablehnung unverändert.
+
+## Einheitliche Teststruktur (19.11.2026)
+
+Alle bisherigen 212 Testmethoden aus Marketplace, Manager und Coach sind erhalten. Tests sind zuerst nach Typ, danach bei Bedarf nach Skill/Komponente geordnet. Vier zusätzliche Tests sichern die Teststeuerung ab; ein weiterer prüft die Make-Testbefehle frisch erzeugter Repositories. `make test` bestand 134 deterministische Tests in ai.plugins einschließlich Manager und 79 im Coach. `make test-native` bestand separat vier Tests in isolierten Claude-/Codex-Profilen, keiner übersprungen. Modelltests wurden nicht ausgeführt; der Coach besitzt derzeit keine eigene native Suite. Frühere Native-Flags bei make test sind historische Aufrufe; aktuell ist test-native der ausdrückliche Einstieg. Keine persönlichen Installationen verändert, keine Commits oder Pushes.
+
+## Dokumentationsabgleich am 19.11.2026
+
+`plugin-manager-update` hat die aktuellen Quellen beider Repositories erneut abgeglichen. Deutsch/Englisch, Skill-Pfade, Einrichtung über configure, lokale Snapshots, Veröffentlichungsfreigaben und historische Nachweise sind abgestimmt. Dokumentationsvalidierung, Manifest-/Katalogprüfung, Verify und lokale Marketplace-README-Links bestanden. Coach: 79 Tests bestanden. ai.plugins einschließlich Manager: 130 Tests erfasst, 126 bestanden und vier optionale native Tests bewusst übersprungen. Kein neuer Host-/GUI-Test und keine Modellaufrufe. Keine persönlichen Installationen verändert, keine Commits, Pushes oder Veröffentlichungen.
+
+## Aktueller Stand (19.11.2026)
+
+Laut Nutzer sind Manager und Coach bereits im veröffentlichten Marketplace vorhanden. Die aktuelle Skill-Umbenennung und Dokumentationsänderungen liegen nur lokal vor; sie wurden nicht committed oder gepusht. Nach der Umbenennung bestanden 79 deterministische Tests (62 Unit-, 17 Regressionstests), Manifestprüfung und Manager-Verify. Der historische Konfigurationspfad bleibt erhalten. Native Host- und GUI-Abnahme der Umbenennung wurden nicht erneut ausgeführt.
+
+## Historie der Repository-Umstellung
+
 Aktueller Umbau am 19.11.2026: Plugin `interview-coach`, Anzeigename Interview Coach, Repository-Import über `ai.plugins`. Frühere ZIP-/Release-Nachweise unten betreffen den alten Aufbau und belegen nicht den neuen grafischen Import. Die lokale Prüfung der neuen Kataloge installierte beide Plugins in isolierten Claude-/Codex-Profilen; die GitHub-URL des Coaches wurde dabei ausschließlich für den Test auf eine temporäre Git-Kopie umgeleitet. Der veröffentlichte GitHub-/GUI-Test steht noch aus.
 
 
-## Aktueller Stand: Skill Manager
+## Historischer Stand: Skill Manager (18.11.2026)
 
 18.11.2026: Manager-Umbenennung und publish-Fähigkeit lokal umgesetzt. Manager: 86 Tests, davon 85 bestanden und ein optionaler Test übersprungen. Interview-Coach: 97 Tests, davon 96 bestanden und ein optionaler Test übersprungen. Die 18 neuen Publish-Tests sind enthalten: konkrete Freigabe, Versions-/Dateikonflikte, unveränderte fremde Arbeit, Journalsperre, Wiederaufnahme und Nutzung aus dem extrahierten Paket. Test-Commits entstehen nur in wegwerfbaren fiktiven Testrepositories; keine Commits in den Produkt-Repositories.
 
-Verify: Manager 35 und Coach 25 Prüfungen ohne Warnungen. Paketbau, Dokumentationsvalidierung und Website-Export erfolgreich. Das umbenannte Manager-Plugin und der Coach wurden in isolierten Claude-Code-/Codex-Profilen installiert, mit geänderten Skill-Inhalten aktualisiert, mit höherer Testversion auf ursprüngliche Inhalte zurückgeführt und entfernt; fiktive private Daten blieben erhalten.
+Verify: Manager 35 und Coach 25 Prüfungen ohne Warnungen. Paketbau und Dokumentationsvalidierung erfolgreich. Das umbenannte Manager-Plugin und der Coach wurden in isolierten Claude-Code-/Codex-Profilen installiert, mit geänderten Skill-Inhalten aktualisiert, mit höherer Testversion auf ursprüngliche Inhalte zurückgeführt und entfernt; fiktive private Daten blieben erhalten.
 
 Der Journalhelfer führt keine Git-/GitHub-Veröffentlichung aus. Der veröffentlichende Ablauf ist eine Anweisung an den Host-Agenten mit expliziter Freigabe und überprüften Zwischenständen. Ein echter entfernter Commit/Push/PR/Merge/Release/Kataloglauf wurde nicht ausgeführt. Keine Produktionsabnahme für die Remote-Orchestrierung behauptet. Die öffentliche GitHub-Adresse bleibt unverändert. Alte generierte Documentation-Artefakte wurden zur Erhaltung unter `.tmp/pre-manager-dist/` archiviert; aktive Installationen wurden nicht geändert.
 
@@ -32,13 +50,9 @@ Der native Lauf verwendete temporäre HOME-, CODEX_HOME- und CLAUDE_CONFIG_DIR-V
 
 Ein realer öffentlicher Git-Katalog, Kontorechte, grafische Updates und Downgrades bleiben offen. Die lokale Wiederherstellung durch atomare Wiederholung ist getestet; ein nativer Downgrade wurde nicht nachgewiesen. Sichere Betriebsstrategie: höhere Patchversion mit bekannt gutem Runtime-Stand. Offene Aufnahmen: [Beispiele](screens.md). Ablauf und Freigaben: [Release-Betrieb](release-operations.md).
 
-Weitere Prüfungen: Dokumentationsvalidierung, Paketbau und Website-Export erfolgreich; Verify 26 Prüfungen ohne Warnungen. Lokale grafische App-Versionen nur aus App-Metadaten gelesen: ChatGPT/Codex 26.1111.21308 (27194), Claude Desktop 5.11492.5. Das ist keine UI-Abnahme.
+Weitere Prüfungen: Dokumentationsvalidierung und Paketbau erfolgreich; Verify 26 Prüfungen ohne Warnungen. Lokale grafische App-Versionen nur aus App-Metadaten gelesen: ChatGPT/Codex 26.1111.21308 (27194), Claude Desktop 5.11492.5. Das ist keine UI-Abnahme.
 
-Nativen Lauf wiederholen (isolierte Profile, beide CLIs erforderlich):
-
-```sh
-python3 -B scripts/test_release_native.py --bundle dist/release-preview-final --output .tmp/native-release.json
-```
+Der damalige native Release-Runner wurde entfernt. Die folgenden älteren Beobachtungen sind historische Nachweise, keine aktuelle Ausführungsanleitung. Aktuelle Prüfungen stehen unter [Entwicklung](development.md).
 
 Nachtrag: Nutzeraufnahmen vom 18.11.2026 belegen den deutschen Claude-Desktop-Menüpfad bis zur Repository-Eingabe. Zwei Dialogbilder sind auf der [Beispielseite](screens.md) enthalten. Keine erfolgreiche Synchronisierung oder Produktinstallation aus diesen Bildern abgeleitet.
 

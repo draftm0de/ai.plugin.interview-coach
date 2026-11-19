@@ -20,7 +20,7 @@ workspace/
   preferences.json
 ```
 
-`preferences.json` entsteht bei bestätigter Sprachspeicherung. Ein Original-Lebenslauf ist optional und benötigt Zustimmung. Vorhandene `workspace.yaml`-Dateien können Pfade zuordnen. Reale Kandidatendaten gehören nie in dieses öffentliche Repository.
+`preferences.json` entsteht bei bestätigter Sprachspeicherung. Ein Original-Lebenslauf ist optional und benötigt Zustimmung. Alternative Workspace-Pfadzuordnungen werden nicht unterstützt. Reale Kandidatendaten gehören nie in dieses öffentliche Repository.
 
 Für private GitHub-/GitLab-Arbeitsbereiche braucht der Agent einen autorisierten Connector oder eine separat authentifizierte Git-CLI. Schreibvorgänge müssen ausdrücklich ausgeführt und verifiziert werden; der Python-Helfer bietet keine entfernte Git-Speicherung.
 
@@ -36,7 +36,7 @@ python3 <installed-skill-directory>/scripts/interview_workspace.py status
 python3 <installed-skill-directory>/scripts/interview_workspace.py validate
 ```
 
-Der Zeiger liegt in `~/.config/zyris/zyris-interview-coach/config.json` oder unter `$XDG_CONFIG_HOME/zyris/zyris-interview-coach/config.json`. Er wird nicht zu ChatGPT synchronisiert. `init` erhält vorhandene Dateien; `init --path NEW_PATH --force` wechselt nur den Zeiger. Die globale Option `--config PATH` steht vor dem Unterbefehl, und ihre Datei muss außerhalb des Arbeitsbereichs liegen.
+Der Zeiger liegt in `~/.config/zyris/interview-coach/config.json` oder unter `$XDG_CONFIG_HOME/zyris/interview-coach/config.json`. Er wird nicht zu ChatGPT synchronisiert. `init` erhält vorhandene Dateien; `init --path NEW_PATH --force` wechselt nur den Zeiger. Die globale Option `--config PATH` steht vor dem Unterbefehl, und ihre Datei muss außerhalb des Arbeitsbereichs liegen. Nur der aktuelle Konfigurationspfad wird gelesen; ältere Zeiger bleiben unberührt und werden weder gesucht noch migriert.
 
 Nach Bestätigung speichert `set-language --interface de --interview en` die Bedien- und Interviewsprache; andere Einstellungsschlüssel bleiben erhalten.
 
@@ -59,7 +59,7 @@ Hash und Lebenszyklusargumente sind verpflichtend; ältere `finish`-Aufrufe müs
 python3 <installed-skill-directory>/scripts/interview_workspace.py resume --run-id <checkpoint-id>
 ```
 
-`resume` liest Bericht, Metadaten und aktuellen Zustand samt Hash, ohne den Checkpoint zu verändern. Speichere die Fortsetzung unter einer neuen ID mit `--resume-from <checkpoint-id>`. Antwortzahlen sind kumulativ; eine geplante Anzahl bleibt erhalten. `completed` setzt bei bekanntem Plan alle Antworten voraus. Bereits fortgesetzte, gestoppte oder abgeschlossene Checkpoints sind nicht fortsetzbar. Alte Markdown-Berichte bleiben manuell lesbar, bekommen aber keine erfundenen Lebenszyklusdaten. Neue Berichte erhalten einen maschinenlesbaren HTML-Kommentar vor dem unveränderten Berichtstext.
+`resume` liest Bericht, Metadaten und aktuellen Zustand samt Hash, ohne den Checkpoint zu verändern. Speichere die Fortsetzung unter einer neuen ID mit `--resume-from <checkpoint-id>`. Antwortzahlen sind kumulativ; eine geplante Anzahl bleibt erhalten. `completed` setzt bei bekanntem Plan alle Antworten voraus. Bereits fortgesetzte, gestoppte oder abgeschlossene Checkpoints sind nicht fortsetzbar. Nicht unterstützte Run-Formate blockieren Workspace-Operationen vor Schreibzugriffen. Es erfolgt keine Konvertierung oder Löschung. Neue Berichte erhalten einen maschinenlesbaren HTML-Kommentar vor dem unveränderten Berichtstext.
 
 ## Fehler und Wiederherstellung
 
@@ -80,3 +80,9 @@ Bei „busy“ auf das Ende des anderen Prozesses warten; `.zyris/lock` nicht l�
 Diese Garantien gelten für kooperierende CLI-Prozesse auf lokalen Dateisystemen. Direkte externe Änderungen nehmen nicht an der Sperre teil. Netzwerk- und Cloud-Sync-Dateisysteme sind kein unterstütztes Transaktionsbackend. Tests mit fiktiven Daten prüfen Prozesse, unterbrochene Schreibvorgänge, Wiederherstellung und den paketierten Helfer, aber keine dauerhafte Speicherung in gehosteten Plattformen.
 
 Bei **Nicht speichern** wird kein Workspace-Befehl aufgerufen: keine Initialisierung, Sperre, Checkpoint, Präferenz, Journal oder Exportdatei. Anpassung und Feedback bleiben im aktiven Gespräch; Host-Chat-Aufbewahrung ist separat.
+
+Run-Publikation verwendet temporäre Dateien unter `.zyris/`, nicht unter `runs/`. Das aktuelle Lifecycle-Format verlangt alle sechs Metadatenfelder; unbekannte Planzahl und fehlender Vorgänger werden ausdrücklich als null gespeichert. Ungültige Strukturen werden vor Anlage von Kontrollpfaden abgelehnt.
+
+JSON-Metadaten müssen eindeutige Schlüssel und die ganzzahlige Schema-Version 1 enthalten; Boolean und Fließkommazahl sind ungültig. Ausstehende Transaktionen blockieren init vor neuen Konfigurationspfaden oder Locks. Ungültige Journale werden vor Recovery-Schreibzugriffen abgelehnt. Bestehende Erweiterungsfelder in Konfiguration und Präferenzen bleiben erhalten.
+
+Gespeicherte Sprachwerte werden vor Änderungen geprüft. Fortsetzungen benötigen einen vorhandenen pausierten Vorgänger: keine Verzweigungen oder Zyklen, keine sinkenden Antwortzahlen und kein Verlust bekannter Planzahlen. Dies gilt auch bei Recovery. Das Run-Staging wird explizit gewählt; ein Konfigurationsordner namens runs bleibt ein normaler Konfigurationspfad.

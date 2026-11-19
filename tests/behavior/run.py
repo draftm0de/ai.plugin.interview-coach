@@ -9,12 +9,13 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-SKILL = ROOT / "skills/zyris-interview-coach"
+SKILL = ROOT / "skills/interview-coach"
 
 def skill_context():
     paths = [SKILL / "SKILL.md", SKILL / "references/training.md",
              SKILL / "references/evaluation.md", SKILL / "references/session-control.md",
-             SKILL / "references/research.md", SKILL / "references/storage.md"]
+             SKILL / "references/research.md", SKILL / "references/storage.md",
+             SKILL / "references/setup.md", SKILL / "references/technical-interview.md"]
     return "\n\n".join(p.read_text(encoding="utf-8") for p in paths)
 
 def check(case, output, exit_code=0):
@@ -48,7 +49,7 @@ def main():
     parser.add_argument("--output-dir", type=Path, help="Optional directory for reviewing generated outputs")
     parser.add_argument("--list", action="store_true", help="List scenarios without invoking an LLM")
     args = parser.parse_args()
-    cases = json.loads((ROOT / "tests/behavior/fixtures/quality-cases.json").read_text(encoding="utf-8"))
+    cases = json.loads((ROOT / "tests/fixtures/behavior/quality-cases.json").read_text(encoding="utf-8"))
     if args.case:
         cases = [c for c in cases if c["id"] == args.case]
         if not cases:

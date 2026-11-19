@@ -6,20 +6,27 @@
 
 ## Kanonische Quelle
 
-`skills/zyris-interview-coach/` enthält unverändert die Coaching-Laufzeit. `plugin.json` definiert das Plugin `interview-coach` mit Anzeigename **Interview Coach**. `make sync-plugin` leitet `.claude-plugin/plugin.json` und `.codex-plugin/plugin.json` ab; `make check-plugin` prüft Drift. Alle Manifeste bleiben versionslos. Der gemeinsame Marketplace liegt im separaten Repository `ai.plugins`; hier gibt es keinen eigenen Katalog.
+`skills/interview-coach/` enthält die Coaching-Laufzeit; Ordner und Skill-Kennung heißen jetzt `interview-coach`. `plugin.json` definiert das Plugin `interview-coach` mit Anzeigename **Interview Coach**. `make sync-plugin` leitet `.claude-plugin/plugin.json` und `.codex-plugin/plugin.json` ab; `make check-plugin` prüft Drift. Alle Manifeste bleiben versionslos. Der gemeinsame Marketplace liegt im separaten Repository `ai.plugins`; hier gibt es keinen eigenen Katalog.
+
+Git und Python 3.10+ sind für Verwaltungswerkzeuge erforderlich; Make ist ein optionaler Komfortzugang. Keine zusätzlichen Python-Pakete. Die Host-CLI wird nur für automatische lokale Installation/Updates sowie ausdrücklich gewählte Modelltests benötigt. Der Speicherhelfer selbst benötigt Python 3.10+, aber kein Git. Fehlende Werkzeuge werden nicht automatisch installiert.
 
 ## Prüfungen
+
+Die gemeinsame [Teststruktur](../../tests/README.md) ordnet zuerst nach Testart: `unit/`, `integration/`, `contracts/`, optional `behavior/` und `native/`. Skills oder Komponenten werden darunter eingeordnet; Daten und Helfer stehen unter `fixtures/` beziehungsweise `support/`.
+
+`make test` führt nur Unit-, Integrations- und Vertragstests aus. Einzelbereiche: `make test-unit`, `make test-integration`, `make test-contracts`. `make test-native` und `make test-behavior` werden separat angefordert. Nicht vorhandene Suiten melden ausdrücklich `NOT RUN`; alte Native-Flags erweitern den normalen Testlauf nicht.
 
 Führe im Repository-Stamm aus:
 
 ```bash
 make test
 make test-unit
-make test-regression
-python3 -m unittest discover -s tests -p 'test_*.py' -v
+make test-integration
+make test-contracts
+python3 -B scripts/run_tests.py --kind deterministic
 ```
 
-Diese Prüfungen verwenden keine Modelle. Alternativ nach Installation von pytest: `python3 -m pytest -q`. Quellbezogene Unit-Tests stehen in `tests/unit/`, Vertrags- und Ablaufregressionen in `tests/regression/`.
+Diese Prüfungen verwenden keine Modelle. Isolierte Funktionen stehen in `tests/unit/`, Dateisystem- und Ablaufprüfungen in `tests/integration/`, Skill- und Paketverträge in `tests/contracts/`.
 
 ### Optionale Modelltests
 
@@ -47,34 +54,53 @@ Ausgaben liegen ignoriert unter `.tmp/tests/behavior/<cli>/`, `.tmp/tests/smoke/
 
 Native Abnahme bleibt separat: Installation, Auswahl, Berechtigungen, gespeicherte Stellenrecherche, Speichern am Ende und Wiederaufnahme im neuen Chat mit einem Wegwerf-Arbeitsbereich prüfen. CLI-Modelltests belegen diese Host-Funktionen nicht.
 
+### Lokal über den gemeinsamen Marketplace
+
+Verwende regulär die Manager-Aktion `configure` mit diesem Plugin-Checkout und dem gewählten Marketplace. Sie erhält andere Zuordnungen, setzt den lokalen Standard und prüft wirksame Ignore-Regeln vor dem Schreiben. `local-marketplace.example.json` ist nur eine optionale manuelle Kopiervorlage. Zur Laufzeit wird ausschließlich die Git-ignorierte `.local/marketplace.json` gelesen; lokale Zuordnungen niemals committen. `MARKETPLACE=/pfad/zu/ai.plugins` überschreibt den Standard für einen Aufruf.
+
+Im Coach-Repository:
+
+```sh
+make install-local TARGET=claude
+make update-local TARGET=codex
+# Ohne Make:
+python3 -B scripts/local_marketplace.py update-local --target codex
+```
+
+Beide Befehle delegieren an den konfigurierten Marketplace und erfassen alle zugeordneten lokalen Plugins im gemeinsamen Entwicklungskatalog `draftmode-ai-plugins-dev`. Fehlende benötigte Checkouts stoppen vor Host-Änderungen. `DRY_RUN=1` erstellt Snapshots ohne Host-Aufruf.
+
+Snapshots verwenden den aktuellen Checkout einschließlich uncommitteter Änderungen, unabhängig vom Branch. Nach Änderungen oder Branchwechsel `update-local` ausführen und eine neue Host-Sitzung öffnen. Kein Commit, Push oder PR ist für lokale Tests erforderlich; keine zusätzlichen Marketplaces pro Branch.
+
+`plugin-verify` im Manager prüft dieses Repository nur lesend. Eine gültige veröffentlichbare Struktur ist unabhängig von vollständiger lokaler Entwicklungskonfiguration: Fehlende Checkouts oder `.local`-Dateien sind auf einem frischen Clone erwartbar und werden als nicht verfügbare lokale Prüfung gemeldet.
+
 ## Paketierung
 
 Repository-Import benötigt keine Plugin-ZIPs. `plugin.mk`, die alten Installationsskripte und die Tag-/Release-Werkzeuge sind entfernt. Tests prüfen die versionierten Manifeste und die unabhängig kopierte Coaching-Laufzeit. Lokale Entwicklung verwendet den gemeinsamen Marketplace `draftmode-ai-plugins-dev`.
 
 ## CI und Releases
 
-Die [CI](../../.github/workflows/validate.yml) führt `make test`, `make check-plugin` und die Website-Exportprüfung aus. Modelltests bleiben optional. Veröffentliche zuerst dieses Plugin-Repository und anschließend den neuen Eintrag in `ai.plugins`. Tags oder GitHub Releases sind dafür nicht erforderlich. [Ablauf](release-operations.md) · [Prüfstand](release-evidence.md).
+Die [CI](../../.github/workflows/validate.yml) führt `make test` und `make check-plugin` aus. Modelltests bleiben optional. Bei neuen Katalogeinträgen zuerst dieses Plugin-Repository und anschließend den Eintrag in `ai.plugins` veröffentlichen. Bestehende Einträge benötigen bei einer reinen Plugin-Änderung keinen künstlichen Katalog-Commit. Tags oder GitHub Releases sind dafür nicht erforderlich. [Ablauf](release-operations.md) · [Prüfstand](release-evidence.md).
 
 ## Dokumentation pflegen
 
-### Export für die Website
-
-`make check-docs-export` prüft den Vertrag; `make export-docs` erzeugt `dist/<plugin-name>-documentation.zip` mit `index.json`, unveränderten Markdown-Seiten und ausgewählten Assets. Die Konfiguration `export` in `docs/documentation.json` enthält ausschließlich Seiten- und Asset-Verweise. Produktmetadaten kommen aus `plugin.json`, Sprachen aus der bestehenden Dokumentationskonfiguration. Der Index ergänzt Linkzuordnungen, Prüfsummen und Git-Herkunft; lokale Änderungen werden kenntlich gemacht. Die Website übernimmt Routing und sichere Darstellung. Es wird nichts veröffentlicht.
-
 Deutsch: `README.md` und `docs/de/`; vollständiges Englisch: `README.en.md` und `docs/en/`. Beide Sprachfassungen beschreiben dieselben Befehle, Grenzen und Fakten. Gegenstücklinks, vorgegebene Überschriften und Medienherkunft erhalten. GitHub rendert Markdown direkt; keine zusätzliche Website, kein Wiki- oder Pages-Deployment nötig.
 
-`docs/documentation.json` enthält Quellenzeiger und die Dokumentationssprachen dieses Repositories (`documentation.languages`: `de`, `en`; `default_language`: `de`). Produktfakten bleiben ausschließlich in ihren kanonischen Quellen. Quellen bei jeder Aktualisierung neu lesen. Die installierte ZYRIS-Dokumentationsaktion aktualisiert Dokumentation; Plugin-Updates erfolgen über den gemeinsamen Marketplace. Anschließend Dokumentationsvalidierung und Verify ausführen. Screenshots erst nach Prüfung auf private Inhalte ergänzen; siehe [Aufnahmecheckliste](screens.md).
+`docs/documentation.json` enthält Quellenzeiger und die Dokumentationssprachen dieses Repositories (`documentation.languages`: `de`, `en`; `default_language`: `de`). Produktfakten bleiben ausschließlich in ihren kanonischen Quellen. Quellen bei jeder Aktualisierung neu lesen. Die Aktion `update` (Plugin Manager) liest die Quellen erneut und aktualisiert README und Anleitungen; `update-local` aktualisiert dagegen lokale Plugin-Snapshots. Anschließend Dokumentationsvalidierung und Verify ausführen. Screenshots erst nach Prüfung auf private Inhalte ergänzen; siehe [Aufnahmecheckliste](screens.md).
 
-Dokumentation erstellt mit ZYRIS Skill Manager.
+Dokumentation erstellt mit Plugin Manager.
 
-### Lokal über den gemeinsamen Marketplace
 
-Die Zuordnung auf diesem Rechner steht bereits in der Git-ignorierten `.local/marketplace.json`. Für einen neuen Rechner `local-marketplace.example.json` dorthin kopieren und den Pfad zu `ai.plugins` anpassen. Dort muss `.local/marketplace.json` unter `sources.interview-coach` auf diesen Checkout zeigen. Alternativ lässt sich der Marketplace-Pfad mit `MARKETPLACE=/pfad/zu/ai.plugins` übergeben.
+README und Anleitungen sind gepflegtes Markdown, keine bei jedem Build neu erzeugten Dateien. `update` (Plugin Manager) nutzt Quellen, Sprachkonfiguration und Vorlagen; der Agent formuliert die Inhalte. Die Strukturprüfung ersetzt keine inhaltliche Prüfung.
 
-```sh
-make install-local TARGET=claude
-# oder TARGET=codex
-make update-local TARGET=claude
-```
+### Zielbild und Entwicklung
 
-Beide Befehle delegieren an `ai.plugins` und umfassen Manager und Coach im selben Entwicklungs-Katalog. Kein eigener Katalog und kein ZIP wird hier erstellt. `DRY_RUN=1` erstellt die gemeinsamen Snapshots ohne Host-Aufruf. Neue lokale Sitzung öffnen und nur die gewünschte Entwicklungskopie aktivieren. Die Prüfung erfolgt im Manager mit `plugin-verify` auf diesen Repository-Pfad; sie verändert keine Dateien.
+Das bestätigte Zielbild steht in [SCOPE.md](../../SCOPE.md), gemeinsame Entwicklungsregeln
+in [AGENTS.md](../../AGENTS.md) und [Architektur](../architecture.md). CLAUDE.md verweist
+auf dieselben Regeln. Source-/Testverweise sind keine Abnahme; Modellprüfungen bleiben
+heuristisch. Der lesende Review führt weder Source noch Tests aus.
+
+Runs ohne aktuelles Lifecycle-Format werden vor Schreibzugriffen abgelehnt und
+bleiben unverändert. Bei Speicherfehlern die konkrete Diagnose beachten: Journal vorhanden →
+recover; kein Auftrag aufgezeichnet → Schreibfehler beheben und gleiche Run-ID mit
+ursprünglichem State-Hash erneut versuchen; Inhalte vorhanden ohne bestätigte finale
+Dauerhaftigkeit → vorhandene Inhalte prüfen, nicht überschreiben.

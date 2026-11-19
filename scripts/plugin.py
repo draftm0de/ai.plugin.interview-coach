@@ -9,10 +9,17 @@ ROOT=Path(__file__).resolve().parents[1]
 def expected(root=ROOT):
     root=root.resolve()
     manifest=json.loads((root/'plugin.json').read_text())
-    if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', manifest['name']):
+    if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', manifest.get('name','')):
         raise ValueError('Plugin name must use lowercase kebab-case')
     if 'version' in manifest:
         raise ValueError('Repository imports must not pin a manifest version')
+    distribution = manifest.get('extensions',{}).get('io.zyris.distribution',{})
+    if (not isinstance(distribution,dict) or set(distribution)-{'skillRoot','catalogs'}
+            or distribution.get('skillRoot','skills') != 'skills' or distribution.get('catalogs',False) is not False):
+        raise ValueError('Unsupported distribution configuration')
+    for relative in ('.claude/skills','.agents/skills'):
+        if (root/relative).exists() or (root/relative).is_symlink():
+            raise ValueError('Unsupported host-local skill layout')
     host=manifest['extensions']['com.openai']
     interface=host['interface']
     for relative in (host['onboardingSkill'],interface['logo'],interface['composerIcon']):
@@ -30,8 +37,8 @@ def expected(root=ROOT):
 def sync(check=False,root=ROOT):
     root=root.resolve()
     files=expected(root)
-    for relative in ('.claude-plugin/marketplace.json','.agents/plugins/marketplace.json'):
-        if (root/relative).exists():
+    for relative in ('marketplace.json','.claude-plugin/marketplace.json','.agents/plugins/marketplace.json','.codex-plugin/marketplace.json'):
+        if (root/relative).exists() or (root/relative).is_symlink():
             raise ValueError('This plugin must not own a marketplace: '+relative)
     drift=[]
     for relative,data in files.items():

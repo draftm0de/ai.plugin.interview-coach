@@ -13,7 +13,7 @@ Never claim a successful write until tool response confirms it. Saving the run a
 
 ## First-run initialization and pointer
 
-Local storage with verified persistent filesystem: `python3 <skill-directory>/scripts/interview_workspace.py init --path ~/interview-workspace` creates missing files without overwriting existing data and writes a user-local JSON pointer at `~/.config/zyris/zyris-interview-coach/config.json` (or under `$XDG_CONFIG_HOME`). `status`, `validate` and `finish` provide deterministic operations. Changing the pointer requires explicit `init --force`. The CLI is bundled with the installed skill and currently implements **local storage only**. In hosted Claude Chat/ChatGPT execution, a home directory may be ephemeral and is not automatically the user's computer. Never claim cross-chat persistence without verifying the storage mechanism.
+Local storage with verified persistent filesystem: `python3 <skill-directory>/scripts/interview_workspace.py init --path ~/interview-workspace` creates missing files without overwriting existing data and writes a user-local JSON pointer at `~/.config/zyris/interview-coach/config.json` (or under `$XDG_CONFIG_HOME`). `status`, `validate` and `finish` provide deterministic operations. Changing the pointer requires explicit `init --force`. The CLI is bundled with the installed skill and currently implements **local storage only**. In hosted Claude Chat/ChatGPT execution, a home directory may be ephemeral and is not automatically the user's computer. Never claim cross-chat persistence without verifying the storage mechanism.
 
 GitHub/GitLab: choose an existing authorized private repository, verify access, and persist its location via a workspace manifest or explicit prompt. Do not pretend the local CLI supports remote Git writes. For Git write use the host's connector or separately authenticated Git CLI, and verify commits.
 
@@ -45,7 +45,7 @@ workspace/
 
 A job folder is persistent across multiple interview sessions for the same vacancy. Preserve its source-backed posting, research on employer and professional interviewers, role-specific question perspectives and preparation notes. Reuse before researching again; refresh outdated facts with dates and sources. Keep separate immutable run reports for each training attempt.
 
-Existing private workspaces may provide paths in a `workspace.yaml` manifest. Prefer mapping paths over duplicating facts.
+Only the documented workspace layout is supported. Alternative path mappings are not supported; preserve unsupported data and request manual reconciliation.
 
 ## Run format
 
@@ -65,9 +65,24 @@ Keep immutable run records; avoid overwriting historical runs, append a suffix t
 
 1. Read `status` (or `resume --run-id ID` for an explicitly selected paused checkpoint) before preparing a replacement state. Retain the returned `state_sha256` from that read; never refresh the hash alone to bypass a stale-state error.
 2. Save with `finish --run-id NEW_ID --run-file RUN.md --state-file STATE.md --expected-state-sha256 HASH --status completed|paused|stopped_early --answered-count N [--planned-count TOTAL] [--resume-from CHECKPOINT_ID]`. Counts are cumulative for the interview; unasked/unanswered questions are not evidence. A known plan must be fully answered for `completed`.
-3. A successful CLI result verifies both immutable run and canonical state. The two files are not jointly atomic to outside readers. On failure, do not claim success or create a second run ID as a workaround. Use `recover` to finish the recorded intent. Conflicting external edits require manual reconciliation; preserve `.zyris/pending.json` until resolved.
+3. A successful CLI result verifies both immutable run and canonical state. The two files are not jointly atomic to outside readers. On failure, do not claim success or create a second run ID as a workaround. Follow the reported state: with a pending journal, use `recover` to finish the recorded intent; before a journal was recorded, resolve the write error and retry the same run ID with the original state hash (reconcile if stale). If the intended run/state already exist but final durability was not confirmed and no journal remains, inspect them without overwriting or creating another run. `recover` cannot replay an absent journal. Conflicting external edits require manual reconciliation; preserve `.zyris/pending.json` until resolved.
 4. A busy workspace fails immediately; retry after the other process finishes. A stale state requires re-reading and reconciling the actual state with the proposed update. OS locks are automatically released on process exit. Never delete `.zyris/lock` to bypass a writer.
-5. New runs carry a versioned lifecycle metadata comment. `resume` returns the exact supplied report body, current state and hash without modifying the checkpoint. Saving a continuation requires a new immutable run and `--resume-from`; a checkpoint already continued cannot be forked implicitly. Legacy Markdown records are preserved and require manual inspection rather than inferred lifecycle metadata.
-6. Existing candidate profiles, research, preferences and legacy runs are preserved by `init`, including `--force`. Managed symlinks and invalid path types are rejected. Configuration must be outside the candidate workspace. Local-filesystem and cooperating-CLI guarantees do not extend to direct external edits or network/cloud-synchronized filesystem semantics.
+5. New runs carry a versioned lifecycle metadata comment. `resume` returns the exact supplied report body, current state and hash without modifying the checkpoint. Saving a continuation requires a new immutable run and `--resume-from`; a checkpoint already continued cannot be forked implicitly. Every run must use the current lifecycle format. Unsupported records block operations before writes; preserve them without automatic conversion.
+6. Existing candidate profiles, research, preferences are preserved by `init`, including `--force`. Unsupported run formats are rejected before writes. Managed symlinks and invalid path types are rejected. Configuration must be outside the candidate workspace. Local-filesystem and cooperating-CLI guarantees do not extend to direct external edits or network/cloud-synchronized filesystem semantics.
 
 In **Nicht speichern** mode none of these CLI operations should run: no initialization, lock, journal, run, checkpoint, preference or export is created by the skill. Test harness artifacts are separate fictional developer data, not candidate persistence.
+
+## Current record validation and staging
+
+Every lifecycle header requires exactly schema_version (integer 1), run_id, status,
+answered_count, planned_count and resume_from. Unknown planned counts and absent
+predecessors are explicit null values, never omitted fields. Run publication stages
+bytes in the workspace control directory `.zyris/`, not among immutable `runs/`.
+Interrupted staging artifacts in `.zyris/` are not run records and do not prevent
+replaying a valid pending journal. No user files are automatically migrated or deleted.
+Workspace/configuration preflight precedes creation of control and lock paths; run
+validation is repeated under the cooperative lock before data operations.
+
+Configuration, preferences, run headers and journals reject duplicate JSON keys. Schema versions are integer 1, never booleans or floats. Pending transactions block initialization before any new configuration directories or locks; invalid recovery journals are rejected before lock creation. Existing configuration/preferences extension fields remain preserved.
+
+Stored language fields must match the same supported language-tag syntax as set-language; invalid values block writes. Continuation chains must reference an existing paused checkpoint, remain acyclic, have at most one successor and preserve established planned counts without decreasing answered counts. These checks also apply before journal recovery. Run staging is selected explicitly; a configuration directory named runs is an ordinary configuration location.

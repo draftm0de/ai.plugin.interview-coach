@@ -14,7 +14,7 @@ import subprocess
 
 from run import ROOT, check, run, skill_context
 
-JOURNEYS = ROOT / "tests" / "behavior" / "fixtures" / "journeys"
+JOURNEYS = ROOT / "tests" / "fixtures" / "behavior" / "journeys"
 
 
 def load_journey(name):

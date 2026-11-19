@@ -10,7 +10,7 @@
 
 **Gerenderte Transkriptvorschau, kein Screenshot einer Host-Oberfläche.** Grundlage sind bereits in der bisherigen Dokumentation veröffentlichte Auszüge des fiktiven Codex-CLI-Ablaufs `teamlead_coaching`, dort als am 18.11.2026 geprüft beschrieben. Diese Aktualisierung führt den Modelltest nicht erneut aus und liest keine ignorierten Rohprotokolle. Gestaltung und Auswahl sind redaktionell. Modellantworten und Noten können variieren.
 
-Die [versionierte Testvorlage](../../tests/behavior/fixtures/journeys/teamlead_coaching.json) enthält fiktive Prompts. Die Originalgrafik bleibt unter `docs/assets/coaching-preview.svg` erhalten; die neuen Fassungen sind sprachlich vollständig lokalisiert.
+Die [versionierte Testvorlage](../../tests/fixtures/behavior/journeys/teamlead_coaching.json) enthält fiktive Prompts. Die Originalgrafik bleibt unter `docs/assets/coaching-preview.svg` erhalten; die neuen Fassungen sind sprachlich vollständig lokalisiert.
 
 ## Beispielablauf
 

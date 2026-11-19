@@ -48,10 +48,10 @@ Warte bei einer Sperre auf den anderen Prozess, ohne die Lock-Datei zu löschen.
 
 ### Warum wird die Fortsetzung abgelehnt?
 
-Nur strukturierte `paused`-Checkpoints ohne bereits gespeicherte Fortsetzung sind fortsetzbar. Abgeschlossene, gestoppte und alte Markdown-Läufe erfordern eine neue Sitzung oder manuelle Sichtung. Siehe [Speicherung](storage.md).
+Nur strukturierte `paused`-Checkpoints ohne bereits gespeicherte Fortsetzung sind fortsetzbar. Abgeschlossene und gestoppte Runs sind nicht fortsetzbar. Nicht unterstützte Run-Formate blockieren Workspace-Operationen vor Schreibzugriffen; sie bleiben unverändert und werden nicht migriert. Siehe [Speicherung](storage.md).
 
 ## Grenzen der Prüfung
 
 Eine höhere Note bewertet eine konkrete Antwort, nicht stabile Kompetenz oder Einstellungschancen. Ein überarbeiteter Versuch nach Coaching ist kein unabhängiger Kompetenznachweis.
 
-Die [Beispiele](screens.md) enthalten gerenderte Auszüge eines fiktiven CLI-Tests, keine Host-Screenshots. Deterministische Tests decken Paketierung, Installer und lokale Speicherung samt Nebenläufigkeit, Fehlerwiederherstellung und paketiertem Helfer ab. Optionale Modelltests prüfen heuristisch Gesprächsverhalten. Native Oberfläche, Berechtigungen und Speicherung über neue Chats hinweg bleiben separat abzunehmen.
+Die [Beispiele](screens.md) enthalten gerenderte Auszüge eines fiktiven CLI-Tests, keine Host-Screenshots. Deterministische Tests decken Manifeste, Paketierung und lokale Speicherung samt Nebenläufigkeit, Fehlerwiederherstellung und paketiertem Helfer ab. Optionale Modelltests prüfen heuristisch Gesprächsverhalten. Native Oberfläche, Berechtigungen und Speicherung über neue Chats hinweg bleiben separat abzunehmen.

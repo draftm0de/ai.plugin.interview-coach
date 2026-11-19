@@ -8,7 +8,7 @@
 
 ### Is this an application or a skill?
 
-It is a portable skill with a local Python workspace helper and platform-specific package builders. It runs inside a supported agent host; it does not provide its own model, chat application or hosted backend.
+It is a plugin with a portable coaching skill, a local Python workspace helper and derived host manifests. It runs inside a supported agent host; it does not provide its own model, chat application or hosted backend.
 
 ### Does a public repository mean there is a paid license or an open-source license?
 
@@ -58,7 +58,7 @@ Never interpret a failed command as a saved run/state pair. [Commands and recove
 
 ### Why does resume reject a run?
 
-Only a structured `paused` checkpoint that has not already been continued is resumable. Completed/stopped records and legacy Markdown require a new session or manual inspection. The CLI must not infer unrecorded answers.
+Only a structured `paused` checkpoint that has not already been continued is resumable. Completed/stopped records are not resumable; unsupported formats block workspace operations without migration. The CLI must not infer unrecorded answers.
 
 ## Validation limits
 
@@ -68,8 +68,8 @@ No. Scores assess particular answers. A polished coached revision is not an inde
 
 ### Are the examples real screenshots?
 
-The current gallery contains a rendered preview and selected text from fictional CLI test responses. They are explicitly labelled as transcript excerpts. Native host UI screenshots have not yet been captured; see [Screens & examples](screens.md).
+The current gallery contains a rendered preview and selected text from fictional CLI test responses. They are explicitly labelled as transcript excerpts. User-supplied Claude installation dialogs are included, but coaching UI screenshots have not yet been captured; see [Screens & examples](screens.md).
 
 ### What has been verified?
 
-Deterministic tests cover packaging, installer behavior and local persistence, including concurrency, failure recovery and a packaged-CLI lifecycle. Optional CLI journeys test conversational heuristics with fictional data. Native platform UI, permissions and durable cross-chat storage still need platform acceptance. See [development](development.md).
+Deterministic tests cover manifests, packaging and local persistence, including concurrency, failure recovery and a packaged-CLI lifecycle. Optional CLI journeys test conversational heuristics with fictional data. Native platform UI, permissions and durable cross-chat storage still need platform acceptance. See [development](development.md).

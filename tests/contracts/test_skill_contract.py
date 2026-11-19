@@ -2,13 +2,20 @@ from pathlib import Path
 import re
 import unittest
 
-ROOT = Path(__file__).resolve().parents[2]
-SKILL = ROOT / "skills/zyris-interview-coach"
+ROOT = next(p for p in Path(__file__).resolve().parents if (p / 'Makefile').is_file())
+SKILL = ROOT / "skills/interview-coach"
 class SkillContractTests(unittest.TestCase):
+    def test_current_storage_contract_has_no_alternative_path_manifest(self):
+        for path in list(SKILL.rglob('*.md')) + list((ROOT/'docs').rglob('*.md')):
+            self.assertNotIn('workspace.yaml',path.read_text(),str(path))
+        behavior = (ROOT/'tests/behavior/run.py').read_text()
+        self.assertIn('references/technical-interview.md',behavior)
+        self.assertIn('SKILL = skill_context()', (ROOT/'tests/behavior/run_smoke.py').read_text())
+
     def test_skill_name_and_references(self):
         text = (SKILL / "SKILL.md").read_text()
         self.assertTrue(text.startswith("---" + chr(10)))
-        self.assertIn("name: zyris-interview-coach", text)
+        self.assertIn("name: interview-coach", text)
         for name in ("research", "training", "evaluation", "storage", "technical-interview", "setup", "session-control"):
             self.assertTrue((SKILL / "references" / (name + ".md")).is_file(), name)
 
@@ -20,7 +27,7 @@ class SkillContractTests(unittest.TestCase):
 
     def test_technical_contract_covers_execution_safety(self):
         content = (SKILL / 'references' / 'technical-interview.md').read_text().lower()
-        for phrase in ('coding', 'debugging', 'sandbox', 'test', 'security'):
+        for phrase in ('coding', 'debugging', 'sandbox', 'test', 'security', 'not executed', 'do not leak the reference solution', 'never execute untrusted candidate code'):
             self.assertIn(phrase, content)
 
     def test_early_stop_and_language_contract(self):

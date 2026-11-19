@@ -8,7 +8,7 @@
 
 After [installation](installation.md), ask:
 
-> Use zyris-interview-coach and run setup. I want to practise for a Team Lead ERP Platform role. Use English and do not save anything.
+> Use interview-coach and run setup. I want to practise for a Team Lead ERP Platform role. Use English and do not save anything.
 
 The coach asks about storage before a path, confirms the interface/interview language and requests relevant profile information. For targeted preparation, supply your approved CV/profile and the job posting privately. Without a CV, general practice remains available; targeted preparation needs an approved profile. Original documents are stored only with permission. Known interviewers are optional; public professional information can help tailor preparation.
 
@@ -28,7 +28,7 @@ Research requires available browsing tools. Facts, hypotheses and unknowns must 
 
 In coached modes, expect an overall **overall assessment x/10**, relevant individual criteria, supported strengths and concrete improvement suggestions. A natural spoken example is a suggestion, not evidence of your professional experience. Scores are qualitative and role-relative, not hiring probabilities.
 
-A second attempt can show that your answer improved after coaching. It is not an independent demonstration of stable competence. Learning status uses actual candidate answers, distinct scenarios and later confirmation. See the [evaluation contract](../../skills/zyris-interview-coach/references/evaluation.md).
+A second attempt can show that your answer improved after coaching. It is not an independent demonstration of stable competence. Learning status uses actual candidate answers, distinct scenarios and later confirmation. See the [evaluation contract](../../skills/interview-coach/references/evaluation.md).
 
 Learning status `improving` requires two spontaneous successful answers in distinct scenarios; `stable` requires confirmation in a later run without coaching. Relevant criteria usually number three to six; the overall score is not a mechanical average. Role-fit gaps remain separate from communication weaknesses.
 

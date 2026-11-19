@@ -11,7 +11,8 @@ import stat
 import sys
 import tempfile
 
-APP = "zyris-interview-coach"
+# Current storage identifier; no lookup or migration of previous identifiers.
+APP = "interview-coach"
 DEFAULT_CONFIG = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "zyris" / APP / "config.json"
 RUN_ID = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._-]{0,120}$")
 LANGUAGE = re.compile(r"^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$")
@@ -19,6 +20,29 @@ CONTROL = ".zyris"
 HEADER = "<!-- zyris-run: "
 STATUSES = ("completed", "paused", "stopped_early")
 REQUIRED = {"state.md": "file", "candidate/profile.md": "file", "runs": "dir", "jobs": "dir"}
+
+
+def strict_json(text):
+    """Reject ambiguous or non-round-trippable JSON before planning writes."""
+    def unique(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError('Duplicate JSON field: ' + key)
+            result[key] = value
+        return result
+    def invalid_constant(value):
+        raise ValueError('Invalid JSON numeric constant: ' + value)
+    def finite_number(value):
+        import math
+        from decimal import Decimal
+        number = float(value)
+        if not math.isfinite(number):
+            raise ValueError('Invalid JSON numeric constant: ' + value)
+        if Decimal(value) != Decimal(str(number)):
+            raise ValueError('Unsupported JSON numeric precision: ' + value)
+        return number
+    return json.loads(text, object_pairs_hook=unique, parse_constant=invalid_constant, parse_float=finite_number)
 
 
 def safe_root(path):
@@ -48,12 +72,15 @@ def sync_directory(path):
             os.close(fd)
 
 
-def write_atomic(path, content, *, create_only=False):
-    """Publish a flushed, unique sibling file; create_only never replaces a target."""
+def write_atomic(path, content, *, create_only=False, staging=None):
+    """Publish flushed data from an explicit staging directory (default: sibling)."""
     path = Path(path)
     if path.is_symlink() or (path.exists() and not path.is_file()):
         raise ValueError(f"Unsafe file target: {path}")
-    fd, name = tempfile.mkstemp(prefix=".zyris-tmp-", dir=path.parent)
+    staging = Path(staging) if staging is not None else path.parent
+    if staging.is_symlink() or not staging.is_dir():
+        raise ValueError('Current staging directory is required')
+    fd, name = tempfile.mkstemp(prefix=".zyris-tmp-", dir=staging)
     temporary = Path(name)
     try:
         with os.fdopen(fd, "w", encoding="utf-8", newline="") as handle:
@@ -108,13 +135,24 @@ def file_lock(path):
 
 
 @contextmanager
-def workspace_lock(root):
+def workspace_lock(root, *, initializing=False, recovering=False):
     if not root.is_dir():
         raise ValueError(f"Workspace does not exist: {root}")
+    if not initializing:
+        require_valid(root)
+    validate_run_records(root)
+    if recovering:
+        if journal_path(root).exists():
+            read_transaction(root)
+    else:
+        require_clean(root)
     control = checked_path(root, CONTROL, "dir")
     control.mkdir(mode=0o700, exist_ok=True)
     sync_directory(root)
     with file_lock(checked_path(root, CONTROL + "/lock", "file")):
+        validate_run_records(root)
+        if not initializing:
+            require_valid(root)
         yield
 
 
@@ -130,12 +168,25 @@ def require_clean(root):
 def validate(root):
     root = safe_root(root)
     problems = []
+    if (root/'workspace.yaml').exists() or (root/'workspace.yaml').is_symlink():
+        problems.append('Unsupported workspace path-mapping manifest; manual reconciliation required')
     for relative, kind in {**REQUIRED, "candidate": "dir", CONTROL: "dir", "preferences.json": "file"}.items():
         try:
             path = checked_path(root, relative, kind)
             if relative in REQUIRED and not path.exists():
                 problems.append(f"missing {relative}")
         except ValueError as exc:
+            problems.append(str(exc))
+    prefs = root / 'preferences.json'
+    if prefs.is_file() and not prefs.is_symlink():
+        try:
+            data = strict_json(prefs.read_text(encoding='utf-8'))
+            if not isinstance(data, dict) or type(data.get('schema_version')) is not int or data['schema_version'] != 1:
+                raise ValueError('Unsupported preferences schema')
+            for field in ('interface_language', 'interview_language'):
+                if field in data and (not isinstance(data[field], str) or not LANGUAGE.fullmatch(data[field])):
+                    raise ValueError('Invalid preferences language tag: ' + field)
+        except (OSError, ValueError) as exc:
             problems.append(str(exc))
     return problems
 
@@ -149,8 +200,8 @@ def require_valid(root):
 def read_config(config):
     if config.is_symlink():
         raise ValueError("Config must not be a symlink")
-    data = json.loads(config.read_text(encoding="utf-8"))
-    if not isinstance(data, dict) or data.get("schema_version") != 1 or data.get("storage") != "local" or not isinstance(data.get("workspace"), str):
+    data = strict_json(config.read_text(encoding="utf-8"))
+    if not isinstance(data, dict) or type(data.get("schema_version")) is not int or data.get("schema_version") != 1 or data.get("storage") != "local" or not isinstance(data.get("workspace"), str):
         raise ValueError("Unsupported config schema or storage adapter")
     return data
 
@@ -158,9 +209,24 @@ def read_config(config):
 def init_workspace(root, config=DEFAULT_CONFIG, force=False):
     root = safe_root(root)
     config = Path(config).expanduser()
+    for directory in (root, config.parent):
+        for ancestor in (directory, *directory.parents):
+            if ancestor.exists() and not ancestor.is_dir():
+                raise ValueError('Expected directory: ' + str(ancestor))
     # A config placed inside the workspace could overwrite candidate/state files.
     if config.resolve().is_relative_to(root):
         raise ValueError("Configuration must be outside the candidate workspace")
+    validate_run_records(root)
+    for relative, kind in {**REQUIRED, "candidate": "dir", "README.md": "file", CONTROL: "dir", "preferences.json": "file"}.items():
+        checked_path(root, relative, kind)
+    problems = [problem for problem in validate(root) if not problem.startswith('missing ')]
+    if problems:
+        raise ValueError('; '.join(problems))
+    require_clean(root)
+    if config.exists() or config.is_symlink():
+        existing = read_config(config)
+        if existing["workspace"] != str(root) and not force:
+            raise ValueError("Configuration exists for another workspace. Use --force to switch explicitly.")
     config.parent.mkdir(parents=True, exist_ok=True)
     with file_lock(config.with_name(config.name + ".lock")):
         existing = read_config(config) if config.exists() or config.is_symlink() else {}
@@ -170,21 +236,21 @@ def init_workspace(root, config=DEFAULT_CONFIG, force=False):
         for relative, kind in {**REQUIRED, "candidate": "dir", "README.md": "file", CONTROL: "dir", "preferences.json": "file"}.items():
             checked_path(root, relative, kind)
         root.mkdir(parents=True, exist_ok=True)
-        with workspace_lock(root):
+        with workspace_lock(root, initializing=True):
             require_clean(root)
             for folder in ("candidate", "jobs", "runs"):
                 checked_path(root, folder, "dir").mkdir(exist_ok=True)
             defaults = {
                 "state.md": "# Interview training state\n\nStatus: initial / no completed runs\n\n## Competencies\n\n## Next training\n",
                 "candidate/profile.md": "# Candidate profile\n\nProvide an approved CV or verified profile before targeted interviews.\n",
-                "README.md": "# Interview workspace\n\nPrivate candidate data. Skill: zyris-interview-coach.\n",
+                "README.md": "# Interview workspace\n\nPrivate candidate data. Skill: interview-coach.\n",
             }
             for name, content in defaults.items():
                 target = checked_path(root, name, "file")
                 if not target.exists():
                     write_atomic(target, content, create_only=True)
             data = dict(existing, schema_version=1, workspace=str(root), storage="local")
-            write_atomic(config, json.dumps(data, indent=2) + "\n")
+            write_atomic(config, json.dumps(data, allow_nan=False, indent=2) + "\n")
     return root
 
 
@@ -220,13 +286,13 @@ def set_language(root, interface_language, interview_language=None):
         require_valid(root)
         require_clean(root)
         target = checked_path(root, "preferences.json", "file")
-        data = json.loads(target.read_text(encoding="utf-8")) if target.exists() else {"schema_version": 1}
+        data = strict_json(target.read_text(encoding="utf-8")) if target.exists() else {"schema_version": 1}
         if not isinstance(data, dict) or data.get("schema_version") != 1:
             raise ValueError("Unsupported preferences schema")
         data["interface_language"] = interface_language
         if interview_language:
             data["interview_language"] = interview_language
-        write_atomic(target, json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+        write_atomic(target, json.dumps(data, allow_nan=False, ensure_ascii=False, indent=2) + "\n")
         return data
 
 
@@ -248,9 +314,12 @@ def validate_lifecycle(status, answered_count, planned_count):
 def parse_run(text, run_id):
     line, _, body = text.partition("\n")
     if not line.startswith(HEADER) or not line.endswith(" -->"):
-        raise ValueError("Legacy run has no verified lifecycle metadata; inspect manually")
-    metadata = json.loads(line[len(HEADER):-4])
-    if not isinstance(metadata, dict) or metadata.get("schema_version") != 1 or metadata.get("run_id") != run_id:
+        raise ValueError("Unsupported run format: current lifecycle metadata required; no migration performed")
+    metadata = strict_json(line[len(HEADER):-4])
+    required = {'schema_version', 'run_id', 'status', 'answered_count', 'planned_count', 'resume_from'}
+    if (not isinstance(metadata, dict) or set(metadata) != required
+            or type(metadata.get('schema_version')) is not int
+            or metadata.get("schema_version") != 1 or metadata.get("run_id") != run_id):
         raise ValueError("Invalid run lifecycle metadata")
     validate_lifecycle(metadata.get("status"), metadata.get("answered_count"), metadata.get("planned_count"))
     source = metadata.get("resume_from")
@@ -263,17 +332,52 @@ def read_run(root, run_id):
     return parse_run(run_path(root, run_id).read_text(encoding="utf-8"), run_id)
 
 
+def validate_run_records(root):
+    """Reject unsupported records before locks, initialization or other writes."""
+    folder = checked_path(root, 'runs', 'dir')
+    if not folder.exists():
+        return
+    records = {}
+    for path in sorted(folder.iterdir()):
+        try:
+            checked_path(root, 'runs/' + path.name, 'file')
+            if path.suffix != '.md':
+                raise ValueError('Only current .md run records are supported')
+            records[path.stem] = read_run(root, path.stem)[0]
+        except (OSError, ValueError) as exc:
+            raise ValueError(f'Unsupported run {path.name}: {exc}; manual reconciliation required; files unchanged') from exc
+
+    validate_run_links(records)
+    return records
+
+def validate_run_links(records):
+    successors = set()
+    for identifier, metadata in records.items():
+        source = metadata['resume_from']
+        if source is None:
+            continue
+        previous = records.get(source)
+        if (source == identifier or previous is None or previous['status'] != 'paused'
+                or source in successors or metadata['answered_count'] < previous['answered_count']
+                or (previous['planned_count'] is not None and metadata['planned_count'] != previous['planned_count'])):
+            raise ValueError('Unsupported run continuation: ' + identifier + '; manual reconciliation required; files unchanged')
+        successors.add(source)
+        seen = {identifier}
+        while source is not None and source in records:
+            if source in seen:
+                raise ValueError('Unsupported run continuation cycle; manual reconciliation required; files unchanged')
+            seen.add(source)
+            source = records[source]['resume_from']
+
+
 def require_resumable(root, run_id):
     metadata, body = read_run(root, run_id)
     if metadata["status"] != "paused":
         raise ValueError("Only a paused checkpoint can be resumed")
     for path in (root / "runs").glob("*.md"):
-        # Do not interpret or rewrite legacy records; reject unsafe links.
-        text = run_path(root, path.stem).read_text(encoding="utf-8")
-        if text.startswith(HEADER):
-            other, _ = read_run(root, path.stem)
-            if other.get("resume_from") == run_id:
-                raise ValueError("Checkpoint already continued; use its latest paused successor")
+        other, _ = read_run(root, path.stem)
+        if other.get("resume_from") == run_id:
+            raise ValueError("Checkpoint already continued; use its latest paused successor")
     return metadata, body
 
 
@@ -288,18 +392,23 @@ def resume(root, run_id):
                 "state_sha256": hashlib.sha256(state).hexdigest()}
 
 
-def apply_pending(root):
-    """Replay a recorded intent only if both targets are still old or intended data."""
+def read_transaction(root):
+    """Read and validate the current journal without creating control paths."""
     pending = journal_path(root)
-    transaction = json.loads(pending.read_text(encoding="utf-8"))
-    if not isinstance(transaction, dict) or transaction.get("schema_version") != 1:
+    transaction = strict_json(pending.read_text(encoding="utf-8"))
+    if (not isinstance(transaction, dict)
+            or set(transaction) != {"schema_version", "run_id", "run_text", "state_text", "expected_state_sha256"}
+            or type(transaction.get("schema_version")) is not int or transaction.get("schema_version") != 1):
         raise ValueError("Unsupported transaction schema; manual reconciliation required")
     for key in ("run_id", "run_text", "state_text", "expected_state_sha256"):
         if not isinstance(transaction.get(key), str):
             raise ValueError("Invalid transaction; manual reconciliation required")
     if not re.fullmatch(r"[0-9a-f]{64}", transaction["expected_state_sha256"]):
         raise ValueError("Invalid transaction state hash; manual reconciliation required")
-    parse_run(transaction["run_text"], transaction["run_id"])
+    metadata, _ = parse_run(transaction["run_text"], transaction["run_id"])
+    records = validate_run_records(root) or {}
+    records[transaction["run_id"]] = metadata
+    validate_run_links(records)
     run = run_path(root, transaction["run_id"])
     state = checked_path(root, "state.md", "file")
     new_digest = hashlib.sha256(transaction["state_text"].encode("utf-8")).hexdigest()
@@ -307,8 +416,18 @@ def apply_pending(root):
         raise ValueError("State changed outside pending transaction; manual reconciliation required")
     if run.exists() and run.read_bytes() != transaction["run_text"].encode("utf-8"):
         raise ValueError("Run conflicts with pending transaction; manual reconciliation required")
+    return transaction
+
+
+def apply_pending(root):
+    """Replay validated intent only if targets are still old or intended data."""
+    transaction = read_transaction(root)
+    pending = journal_path(root)
+    run = run_path(root, transaction["run_id"])
+    state = checked_path(root, "state.md", "file")
+    new_digest = hashlib.sha256(transaction["state_text"].encode("utf-8")).hexdigest()
     if not run.exists():
-        write_atomic(run, transaction["run_text"], create_only=True)
+        write_atomic(run, transaction["run_text"], create_only=True, staging=checked_path(root, CONTROL, "dir"))
     if state_digest(root) != new_digest:
         write_atomic(state, transaction["state_text"])
     # Verify before clearing the recovery record or reporting success.
@@ -321,7 +440,7 @@ def apply_pending(root):
 
 def recover(root):
     root = safe_root(root)
-    with workspace_lock(root):
+    with workspace_lock(root, recovering=True):
         require_valid(root)
         if not journal_path(root).exists():
             return None
@@ -356,13 +475,29 @@ def finish(root, run_id, run_text, state_text, *, expected_state_sha256,
                         answered_count=answered_count, planned_count=planned_count,
                         resume_from=resume_from)
         transaction = dict(schema_version=1, run_id=run_id,
-                           run_text=HEADER + json.dumps(metadata, ensure_ascii=False) + " -->\n" + run_text,
+                           run_text=HEADER + json.dumps(metadata, allow_nan=False, ensure_ascii=False) + " -->\n" + run_text,
                            state_text=state_text, expected_state_sha256=expected_state_sha256)
         try:
-            write_atomic(journal_path(root), json.dumps(transaction, ensure_ascii=False) + "\n", create_only=True)
+            write_atomic(journal_path(root), json.dumps(transaction, allow_nan=False, ensure_ascii=False) + "\n", create_only=True)
             return apply_pending(root)
         except (OSError, ValueError, RuntimeError) as exc:
-            raise RuntimeError("Save incomplete; do not claim success. Run recover; if recovery conflicts, reconcile manually") from exc
+            # Recovery is possible only while a recorded intent exists.
+            try:
+                if journal_path(root).exists():
+                    guidance = "Pending transaction. Run recover; if recovery conflicts, reconcile manually"
+                elif (run.exists() and run.read_bytes() == transaction["run_text"].encode("utf-8")
+                      and state_digest(root) == hashlib.sha256(state_text.encode("utf-8")).hexdigest()):
+                    guidance = ("Run and state match the intended content, but final durability was not confirmed. "
+                                "No pending transaction; recover cannot replay it. Inspect the existing run/state; "
+                                "do not create another run or overwrite them")
+                elif not run.exists() and state_digest(root) == expected_state_sha256:
+                    guidance = ("No transaction recorded; recover has nothing to replay. Resolve the write error, "
+                                "then retry the same run ID with the original state hash; reconcile if stale")
+                else:
+                    guidance = "No pending transaction; inspect run/state and reconcile manually before retrying"
+            except (OSError, ValueError):
+                guidance = "Save state could not be inspected; inspect journal/run/state and reconcile manually"
+            raise RuntimeError("Save incomplete; do not claim success. " + guidance) from exc
 
 
 def main(argv=None):

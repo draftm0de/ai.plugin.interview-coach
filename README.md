@@ -9,7 +9,7 @@
 
 **[Installation](docs/de/installation.md) · [Nutzung](docs/de/usage.md) · [Beispiele](docs/de/screens.md) · [FAQ](docs/de/faq.md) · [Dokumentation](docs/de/README.md)**
 
-**Installationsvorschau:** [Claude](docs/de/installation.md#claude-desktop) · [Claude Code](docs/de/installation.md#optionale-terminal-installation) · [Codex Desktop](docs/de/installation.md#codex-desktop). Marketplace: `https://github.com/draftm0de/ai.plugins`. Die Veröffentlichung des neuen Eintrags und die GUI-Abnahme stehen noch aus.
+**Installation:** [Claude](docs/de/installation.md#claude-desktop) · [Claude Code](docs/de/installation.md#optionale-terminal-installation) · [Codex Desktop](docs/de/installation.md#codex-desktop). Marketplace: `https://github.com/draftm0de/ai.plugins`. Beide Plugins sind laut Nutzer im veröffentlichten Marketplace vorhanden. Lokale Änderungen und deren GUI-Abnahme sind davon getrennt.
 
 ## Für wen ist das gedacht?
 
@@ -43,13 +43,13 @@ Recherche nutzt verfügbare öffentliche berufliche Quellen und kennzeichnet Uns
 
 ## Schnellstart
 
-Öffne die [Installationsanleitung](docs/de/installation.md) und wähle Claude oder Codex. Die öffentliche Katalogadresse ist noch nicht freigegeben; die Anleitung ist eine Vorschau. Nach Installation in einem neuen Chat das Plugin auswählen und die dort genannte erste Anfrage senden. Für diesen Nutzerweg ist kein Quellcheckout erforderlich.
+Öffne die [Installationsanleitung](docs/de/installation.md) und wähle Claude oder Codex. Nach Installation in einem neuen Chat das Plugin auswählen und die dort genannte erste Anfrage senden. Für diesen Nutzerweg ist kein Quellcheckout erforderlich.
 
 ## Nutzung
 
 Nach der Installation:
 
-> Nutze zyris-interview-coach und starte die Einrichtung. Ich möchte für eine Team-Lead-Rolle üben. Verwende Deutsch. Nicht speichern.
+> Nutze interview-coach und starte die Einrichtung. Ich möchte für eine Team-Lead-Rolle üben. Verwende Deutsch. Nicht speichern.
 
 Für gezielte Vorbereitung stelle dein bestätigtes Profil und die Stellenanzeige privat bereit. Unbekannte Interviewer verhindern das Training nicht.
 
@@ -69,23 +69,24 @@ Die lokale CLI unterstützt den Adapter `local` mit `init`, `status`, `finish`, 
 
 ## Projektstatus
 
-MVP mit versionslosen Plugin-Manifesten und Repository-Import über Draftmode AI Plugins. Lizenz: [MIT](LICENSE). Kein Kundenportal, Zahlungssystem oder Lizenzserver; eine Veröffentlichung in einem Plugin-Verzeichnis ist durch das Repository nicht belegt.
+MVP mit versionslosen Plugin-Manifesten und Repository-Import über Draftmode AI Plugins. Lizenz: [MIT](LICENSE). Kein Kundenportal, Zahlungssystem oder Lizenzserver; eine Aufnahme in ein zusätzliches offizielles Plugin-Verzeichnis wird nicht behauptet.
 
 Lokale Speicherung und Paketierung besitzen deterministische Tests. CLI-Modellabläufe verwenden fiktive Daten und heuristische Prüfungen. Native Host-Abnahme bleibt separat; erfolgreiche Modelltests belegen weder Oberfläche noch Speicherintegration. Isolierte native CLI-Prüfungen sind im [Release-Nachweis](docs/de/release-evidence.md) dokumentiert; die GUI-Abnahme bleibt offen.
 
 ## Entwicklung
 
-Website-Export aus denselben Quellen: `make check-docs-export` und `make export-docs`. Details stehen in der [Entwicklungsdokumentation](docs/de/development.md).
+Die [Testübersicht](tests/README.md) beschreibt die gemeinsame Struktur nach Testart. `make test` prüft Unit-, Integrations- und Vertragstests; native Host- und Modelltests werden separat gestartet.
+
 
 ```bash
-make test          # Deterministische Unit- und Regressionstests ohne Modellaufrufe
+make test          # Deterministische Unit-, Integrations- und Vertragstests ohne Modellaufrufe
 make check-plugin  # Versionslose Host-Manifeste prüfen
 ```
 
-Alternativ nach Installation von pytest: `python3 -m pytest -q`. Python 3.10+ ist für Paketierung und lokalen Speicherhelfer erforderlich. [Entwicklung und Tests](docs/de/development.md).
+Die Tests benötigen keine zusätzlichen Python-Pakete wie pytest. Git und Python 3.10+ werden für die Verwaltungswerkzeuge benötigt; der lokale Speicherhelfer benötigt Python 3.10+, aber kein Git. Make ist optional. [Entwicklung und Tests](docs/de/development.md).
 
-Die [kanonische Skill-Quelle](skills/zyris-interview-coach/SKILL.md) definiert das Laufzeitverhalten. Nutzerdokumentation liegt unter [docs/de/](docs/de/README.md) und wird direkt auf GitHub dargestellt.
+Die [kanonische Skill-Quelle](skills/interview-coach/SKILL.md) definiert das Laufzeitverhalten. Nutzerdokumentation liegt unter [docs/de/](docs/de/README.md) und wird direkt auf GitHub dargestellt.
 
 Herausgeber: **draftmode** · [draftmode.io](https://draftmode.io) · Autor: **Peter Fux**.
 
-Dokumentation erstellt mit ZYRIS Skill Manager.
+Dokumentation erstellt mit Plugin Manager.

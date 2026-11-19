@@ -6,7 +6,7 @@
 
 ## Storage model
 
-The bundled Python CLI implements local storage only. A private workspace contains `candidate/profile.md`, `state.md`, immutable `runs/`, reusable `jobs/<job-id>/job.md`, `research.md` and `preparation.md`, plus optional `preferences.json` and the original CV with permission. Existing `workspace.yaml` can map paths. No real candidate data belongs in the public repository.
+The bundled Python CLI implements local storage only. A private workspace contains `candidate/profile.md`, `state.md`, immutable `runs/`, reusable `jobs/<job-id>/job.md`, `research.md` and `preparation.md`, plus optional `preferences.json` and the original CV with permission. Alternative workspace path mappings are unsupported. No real candidate data belongs in the public repository.
 
 ### Private GitHub / GitLab workspace
 
@@ -26,7 +26,7 @@ python3 <installed-skill-directory>/scripts/interview_workspace.py status
 python3 <installed-skill-directory>/scripts/interview_workspace.py validate
 ```
 
-The local pointer is stored in `~/.config/zyris/zyris-interview-coach/config.json` (or `$XDG_CONFIG_HOME/zyris/zyris-interview-coach/config.json`). The `init` command preserves existing files. To intentionally change workspace, use `init --path NEW_PATH --force`. This configuration is local to the machine and **does not synchronize to ChatGPT**.
+The local pointer is stored in `~/.config/zyris/interview-coach/config.json` (or `$XDG_CONFIG_HOME/zyris/interview-coach/config.json`). The `init` command preserves existing files. To intentionally change workspace, use `init --path NEW_PATH --force`. This configuration is local to the machine and **does not synchronize to ChatGPT**. Only the current configuration path is read; older pointers are neither discovered nor migrated and remain untouched.
 
 After confirming the preference, use `set-language --interface de --interview en` with the same CLI. `--config PATH` is a global option before the subcommand; its file must be outside the workspace. Other preference keys are preserved.
 
@@ -49,14 +49,20 @@ For a checkpoint, save with `--status paused`, then use:
 python3 <installed-skill-directory>/scripts/interview_workspace.py resume --run-id <checkpoint-id>
 ```
 
-`resume` reads the checkpoint transcript, lifecycle metadata and current state/hash without consuming the checkpoint. Continue with a **new** run ID and `--resume-from <checkpoint-id>`; use `paused`, `stopped_early` or `completed` as appropriate. Answer counts are cumulative for that interview; the planned count is preserved. A known plan must be fully answered before using `completed`. Completed/stopped checkpoints and checkpoints already continued cannot be resumed. Legacy Markdown runs remain readable manually but are not automatically treated as resumable checkpoints. New runs include a small machine-readable HTML comment before the supplied Markdown; the original answer text remains in the body.
+`resume` reads the checkpoint transcript, lifecycle metadata and current state/hash without consuming the checkpoint. Continue with a **new** run ID and `--resume-from <checkpoint-id>`; use `paused`, `stopped_early` or `completed` as appropriate. Answer counts are cumulative for that interview; the planned count is preserved. A known plan must be fully answered before using `completed`. Completed/stopped checkpoints and checkpoints already continued cannot be resumed. Unsupported run formats block workspace operations without changing files. New runs include a small machine-readable HTML comment before the supplied Markdown; the original answer text remains in the body.
 
 ## Failures and recovery
 
-The CLI serializes cooperating writers with an OS file lock and rejects stale prepared states. Runs are published without replacing an existing file. Unique temporary files are flushed before publication; existing file permissions are preserved. Candidate files and legacy runs are never migrated or rewritten by initialization, and `--force` only switches the workspace pointer. Configuration must be outside the candidate workspace; symlinks in managed workspace paths are refused.
+The CLI serializes cooperating writers with an OS file lock and rejects stale prepared states. Runs are published without replacing an existing file. Unique temporary files are flushed before publication; existing file permissions are preserved. Candidate files are preserved; unsupported runs are rejected before initialization. No migration occurs, and `--force` only switches the workspace pointer. Configuration must be outside the candidate workspace; symlinks in managed workspace paths are refused.
 
 Run and state remain separate files, so this is **not a multi-file atomic transaction**. A private `.zyris/pending.json` records recovery intent before publication. On any incomplete save, do not claim success: run `python3 <installed-skill-directory>/scripts/interview_workspace.py recover`. Recovery verifies existing contents and completes the same transaction; conflicts require manual reconciliation and are never overwritten. Until recovery, other writes and `status`/`resume` fail explicitly. Keep the journal until recovery succeeds; do not delete the persistent lock file to bypass a busy writer. OS locks are released automatically when a process exits or crashes.
 
 ## Limitations
 
 These guarantees apply to cooperating CLI processes on a local filesystem. Direct external edits do not acquire the lock, and network/cloud-synchronized filesystems are not a supported transactional backend. The automated storage tests exercise real processes, interrupted writes, recovery and the packaged CLI with fictional data; they do not establish hosted-platform persistence. In **Do not save** (`Nicht speichern`) mode, do not invoke workspace commands: no initialization, lock, journal, run, checkpoint, preference or export is created. Feedback remains in the current conversation; host chat retention is separate.
+
+Run publication stages temporary files under `.zyris/`, not `runs/`. The current lifecycle format requires all six metadata fields; an unknown planned count or absent predecessor is explicitly null. Invalid structures are rejected before control paths are created.
+
+JSON metadata requires unique keys and integer schema version 1; booleans and floats are invalid. Pending transactions block init before new configuration paths or locks. Invalid journals are rejected before recovery writes. Existing configuration and preferences extension fields are preserved.
+
+Stored language tags are validated before changes. Continuations require an existing paused predecessor: no forks or cycles, decreasing answer counts or lost established planned counts. Recovery applies the same checks. Run staging is selected explicitly; a configuration directory named runs remains an ordinary configuration path.

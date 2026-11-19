@@ -10,7 +10,7 @@
 
 **Rendered transcript preview, not a host UI screenshot. English translation of the previously published German excerpts.** The earlier documentation attributes these excerpts to the fictional Codex CLI `teamlead_coaching` journey reviewed on 2026-11-18. This update neither reruns that model test nor reads ignored raw transcripts. Layout and selection are editorial; responses and scores vary.
 
-The [versioned fixture](../../tests/behavior/fixtures/journeys/teamlead_coaching.json) contains fictional prompts. The original graphic remains at `docs/assets/coaching-preview.svg`; the new variants are fully localized.
+The [versioned fixture](../../tests/fixtures/behavior/journeys/teamlead_coaching.json) contains fictional prompts. The original graphic remains at `docs/assets/coaching-preview.svg`; the new variants are fully localized.
 
 ## Example walkthrough
 

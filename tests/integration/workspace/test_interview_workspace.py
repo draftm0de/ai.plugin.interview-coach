@@ -8,7 +8,7 @@ import sys
 import subprocess
 import os
 from unittest.mock import patch
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "skills/zyris-interview-coach/scripts"))
+sys.path.insert(0, str(next(p for p in Path(__file__).resolve().parents if (p / 'Makefile').is_file()) / "skills/interview-coach/scripts"))
 import interview_workspace as workspace
 from interview_workspace import init_workspace, configured_root, validate, finish, set_language
 
@@ -19,6 +19,202 @@ class WorkspaceTests(unittest.TestCase):
         self.base = Path(self.tmp.name)
         self.cfg = self.base / "config.json"
         self.root = self.base / "workspace"
+
+    def files_and_directories(self):
+        return {str(p.relative_to(self.base)):(p.read_bytes() if p.is_file() else None) for p in self.base.rglob('*')}
+
+    def test_file_workspace_or_ancestor_rejected_before_configuration(self):
+        target = self.base/'regular-file';target.write_text('preserve')
+        before = self.files_and_directories()
+        for root in (target,target/'nested/workspace'):
+            with self.assertRaisesRegex(ValueError,'Expected directory'):
+                init_workspace(root,self.base/'new/config.json')
+            self.assertEqual(before,self.files_and_directories())
+
+    def test_duplicate_config_preferences_and_journal_rejected(self):
+        self.cfg.write_text('{"schema_version":1,"schema_version":1}')
+        before = self.files_and_directories()
+        with self.assertRaisesRegex(ValueError,'Duplicate JSON field'):
+            init_workspace(self.root,self.cfg)
+        self.assertEqual(before,self.files_and_directories());self.cfg.unlink()
+        init_workspace(self.root,self.cfg)
+        prefs=self.root/'preferences.json';prefs.write_text('{"schema_version":1,"schema_version":1}')
+        before = self.files_and_directories()
+        with self.assertRaisesRegex(ValueError,'Duplicate JSON field'):
+            set_language(self.root,'de')
+        self.assertEqual(before,self.files_and_directories());prefs.unlink()
+        journal=self.root/workspace.CONTROL/'pending.json';journal.write_text('{"schema_version":1,"schema_version":1}')
+        before = self.files_and_directories()
+        with self.assertRaisesRegex(ValueError,'Duplicate JSON field'):
+            workspace.recover(self.root)
+        self.assertEqual(before,self.files_and_directories())
+
+    def test_old_workspace_mapping_blocks_initialization_without_writes(self):
+        self.root.mkdir()
+        (self.root/'workspace.yaml').write_text('state: custom.md')
+        (self.root/'custom.md').write_text('preserve fictional state')
+        before = self.files_and_directories()
+        with self.assertRaisesRegex(ValueError,'Unsupported workspace path-mapping'):
+            init_workspace(self.root,self.base/'new/config.json')
+        self.assertEqual(before,self.files_and_directories())
+
+    def test_nonstandard_json_numbers_rejected_before_writes(self):
+        for constant in ('NaN','Infinity','-Infinity','1e999','-1e999'):
+            self.cfg.write_text('{"schema_version":1,"storage":"local","workspace":'+json.dumps(str(self.root))+',"custom":'+constant+'}')
+            before = self.files_and_directories()
+            with self.assertRaisesRegex(ValueError,'Invalid JSON numeric constant'):
+                init_workspace(self.root,self.cfg)
+            self.assertEqual(before,self.files_and_directories())
+        self.cfg.unlink();init_workspace(self.root,self.cfg)
+        for constant in ('NaN','Infinity','-Infinity','1e999','-1e999'):
+            (self.root/'preferences.json').write_text('{"schema_version":1,"custom":'+constant+'}')
+            before = self.files_and_directories()
+            with self.assertRaisesRegex(ValueError,'Invalid JSON numeric constant'):
+                set_language(self.root,'de')
+            self.assertEqual(before,self.files_and_directories())
+
+    def test_config_directory_named_runs_is_not_workspace_staging(self):
+        config = self.base/'runs/config.json'
+        init_workspace(self.root,config)
+        self.assertEqual(configured_root(config),self.root.resolve())
+        self.assertFalse((self.base/'.zyris').exists())
+
+    def test_invalid_continuation_graph_rejected_without_mutation(self):
+        self.digest = self.prepare()
+        self.save('checkpoint',status='paused',answered_count=1,planned_count=2)
+        path = self.root/'runs/invalid.md'
+        base = dict(schema_version=1,run_id='invalid',status='paused',answered_count=1,planned_count=2,resume_from='checkpoint')
+        for change in ({'resume_from':'ghost'},{'resume_from':'invalid'},{'answered_count':0},{'planned_count':None}):
+            path.write_text(workspace.HEADER+json.dumps(dict(base,**change))+' -->\nFictional')
+            before = self.files_and_directories()
+            for call in (lambda: workspace.snapshot(self.root),lambda: init_workspace(self.root,self.cfg),lambda: self.save('next')):
+                with self.assertRaisesRegex(ValueError,'Unsupported run continuation'):
+                    call()
+                self.assertEqual(before,self.files_and_directories())
+        path.write_text(workspace.HEADER+json.dumps(base)+' -->\nFictional')
+        other = self.root/'runs/other.md'
+        other.write_text(workspace.HEADER+json.dumps(dict(base,run_id='other'))+' -->\nFictional')
+        before = self.files_and_directories()
+        with self.assertRaisesRegex(ValueError,'Unsupported run continuation'):
+            workspace.snapshot(self.root)
+        self.assertEqual(before,self.files_and_directories())
+
+    def test_invalid_saved_languages_rejected_without_mutation(self):
+        init_workspace(self.root,self.cfg)
+        for field in ('interface_language','interview_language'):
+            for value in (123,True,None,'','not_a_tag'):
+                (self.root/'preferences.json').write_text(json.dumps({'schema_version':1,field:value,'custom':'preserve'}))
+                before = self.files_and_directories()
+                for call in (lambda: init_workspace(self.root,self.cfg), lambda: set_language(self.root,'de')):
+                    with self.assertRaisesRegex(ValueError,'Invalid preferences language tag'):
+                        call()
+                    self.assertEqual(before,self.files_and_directories())
+
+    def test_duplicate_run_fields_rejected_before_mutation(self):
+        self.digest = self.prepare()
+        self.save('checkpoint', status='paused', answered_count=1, planned_count=2)
+        path = self.root/'runs/checkpoint.md'
+        path.write_text(path.read_text().replace('"status":', '"status":"completed", "status":'))
+        before = self.files_and_directories()
+        for call in (lambda: workspace.resume(self.root,'checkpoint'), lambda: init_workspace(self.root,self.cfg),
+                     lambda: self.save('next',status='paused',answered_count=1,resume_from='checkpoint')):
+            with self.assertRaisesRegex(ValueError, 'Duplicate JSON field'):
+                call()
+            self.assertEqual(before,self.files_and_directories())
+
+    def test_noninteger_config_schema_rejected_before_locks(self):
+        for version in (True,1.0):
+            self.cfg.write_text(json.dumps({'schema_version':version,'storage':'local','workspace':str(self.root)}))
+            before = self.files_and_directories()
+            for call in (lambda: init_workspace(self.root,self.cfg),lambda: configured_root(self.cfg)):
+                with self.assertRaisesRegex(ValueError,'Unsupported config'):
+                    call()
+                self.assertEqual(before,self.files_and_directories())
+
+    def test_pending_init_and_invalid_recovery_do_not_create_paths(self):
+        self.digest = self.prepare()
+        with patch.object(workspace,'apply_pending',side_effect=OSError('interrupted')):
+            with self.assertRaisesRegex(RuntimeError,'Run recover'):
+                self.save('pending')
+        journal = self.root/workspace.CONTROL/'pending.json'
+        original = json.loads(journal.read_text())
+        lock = self.root/workspace.CONTROL/'lock'; lock.unlink()
+        before = self.files_and_directories()
+        cfg = self.base/'not-created/config.json'
+        for force in (False,True):
+            with self.assertRaisesRegex(RuntimeError,'Pending transaction'):
+                init_workspace(self.root,cfg,force=force)
+            self.assertEqual(before,self.files_and_directories())
+        for change in ({'schema_version':True},{'schema_version':1.0},{'unexpected':'preserve'}):
+            journal.write_text(json.dumps(dict(original,**change)))
+            before = self.files_and_directories()
+            with self.assertRaisesRegex(ValueError,'Unsupported transaction'):
+                workspace.recover(self.root)
+            self.assertEqual(before,self.files_and_directories())
+
+    def test_incomplete_lifecycle_fields_rejected_without_mutation(self):
+        self.digest = self.prepare()
+        self.save('checkpoint', status='paused', answered_count=1, planned_count=2)
+        path = self.root/'runs/checkpoint.md'
+        original = path.read_text()
+        metadata, body = workspace.parse_run(original, 'checkpoint')
+        for field in ('planned_count', 'resume_from'):
+            invalid = dict(metadata); del invalid[field]
+            path.write_text(workspace.HEADER + json.dumps(invalid) + ' -->\n' + body)
+            before = {str(p.relative_to(self.base)):(p.read_bytes() if p.is_file() else None) for p in self.base.rglob('*')}
+            for call in (lambda: workspace.resume(self.root, 'checkpoint'),
+                         lambda: init_workspace(self.root, self.cfg),
+                         lambda: self.save('next', status='paused', answered_count=1, resume_from='checkpoint')):
+                with self.assertRaisesRegex(ValueError, 'Invalid run lifecycle'):
+                    call()
+                self.assertEqual(before, {str(p.relative_to(self.base)):(p.read_bytes() if p.is_file() else None) for p in self.base.rglob('*')})
+        path.write_text(original)
+
+    def test_invalid_workspace_and_preferences_rejected_before_control_writes(self):
+        self.root.mkdir()
+        with self.assertRaises(ValueError): workspace.snapshot(self.root)
+        self.assertEqual(list(self.root.iterdir()), [])
+        init_workspace(self.root, self.cfg)
+        (self.root/'preferences.json').write_text('{"schema_version":999}')
+        before = {str(p):(p.read_bytes() if p.is_file() else None) for p in self.base.rglob('*')}
+        for call in (lambda: set_language(self.root, 'de'), lambda: init_workspace(self.root, self.cfg)):
+            with self.assertRaisesRegex(ValueError, 'preferences'):
+                call()
+            self.assertEqual(before, {str(p):(p.read_bytes() if p.is_file() else None) for p in self.base.rglob('*')})
+
+    def test_run_staging_is_in_control_directory_and_orphans_do_not_block_recovery(self):
+        self.digest = self.prepare()
+        original = workspace.os.link
+        def check_staging(source, target):
+            if Path(target).parent.name == 'runs':
+                self.assertEqual(Path(source).parent, self.root.resolve()/workspace.CONTROL)
+                raise OSError('interrupted publication')
+            return original(source, target)
+        with patch.object(workspace.os, 'link', side_effect=check_staging):
+            with self.assertRaisesRegex(RuntimeError, 'Run recover'): self.save('pending')
+        orphan = self.root/workspace.CONTROL/'.zyris-tmp-interrupted'
+        orphan.write_bytes(b'fictional interrupted writer')
+        self.assertEqual(workspace.recover(self.root), self.root.resolve()/'runs/pending.md')
+        self.assertEqual(orphan.read_bytes(), b'fictional interrupted writer')
+        self.assertEqual(workspace.snapshot(self.root)['state'], '# New state')
+
+    def test_only_current_config_location_is_selected(self):
+        self.assertEqual(workspace.DEFAULT_CONFIG.parts[-3:],
+                         ('zyris', 'interview-coach', 'config.json'))
+
+    def test_default_lookup_never_uses_old_pointer(self):
+        config_home = self.base / 'config-home'
+        old = config_home / 'zyris/zyris-interview-coach/config.json'
+        old.parent.mkdir(parents=True)
+        old.write_text(json.dumps({'schema_version':1, 'storage':'local', 'workspace':str(self.root)}))
+        before = old.read_bytes()
+        env = dict(os.environ, XDG_CONFIG_HOME=str(config_home), PYTHONDONTWRITEBYTECODE='1')
+        result = subprocess.run([sys.executable, '-B', str(Path(workspace.__file__)), 'status'],
+                                env=env, capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('No workspace configured', result.stderr)
+        self.assertEqual(old.read_bytes(), before)
+        self.assertFalse((config_home / 'zyris/interview-coach').exists())
 
     def test_init_is_idempotent_and_does_not_overwrite(self):
         init_workspace(self.root, self.cfg)
@@ -74,6 +270,74 @@ class WorkspaceTests(unittest.TestCase):
     def save(self, run_id='test', **kwargs):
         return finish(self.root, run_id, 'Fictional answer', '# New state',
                       expected_state_sha256=self.digest, **kwargs)
+
+    def test_unsupported_runs_rejected_without_any_workspace_changes(self):
+        self.digest = self.prepare()
+        self.save('checkpoint', status='paused', answered_count=1, planned_count=2)
+        for name, content in [('old.md', b'No metadata'), ('Altes Interview äö.md', b'old'),
+                              ('encoding.md', b'\xe4\xf6\xfc')]:
+            with self.subTest(name=name):
+                invalid = self.root / 'runs' / name
+                invalid.write_bytes(content)
+                before = {str(p):p.read_bytes() for p in self.base.rglob('*') if p.is_file()}
+                operations = [lambda: workspace.resume(self.root, 'checkpoint'),
+                              lambda: init_workspace(self.root, self.cfg, force=True),
+                              lambda: self.save('next', status='paused', answered_count=1, resume_from='checkpoint'),
+                              lambda: set_language(self.root, 'de'), lambda: workspace.recover(self.root)]
+                for operation in operations:
+                    with self.assertRaisesRegex(ValueError, 'Unsupported run'):
+                        operation()
+                    self.assertEqual(before, {str(p):p.read_bytes() for p in self.base.rglob('*') if p.is_file()})
+                invalid.unlink()
+
+    def test_continuation_rejects_count_changes_and_corrupt_other_run(self):
+        self.digest = self.prepare()
+        self.save('checkpoint', status='paused', answered_count=2, planned_count=3)
+        self.digest = workspace.resume(self.root, 'checkpoint')['state_sha256']
+        before = {p.name: p.read_bytes() for p in (self.root / 'runs').iterdir()}
+        for count, plan, message in ((1, 3, 'cannot decrease'), (2, 4, 'preserve the checkpoint')):
+            with self.subTest(count=count, plan=plan):
+                with self.assertRaisesRegex(ValueError, message):
+                    self.save('invalid', status='paused', answered_count=count,
+                              planned_count=plan, resume_from='checkpoint')
+                self.assertFalse((self.root / 'runs/invalid.md').exists())
+                self.assertEqual(workspace.state_digest(self.root), self.digest)
+        self.assertEqual(before, {p.name: p.read_bytes() for p in (self.root / 'runs').iterdir()})
+        corrupt = self.root / 'runs/other.md'
+        corrupt.write_text(workspace.HEADER + '{broken metadata -->')
+        original = corrupt.read_bytes()
+        with self.assertRaises(ValueError):
+            workspace.resume(self.root, 'checkpoint')
+        self.assertEqual(corrupt.read_bytes(), original)
+        self.assertEqual(workspace.state_digest(self.root), self.digest)
+
+    def test_failure_before_journal_reports_retry_not_recovery(self):
+        self.digest = self.prepare()
+        with patch.object(workspace, 'write_atomic', side_effect=OSError('disk error')):
+            with self.assertRaisesRegex(RuntimeError, 'No transaction recorded') as error:
+                self.save()
+        self.assertNotIn('Run recover', str(error.exception))
+        self.assertIn('same run ID', str(error.exception))
+        self.assertIsNone(workspace.recover(self.root))
+        self.assertFalse((self.root / 'runs/test.md').exists())
+        self.save()
+
+    def test_failure_after_journal_removal_reports_existing_content(self):
+        self.digest = self.prepare()
+        original = workspace.sync_directory
+        def fail_final(path):
+            if (Path(path).resolve() == (self.root / workspace.CONTROL).resolve()
+                    and (self.root / 'runs/test.md').exists()
+                    and not workspace.journal_path(self.root).exists()):
+                raise OSError('final directory sync failed')
+            return original(path)
+        with patch.object(workspace, 'sync_directory', side_effect=fail_final):
+            with self.assertRaisesRegex(RuntimeError, 'final durability was not confirmed') as error:
+                self.save()
+        self.assertNotIn('Run recover', str(error.exception))
+        self.assertEqual((self.root / 'state.md').read_text(), '# New state')
+        self.assertTrue((self.root / 'runs/test.md').exists())
+        self.assertIsNone(workspace.recover(self.root))
 
     def test_stale_state_rejected_without_creating_run(self):
         self.digest = self.prepare()
@@ -187,7 +451,8 @@ class WorkspaceTests(unittest.TestCase):
 
     def test_init_preserves_existing_content_preferences_and_config_extensions(self):
         self.prepare()
-        (self.root / 'runs/legacy.md').write_text('Legacy fictional run')
+        self.digest = workspace.state_digest(self.root)
+        self.save('current')
         (self.root / 'jobs/example').mkdir()
         (self.root / 'jobs/example/job.md').write_text('Fictional vacancy')
         (self.root / 'preferences.json').write_text('{"schema_version":1,"custom":"keep"}')
@@ -399,7 +664,8 @@ w.finish(Path(sys.argv[2]), 'crash', 'Fictional checkpoint', 'Recovered state', 
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         try:
             self.assertEqual(worker.stdout.readline().strip(), 'RUN_PUBLISHED')
-            with self.assertRaisesRegex(RuntimeError, 'busy'):
+            # The published pending journal is rejected even before lock acquisition.
+            with self.assertRaisesRegex(RuntimeError, 'Pending transaction'):
                 self.save('competing')
             worker.kill()
             worker.communicate(timeout=15)

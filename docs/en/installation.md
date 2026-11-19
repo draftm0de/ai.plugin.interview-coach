@@ -4,11 +4,11 @@
 
 [Home](../../README.en.md) · [Documentation](README.md) · [Install](installation.md) · [Use](usage.md) · [Examples](screens.md) · [FAQ](faq.md) · [Storage](storage.md) · [Development](development.md)
 
-## Choose a platform
+## Choose your platform
 
-This repository contains **Interview Coach** (`interview-coach`), with no marketplace of its own. Its bundled skill identity `zyris-interview-coach` is unchanged. Install through **Draftmode AI Plugins** (`draftmode-ai-plugins`): `https://github.com/draftm0de/ai.plugins`.
+This repository contains **Interview Coach** (`interview-coach`), with no marketplace of its own. Its bundled skill identity is also `interview-coach`. Install through **Draftmode AI Plugins** (`draftmode-ai-plugins`): `https://github.com/draftm0de/ai.plugins`.
 
-Publish the new `ai.plugin.interview-coach` content first, then the `ai.plugins` catalog. Graphical acceptance of this new entry is still pending. Your account needs access to both repositories.
+The user confirms both plugins are in the published marketplace. The local skill rename to `interview-coach` is not yet published; repository import delivers the published content. GUI acceptance of the current changes remains separate. Your account needs access to both repositories.
 
 ## Install
 
@@ -57,3 +57,5 @@ Remove **Interview Coach** in plugin settings. Keep private training data outsid
 Open a new chat and send **“Start interview coach setup”**. Select English and **Do not save**, practice with a fictional question and finish with `stop`. Persistent storage needs an authorized private workspace and a compatible Python runtime in the host; see [Storage](storage.md). Internet research requires internet access.
 
 Check that both **Plugin Manager** and **Interview Coach** are offered by the marketplace. [Development](development.md) · [Evidence](release-evidence.md).
+
+Menu paths come from existing user reports and captures, not a new GUI acceptance run. CLI commands were checked against local help. [Claude Code guide](https://code.claude.com/docs/en/discover-plugins) · [OpenAI plugin documentation](https://developers.openai.com/plugins/build/plugins).

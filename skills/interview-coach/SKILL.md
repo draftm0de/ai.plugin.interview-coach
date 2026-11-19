@@ -1,5 +1,5 @@
 ---
-name: zyris-interview-coach
+name: interview-coach
 description: Adaptive job-interview research and coaching. Train general interview skills or prepare for a specific vacancy using a CV, job description, public company/person research and persistent evidence-based learning state.
 ---
 
@@ -15,7 +15,7 @@ Use when a user requests interview preparation, realistic interview simulation, 
 
 **Before the first response in every chat**, load `references/session-control.md` and the private workspace `preferences.json` if accessible. Reply in the configured interface language; if no confirmed preference exists, use the user's current conversation language. Never default to English merely because this skill is written in English. Treat interview language as separate.
 
-When the user says `stop`, `end`, `beenden`, `abbrechen`, or `/zyris-interview-coach stop`, immediately end questioning, summarize available evidence and persist a partial run plus updated state, marking `stopped_early` (see `references/session-control.md`). `pause` saves a resumable checkpoint when possible. Do not require a second confirmation to stop.
+When the user says `stop`, `end`, `beenden`, `abbrechen`, or `/interview-coach stop`, immediately end questioning, summarize available evidence and persist a partial run plus updated state, marking `stopped_early` (see `references/session-control.md`). `pause` saves a resumable checkpoint when possible. Do not require a second confirmation to stop.
 
 ## No-storage mode
 
@@ -23,17 +23,17 @@ When the user explicitly chooses **Nicht speichern**, run coaching without any s
 
 ## Setup command
 
-If the user invokes `setup`, `/zyris-interview-coach setup`, or no accessible workspace is configured, follow `references/setup.md` **before** beginning interview training. Ask for storage, verify durable access (a hosted sandbox is not necessarily the user's computer), request a current CV, reuse existing state and confirm the outcome. The distribution bundles `scripts/interview_workspace.py`; never claim persistence without verifying it. A Git repository is optional.
+If the user invokes `setup`, `/interview-coach setup`, or no accessible workspace is configured, follow `references/setup.md` **before** beginning interview training. Ask for storage, verify durable access (a hosted sandbox is not necessarily the user's computer), request a current CV, reuse existing state and confirm the outcome. The distribution bundles `scripts/interview_workspace.py`; never claim persistence without verifying it. A Git repository is optional.
 
 ## Preconditions and bootstrap
 
-1. Identify the candidate workspace provided by the user (local directory, private Git repository, or supplied ChatGPT files). A Git repository is **optional**; do not require one.
+1. Follow the four storage choices in `references/setup.md`. In **Nicht speichern** mode skip workspace bootstrap entirely. Otherwise identify the candidate workspace provided by the user (local directory, private Git repository, or user-managed files). A Git repository is **optional**; do not require one.
 2. Read `references/storage.md` and the workspace's `state.md`, prior `runs/`, candidate CV/profile and any relevant `jobs/` record. Read only necessary files and keep context compact.
-3. If no workspace exists, create/download a portable file bundle with `state.md`, `candidate/profile.md`, `jobs/` and `runs/` or use supplied documents. Declare whether saving is automatic or user-managed.
+3. Only when storage was chosen and authorized, if no workspace exists, create/download a portable file bundle with `state.md`, `candidate/profile.md`, `jobs/` and `runs/` or use supplied documents. Declare whether saving is automatic or user-managed.
 4. For targeted preparation, require both a candidate CV (or verified equivalent profile) and the job posting or a reliable source. Ask for missing essentials, but begin general practice if possible; do not infer a job description.
 5. If a real interview is scheduled, collect known date, format and interviewers from available materials. Never invent them.
 6. For developer/engineering roles, read `references/technical-interview.md` and offer coding, debugging, review or architecture exercises; execute candidate code only in a safe isolated runner.
-7. For a verified persistent local filesystem, use `python3 <skill-directory>/scripts/interview_workspace.py init --path <workspace>` when authorized, or guide the user through it. The configuration pointer is local to the user's machine; it is not a ChatGPT-wide setting. For Git workspaces, use the repository `workspace.yaml` or an explicit user-supplied repo reference.
+7. For a verified persistent local filesystem, use `python3 <skill-directory>/scripts/interview_workspace.py init --path <workspace>` when authorized, or guide the user through it. The configuration pointer is local to the user's machine; it is not a ChatGPT-wide setting. For Git workspaces, use an explicit user-supplied repository reference and the same current workspace layout.
 8. Read the skill references selectively: `references/research.md`, `references/training.md`, `references/evaluation.md`, `references/storage.md`.
 
 ## Role-aware targeted preparation
@@ -83,7 +83,7 @@ For every completed session:
 
 ## Validation
 
-The public repository provides `python -m unittest discover -s tests -v` for deterministic tests and `python tests/behavior/run_smoke.py --cli claude|codex` for opt-in local CLI smoke tests. The latter may consume tokens and is heuristic, not a proof of correctness. Never claim that tests passed without actual execution.
+The public repository provides `python3 scripts/run_tests.py` (development checkout only) for deterministic tests and `python tests/behavior/run_smoke.py --cli claude|codex` for opt-in local CLI smoke tests. The latter may consume tokens and is heuristic, not a proof of correctness. Never claim that tests passed without actual execution.
 
 ## Workspace boundary
 

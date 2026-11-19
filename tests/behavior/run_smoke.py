@@ -8,10 +8,10 @@ import subprocess
 import sys
 
 # Share answer/diagnostic separation with behavior and journey tests.
-from run import ROOT, run as run_case, check
+from run import ROOT, run as run_case, check, skill_context
 
-CASES = json.loads((ROOT / "tests/behavior/fixtures/behavior-cases.json").read_text())
-SKILL = (ROOT / "skills/zyris-interview-coach/SKILL.md").read_text()
+CASES = json.loads((ROOT / "tests/fixtures/behavior/behavior-cases.json").read_text())
+SKILL = skill_context()
 
 def main():
     p = argparse.ArgumentParser()

@@ -4,7 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
-ROOT=Path(__file__).resolve().parents[2]
+ROOT=next(p for p in Path(__file__).resolve().parents if (p / 'Makefile').is_file())
 spec=importlib.util.spec_from_file_location('local_forwarder',ROOT/'scripts/local_marketplace.py')
 engine=importlib.util.module_from_spec(spec);spec.loader.exec_module(engine)
 class LocalForwardingTests(unittest.TestCase):

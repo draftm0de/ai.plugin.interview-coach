@@ -10,7 +10,7 @@ SPEC.loader.exec_module(module)
 
 class BehaviorHarnessTests(unittest.TestCase):
     def test_cases_are_fictional_and_complete(self):
-        cases = json.loads((ROOT / "tests/behavior/fixtures/quality-cases.json").read_text())
+        cases = json.loads((ROOT / "tests/fixtures/behavior/quality-cases.json").read_text())
         self.assertGreaterEqual(len(cases), 4)
         self.assertEqual(len({c["id"] for c in cases}), len(cases))
         for case in cases:
@@ -36,7 +36,7 @@ class BehaviorHarnessTests(unittest.TestCase):
         self.assertTrue(module.check(case, "Zusammenfassung. state.md aktualisiert."))
 
     def test_stop_accepts_valid_completion_without_summary_heading(self):
-        cases = json.loads((ROOT / "tests/behavior/fixtures/quality-cases.json").read_text())
+        cases = json.loads((ROOT / "tests/fixtures/behavior/quality-cases.json").read_text())
         case = next(c for c in cases if c["id"] == "stop_without_storage")
         answer = ("Das Interview ist beendet (stopped_early). Es wurde genau eine Frage "
                   "beantwortet. Der Wortlaut fehlt, daher keine Bewertung möglich. "
@@ -44,11 +44,19 @@ class BehaviorHarnessTests(unittest.TestCase):
         self.assertEqual(module.check(case, answer), [])
 
     def test_stop_rejects_false_persistence_claim(self):
-        cases = json.loads((ROOT / "tests/behavior/fixtures/quality-cases.json").read_text())
+        cases = json.loads((ROOT / "tests/fixtures/behavior/quality-cases.json").read_text())
         case = next(c for c in cases if c["id"] == "stop_without_storage")
         answer = ("Das Interview ist beendet. Genau eine Frage beantwortet. "
                   "Nicht gespeichert. state.md aktualisiert.")
         self.assertTrue(module.check(case, answer))
+
+    def test_setup_case_requires_all_four_choices(self):
+        cases = json.loads((ROOT / 'tests/fixtures/behavior/quality-cases.json').read_text())
+        case = next(c for c in cases if c['id'] == 'setup_four_storage_choices')
+        valid = 'Speicher wählen: Lokales Verzeichnis; Privates Git-Repository; Dateien selbst verwalten; Nicht speichern.'
+        self.assertEqual(module.check(case, valid), [])
+        self.assertTrue(module.check(case, valid.replace('; Nicht speichern', '')))
+        self.assertIn('all four storage-type choices', module.skill_context())
 
     def test_skill_context_includes_evaluation_and_research(self):
         context = module.skill_context()

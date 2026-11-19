@@ -8,7 +8,6 @@ on:
       - "tests/**"
       - "pyproject.toml"
       - "Makefile"
-      - "docs.mk"
       - "docs/**"
       - "README*.md"
       - "LICENSE"
@@ -25,7 +24,6 @@ on:
       - "tests/**"
       - "pyproject.toml"
       - "Makefile"
-      - "docs.mk"
       - "docs/**"
       - "README*.md"
       - "LICENSE"
@@ -48,7 +46,3 @@ jobs:
       - name: Validate repository import manifests
         run: |
           make check-plugin
-      - name: Validate and build documentation export
-        run: |
-          make check-docs-export
-          make export-docs

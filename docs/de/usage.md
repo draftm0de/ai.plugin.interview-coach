@@ -8,7 +8,7 @@
 
 Nach der [Installation](installation.md) kannst du schreiben:
 
-> Nutze zyris-interview-coach und starte die Einrichtung. Ich möchte für eine Team-Lead-Rolle im ERP-Umfeld üben. Verwende Deutsch. Nicht speichern.
+> Nutze interview-coach und starte die Einrichtung. Ich möchte für eine Team-Lead-Rolle im ERP-Umfeld üben. Verwende Deutsch. Nicht speichern.
 
 Der Coach fragt zuerst nach der Speicherart, dann nach einem passenden Ort. Er bestätigt Bedien- und Interviewsprache und fragt nach deinem aktuellen Lebenslauf oder freigegebenen Profil. Ohne Lebenslauf ist allgemeines Training möglich; gezielte Vorbereitung braucht ein bestätigtes Profil und die Stellenanzeige. Bekannte Interviewer sind optional. Originalunterlagen werden nur mit deiner Zustimmung im privaten Arbeitsbereich abgelegt.
 
@@ -28,7 +28,7 @@ Der Coach fragt jeweils eine Frage und passt Tiefe und Kriterien an Rolle und Er
 
 In begleiteten Modi erhältst du eine qualitative **Gesamtbewertung x/10**, etwa drei bis sechs passende Einzelkriterien, belegte Stärken, konkrete Verbesserungen und bei Bedarf einen Formulierungsvorschlag. Die Gesamtnote ist kein mechanischer Mittelwert und keine Einstellungswahrscheinlichkeit. Bei zu wenig Inhalt soll der Coach nachfragen statt eine sichere Bewertung zu erfinden.
 
-Deine Originalantwort bleibt von Vorschlägen getrennt. Ein besserer zweiter Versuch nach Coaching belegt noch keine stabile Kompetenz. Laut [Bewertungsregeln](../../skills/zyris-interview-coach/references/evaluation.md) braucht `improving` zwei spontane erfolgreiche Antworten in unterschiedlichen Szenarien; `stable` eine Bestätigung in einer späteren Sitzung ohne Coaching. Eignungslücken für eine Stelle sind von Kommunikationsschwächen getrennt.
+Deine Originalantwort bleibt von Vorschlägen getrennt. Ein besserer zweiter Versuch nach Coaching belegt noch keine stabile Kompetenz. Laut [Bewertungsregeln](../../skills/interview-coach/references/evaluation.md) braucht `improving` zwei spontane erfolgreiche Antworten in unterschiedlichen Szenarien; `stable` eine Bestätigung in einer späteren Sitzung ohne Coaching. Eignungslücken für eine Stelle sind von Kommunikationsschwächen getrennt.
 
 ## Sitzung steuern
 
