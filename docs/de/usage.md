@@ -4,52 +4,60 @@
 
 [Start](../../README.md) · [Dokumentation](README.md) · [Installation](installation.md) · [Nutzung](usage.md) · [Beispiele](screens.md) · [FAQ](faq.md) · [Speicherung](storage.md) · [Entwicklung](development.md)
 
-## Einrichten
+## Einstiegspunkte je Host
 
-Nach der [Installation](installation.md) kannst du schreiben:
+Alle Fähigkeiten liegen in fünf Skills desselben Plugins. Natürliche Sprache funktioniert in beiden Hosts („Lege einen Bewerber an“, „Bereite die Stelle bei ACME vor“). Zusätzlich gibt es host-spezifische Aufrufe:
 
-> Nutze interview-coach und starte die Einrichtung. Ich möchte für eine Team-Lead-Rolle im ERP-Umfeld üben. Verwende Deutsch. Nicht speichern.
+| Aufgabe | Skill | Claude Code | Codex |
+|---|---|---|---|
+| Einrichtung, Status, Weiterleitung | `interview-coach` | `/interview-coach:interview-coach setup` | `$interview-coach` bzw. Skill-Auswahl |
+| Bewerber anlegen | `candidate-create` | `/interview-coach:candidate-create` | `$candidate-create` |
+| Allgemeines Training | `candidate-training` | `/interview-coach:candidate-training` | `$candidate-training` |
+| Stelle vorbereiten | `job-create` | `/interview-coach:job-create` | `$job-create` |
+| Training für eine gespeicherte Stelle | `job-training` | `/interview-coach:job-training` | `$job-training` |
 
-Der Coach fragt zuerst nach der Speicherart, dann nach einem passenden Ort. Er bestätigt Bedien- und Interviewsprache und fragt nach deinem aktuellen Lebenslauf oder freigegebenen Profil. Ohne Lebenslauf ist allgemeines Training möglich; gezielte Vorbereitung braucht ein bestätigtes Profil und die Stellenanzeige. Bekannte Interviewer sind optional. Originalunterlagen werden nur mit deiner Zustimmung im privaten Arbeitsbereich abgelegt.
+Die Schreibweisen folgen der jeweiligen Host-Dokumentation und sind in den isolierten Host-Läufen dieses Repositories **nicht** nachgewiesen (siehe [Abnahme](../acceptance.md)). Ein nativer Befehl `:job-create` ohne Hostunterstützung wird nicht behauptet. Es gibt keine automatische Aktivierung beim Öffnen eines Projekts: Die Einrichtung startet bei der ersten Nutzung oder mit ausdrücklichem `setup`.
 
-## Ablauf auswählen
+## 1. Einrichten
 
-| Modus | Beispiel | Rückmeldung |
+> Starte die Einrichtung von interview-coach. Verwende Deutsch.
+
+Der Coach bietet genau drei Speicheroptionen an: **Lokal**, **Git** (privates GitHub/GitLab-Repository), **Nicht speichern**. Danach fragt er nach Pfad bzw. Repository und bestätigt das Ziel. Bei Git gehören Commits und Pushes im gewählten Repository zum Speichern. Details: [Speicherung](storage.md).
+
+## 2. Bewerber anlegen (`candidate-create`)
+
+Name erfragen → eindeutige ID → „Gibt es einen Lebenslauf?“.
+
+- **Mit CV** (PDF, DOCX, Markdown): Datei bereitstellen. Das Original bleibt bytegleich, daraus entsteht eine Markdown-Übertragung und ein Profil. Lücken (Bilder, nicht lesbare Seiten, fehlende Textebene) werden offengelegt, Teilimporte nicht als fertig gemeldet. Fehlt ein Werkzeug (z. B. für PDF: `pdftotext`, `mutool` oder Python-`pypdf`), nennt der Coach genau, was fehlt; es wird nichts installiert und nichts erfunden.
+- **Ohne CV**: Der Coach stellt jeweils eine Frage (Erfahrung, Ausbildung, Fähigkeiten, Projekte, Ziele), erstellt einen als Entwurf gekennzeichneten CV und ein Profil und lässt dich die Angaben bestätigen. Erst dann gelten sie als verifizierte Grundlage; ein Entwurf kann gespeichert und angezeigt werden, dient aber nicht als verlässliche Evidenz. Der stellenbezogene Abgleich und profilbasiertes Training warten auf deine Bestätigung (Stellenaufnahme, Unternehmensrecherche und allgemeines Training nicht).
+
+Am Ende siehst du Ergebnis, offene Punkte und den tatsächlichen Speicherort. Mehrere Bewerber pro Projekt sind möglich, auch gleichnamige; bei Mehrdeutigkeit fragt der Coach nach.
+
+## 3. Allgemeines Training (`candidate-training`)
+
+Bewerber wählen → Profil, Lernstand und frühere Runs werden geladen → eine Frage pro Turn, ausgerichtet an Fähigkeiten, Erfahrung, Rolle und Zielen. Du erhältst **Gesamtbewertung x/10**, passende Einzelkriterien, Stärken und Verbesserungen; Formulierungsvorschläge nutzen nur deine belegten Angaben. Jeder gespeicherte Durchlauf ist ein eigener unveränderlicher Run, der Lernstand ändert sich nur beim gewählten Bewerber.
+
+## 4. Stelle vorbereiten (`job-create`)
+
+Bewerber wählen → Stellenlink oder Upload (Link mit Abrufdatum; ist der Link nicht erreichbar, bittest du den Text/Upload nach) → Unternehmen (falls unklar) → bekannte Interviewteilnehmer („unbekannt“ ist erlaubt und blockiert nichts) → öffentliche, berufliche Recherche mit Quellen und Datum, Namensgleichheiten werden vor der Zuordnung geklärt, keine psychologischen Profile → Abgleich Anforderungen ↔ Belege/Lücken → gespeicherte Vorbereitung mit Themen und offenen Fragen. Eine Stelle gehört einem Bewerber und ist für mehrere Trainings wiederverwendbar.
+
+## 5. Training für eine Stelle (`job-training`)
+
+Bewerber und Stelle wählen → vorhandene Recherche wird wiederverwendet, zeitabhängige Fakten werden bei Bedarf aktualisiert → Fragen und Bewertung richten sich nach Anforderungen, Seniorität und Lücken → jeder Durchlauf ist ein eigener Run mit Bewerber- und Stellenzuordnung. Der bewerberübergreifende Lernstand bleibt getrennt von stellenspezifischen Passungslücken.
+
+## Modi und Steuerung
+
+| Modus | Zweck | Rückmeldung |
 |---|---|---|
-| `general` | „Übe allgemeine Fragen für eine Junior-Entwicklerrolle.“ | Nach jeder Antwort |
-| `targeted` | „Bereite mich anhand meines Lebenslaufs auf diese Stelle vor.“ | Nach jeder Antwort |
-| `drill` | „Trainiere klare Entscheidungsverantwortung mit mir.“ | Gezielte Rückmeldung und eigener zweiter Versuch |
-| `mock` | „Simuliere ein Interview ohne Unterbrechungen durch Coaching.“ | Am Ende |
-| `briefing` | „Fasse Arbeitgeberfakten, passende Beispiele und meine Rückfragen zusammen.“ | Vorbereitung ohne Antwortbewertung |
+| `general` | Allgemeines Training | nach jeder Antwort |
+| `targeted` | Gespeicherte Stelle | nach jeder Antwort |
+| `drill` | Einzelne Lernlücke, zweiter Versuch | gezielt |
+| `mock` | Ununterbrochene Simulation | am Ende |
+| `briefing` | Kompakte Vorbereitung | ohne Antwortbewertung |
 
-Der Coach fragt jeweils eine Frage und passt Tiefe und Kriterien an Rolle und Erfahrung an. Öffentliche Recherche setzt Browserzugriff voraus. Fakten, begründete Annahmen und Unbekanntes bleiben getrennt; Interviewerrecherche beschränkt sich auf beruflich relevante öffentliche Informationen.
+- `stop` / `beenden` / `abbrechen` beendet sofort ohne zweite Bestätigung; bei gespeichertem Bewerber entsteht ein Teilrun (`stopped_early`).
+- `pause` speichert einen Checkpoint; die Fortsetzung läuft unter neuer Run-ID, nur beim selben Bewerber und derselben Stelle.
+- Bedien- und Interviewsprache sind getrennt einstellbar.
+- Fortschritt: nur unabhängige Antworten zählen; `improving` nach zwei spontanen erfolgreichen Antworten in verschiedenen Szenarien, `stable` erst nach Bestätigung in einem späteren Lauf ohne Coaching. Modellantworten sind keine Kompetenznachweise.
 
-## Ausgabe verstehen
-
-In begleiteten Modi erhältst du eine qualitative **Gesamtbewertung x/10**, etwa drei bis sechs passende Einzelkriterien, belegte Stärken, konkrete Verbesserungen und bei Bedarf einen Formulierungsvorschlag. Die Gesamtnote ist kein mechanischer Mittelwert und keine Einstellungswahrscheinlichkeit. Bei zu wenig Inhalt soll der Coach nachfragen statt eine sichere Bewertung zu erfinden.
-
-Deine Originalantwort bleibt von Vorschlägen getrennt. Ein besserer zweiter Versuch nach Coaching belegt noch keine stabile Kompetenz. Laut [Bewertungsregeln](../../skills/interview-coach/references/evaluation.md) braucht `improving` zwei spontane erfolgreiche Antworten in unterschiedlichen Szenarien; `stable` eine Bestätigung in einer späteren Sitzung ohne Coaching. Eignungslücken für eine Stelle sind von Kommunikationsschwächen getrennt.
-
-## Sitzung steuern
-
-- `stop`, `end`, `beenden` oder `abbrechen` beendet Fragen sofort. Bereits beantwortete Fragen werden zusammengefasst; mit vorher bestätigter Speicherung entsteht ein Teilbericht mit `stopped_early`.
-- `finish` beendet vorzeitig, solange Fragen offen sind; nach der letzten geplanten Antwort gilt `completed`.
-- `pause` oder `unterbrechen` ermöglicht bei verfügbarer Speicherung einen Checkpoint mit `paused`.
-- **Nicht speichern** verhindert Arbeitsbereich, Dateien, Einstellungen, Recherchearchive und automatische Exporte. Die Chat-Aufbewahrung des Hosts bleibt davon getrennt.
-- Bedien- und Interviewsprache dürfen verschieden sein. Vor dauerhaften Änderungen der Sprachpräferenz wird eine Bestätigung benötigt.
-
-Diese Wörter gelten als Steuerung, wenn du sie als Befehl verwendest, nicht wenn du sie in einer Antwort zitierst. Ein Speicherversprechen ersetzt keinen bestätigten Schreibvorgang. Bei Fehlern gilt die [Wiederherstellung](storage.md).
-
-## Später fortsetzen
-
-Lass den Coach im bestätigten privaten Arbeitsbereich Einstellungen, Lernstand und frühere Berichte lesen. Einen pausierten lokalen Lauf wählst du ausdrücklich aus; `resume` liefert Checkpoint und aktuellen Zustand. Abgeschlossene oder gestoppte Läufe bleiben Historie.
-
-Ohne Speicherung musst du Kontext erneut bereitstellen. Ein alter Chat, Anhang oder temporärer Cloud-Arbeitsbereich garantiert keine dauerhafte Speicherung.
-
-## Spezialisierte Abläufe
-
-Technische Interviews können Coding, Debugging, Code Review, SQL, Tests, Sicherheit, CI/CD, Betrieb und Systemdesign umfassen. Aufgaben sollen Ein-/Ausgaben, Grenzen, Laufzeit, Zeitrahmen und Bewertungskriterien nennen. Lösungen werden nicht vor deinem Versuch verraten.
-
-Code darf nur in einer geeigneten autorisierten isolierten Umgebung ausgeführt werden. Ohne sicheren Runner wird statisch geprüft und ausdrücklich „nicht ausgeführt“ vermerkt. Ein Modellurteil ersetzt keinen bestandenen Test.
-
-Für wiederholte gezielte Vorbereitung werden `jobs/<job-id>/job.md`, `research.md` und `preparation.md` wiederverwendet. Recherche enthält Quellen, Abrufdatum und `verified | inferred | unknown`; veraltete Fakten werden aktualisiert. Ein LinkedIn-Import ist nur als zukünftige Option beschrieben, nicht implementiert.
+Technische Rollen können Coding, Debugging, Review und Systemdesign üben; Code wird nur in sicherer, autorisierter Isolation ausgeführt, sonst als „nicht ausgeführt“ bewertet.

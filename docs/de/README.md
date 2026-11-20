@@ -17,13 +17,9 @@
 
 ## Quellen und Referenzen
 
-- [setup](../../skills/interview-coach/references/setup.md)
-- [training](../../skills/interview-coach/references/training.md)
-- [evaluation](../../skills/interview-coach/references/evaluation.md)
-- [research](../../skills/interview-coach/references/research.md)
-- [session-control](../../skills/interview-coach/references/session-control.md)
-- [technical-interview](../../skills/interview-coach/references/technical-interview.md)
-- [storage](../../skills/interview-coach/references/storage.md)
+- [Zielbild und Anforderungen (SCOPE.md)](../../SCOPE.md) · [Abnahmematrix](../acceptance.md) · [Architektur](../architecture.md)
+- Skills: [interview-coach](../../skills/interview-coach/SKILL.md) · [candidate-create](../../skills/candidate-create/SKILL.md) · [candidate-training](../../skills/candidate-training/SKILL.md) · [job-create](../../skills/job-create/SKILL.md) · [job-training](../../skills/job-training/SKILL.md)
+- Gemeinsame Referenzen: [setup](../../skills/_shared/references/setup.md) · [storage](../../skills/_shared/references/storage.md) · [runtime](../../skills/_shared/references/runtime.md) · [candidate-selection](../../skills/_shared/references/candidate-selection.md) · [cv-profile](../../skills/_shared/references/cv-profile.md) · [job-preparation](../../skills/_shared/references/job-preparation.md) · [training](../../skills/_shared/references/training.md) · [evaluation](../../skills/_shared/references/evaluation.md) · [research](../../skills/_shared/references/research.md) · [session-control](../../skills/_shared/references/session-control.md) · [technical-interview](../../skills/_shared/references/technical-interview.md)
 
 [Plugin-Manifest](../../plugin.json) · [MIT-Lizenz](../../LICENSE)
 

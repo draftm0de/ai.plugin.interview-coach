@@ -4,53 +4,60 @@
 
 [Home](../../README.en.md) · [Documentation](README.md) · [Install](installation.md) · [Use](usage.md) · [Examples](screens.md) · [FAQ](faq.md) · [Storage](storage.md) · [Development](development.md)
 
-## Set up
+## Entry points per host
 
-After [installation](installation.md), ask:
+All capabilities live in five skills of the same plugin. Natural language works in both hosts ("create a candidate", "prepare the ACME job"). Host-specific invocations are additionally documented:
 
-> Use interview-coach and run setup. I want to practise for a Team Lead ERP Platform role. Use English and do not save anything.
+| Task | Skill | Claude Code | Codex |
+|---|---|---|---|
+| Setup, status, routing | `interview-coach` | `/interview-coach:interview-coach setup` | `$interview-coach` or the skill picker |
+| Create a candidate | `candidate-create` | `/interview-coach:candidate-create` | `$candidate-create` |
+| General training | `candidate-training` | `/interview-coach:candidate-training` | `$candidate-training` |
+| Prepare a job | `job-create` | `/interview-coach:job-create` | `$job-create` |
+| Train for a saved job | `job-training` | `/interview-coach:job-training` | `$job-training` |
 
-The coach asks about storage before a path, confirms the interface/interview language and requests relevant profile information. For targeted preparation, supply your approved CV/profile and the job posting privately. Without a CV, general practice remains available; targeted preparation needs an approved profile. Original documents are stored only with permission. Known interviewers are optional; public professional information can help tailor preparation.
+The spellings follow each host's documentation and are **not** proven by isolated host runs in this repository (see [acceptance](../acceptance.md)). A native `:job-create` command without host support is not claimed. There is no automatic activation when a project opens: setup starts on first use or on an explicit `setup`.
 
-## Choose a workflow
+## 1. Set up
 
-| Mode | Example prompt | Feedback |
+> Start interview-coach setup. Use English.
+
+The coach offers exactly three storage options: **Local**, **Git** (private GitHub/GitLab repository), **Do not save**. It then asks for the path or repository and confirms the target. With Git, commits and pushes in the chosen repository are part of saving. Details: [Storage](storage.md).
+
+## 2. Create a candidate (`candidate-create`)
+
+Ask for the name → unique ID → "Is there a CV?".
+
+- **With a CV** (PDF, DOCX, Markdown): provide the file. The original stays byte-identical; a Markdown transfer and a profile are created. Gaps (images, unreadable pages, missing text layer) are disclosed and partial imports are not reported as done. If a tool is missing (e.g. for PDF: `pdftotext`, `mutool` or Python `pypdf`), the coach names exactly what is missing; nothing is installed and nothing invented.
+- **Without a CV**: the coach asks one question at a time (experience, education, skills, projects, goals), writes a CV draft marked as a draft plus a profile, and has you confirm the facts. Only then do they count as a verified basis; a draft can be saved and shown but is not reliable evidence. The job-specific comparison and profile-based training wait for your confirmation (posting intake, company research and general training do not).
+
+At the end you see the result, open points and the actual storage location. A project can hold several candidates, including equal names; the coach asks when a choice is ambiguous.
+
+## 3. General training (`candidate-training`)
+
+Choose the candidate → profile, learning state and earlier runs are loaded → one question per turn, aligned with skills, experience, role and goals. You get an **overall score x/10**, fitting criteria, strengths and improvements; wording suggestions use only facts you provided. Every saved session is its own immutable run, and the learning state changes only for the chosen candidate.
+
+## 4. Prepare a job (`job-create`)
+
+Choose the candidate → job link or upload (a link needs its retrieval date; if it is unreachable you provide text/upload) → company (if unclear) → known interview participants ("unknown" is allowed and blocks nothing) → public professional research with sources and dates, namesakes are clarified before attribution, no psychological profiles → requirement ↔ evidence/gap comparison → saved preparation with topics and open questions. A job belongs to one candidate and is reusable across trainings.
+
+## 5. Train for a job (`job-training`)
+
+Choose candidate and job → existing research is reused, time-sensitive facts refreshed when needed → questions and evaluation follow requirements, seniority and gaps → each session is its own run with candidate and job assignment. The cross-job learning state stays separate from job-specific fit gaps.
+
+## Modes and controls
+
+| Mode | Purpose | Feedback |
 |---|---|---|
-| `general` | “Practise common interview questions for a junior developer.” | After each answer |
-| `targeted` | “Prepare me for this vacancy using my CV and the employer's public information.” | After each answer |
-| `drill` | “Train decision ownership. Ask me to improve an unclear answer in my own words.” | Focused feedback and comparison |
-| `mock` | “Simulate a realistic interview and save the assessment until the end.” | At the end |
-| `briefing` | “Summarize verified employer facts, relevant examples and questions I can ask.” | Preparation summary; no answer scoring |
+| `general` | General training | after each answer |
+| `targeted` | Saved job | after each answer |
+| `drill` | One learning gap, second attempt | focused |
+| `mock` | Uninterrupted simulation | at the end |
+| `briefing` | Compact preparation | no answer scoring |
 
-Research requires available browsing tools. Facts, hypotheses and unknowns must remain distinct. Interviewer research is limited to relevant public professional information.
+- `stop` / `end` ends immediately without a second confirmation; for a stored candidate a partial run (`stopped_early`) is saved.
+- `pause` saves a checkpoint; continuing happens under a new run ID, only for the same candidate and job.
+- Interface and interview language are configurable separately.
+- Progress: only independent answers count; `improving` after two spontaneous successes in different scenarios, `stable` only after confirmation in a later run without coaching. Model answers are not evidence of competence.
 
-## Understand the output
-
-In coached modes, expect an overall **overall assessment x/10**, relevant individual criteria, supported strengths and concrete improvement suggestions. A natural spoken example is a suggestion, not evidence of your professional experience. Scores are qualitative and role-relative, not hiring probabilities.
-
-A second attempt can show that your answer improved after coaching. It is not an independent demonstration of stable competence. Learning status uses actual candidate answers, distinct scenarios and later confirmation. See the [evaluation contract](../../skills/interview-coach/references/evaluation.md).
-
-Learning status `improving` requires two spontaneous successful answers in distinct scenarios; `stable` requires confirmation in a later run without coaching. Relevant criteria usually number three to six; the overall score is not a mechanical average. Role-fit gaps remain separate from communication weaknesses.
-
-## Control the session
-
-- Say **stop**, **end**, **beenden** or **abbrechen** to end questioning immediately and receive a summary. With previously verified storage, a partial run is saved as `stopped_early`.
-- Say **pause** to request a checkpoint when persistent storage is available. On return, explicitly select the paused session to continue; no past question should silently count as answered.
-- Choose **Do not save** (`Nicht speichern`) to keep skill-managed coaching state within the conversation. No workspace, preference, report file or export is automatically created. Platform chat retention is separate.
-- Ask to change the interface language or practise in a different interview language; confirm preference changes before persistence.
-
-`finish` ends early while questions remain; after the planned final answer the status is `completed`. Quoted control words inside an answer are not commands. These are conversational controls. The agent must use the available tools and verify saves; saying “saved” is not a successful write. If persistence fails, keep the report and follow [recovery instructions](storage.md).
-
-## Return later
-
-With a verified private workspace, ask the coach to read its state, preferences and prior runs. For a paused local interview, the helper's `resume` command provides the checkpoint and current state; see [storage](storage.md). Stopped/completed runs are history, not resumable checkpoints.
-
-Without persistence, supply the context again. A hosted sandbox, previous chat or uploaded attachment alone is not a verified durable storage adapter.
-
-## Specialized workflows
-
-Ask for coding, debugging, code review, SQL, testing or system-design practice. Candidate code should only execute in an appropriate isolated sandbox. When execution is unavailable, the coach must distinguish static review from tested behavior.
-
-Technical tasks define inputs/outputs, constraints, runtime, timebox and criteria; the reference solution stays hidden until your attempt. Security, CI/CD and operations can also be practised.
-
-Repeated targeted preparation reuses `jobs/<job-id>/job.md`, `research.md` and `preparation.md`, with sources, retrieval dates and `verified | inferred | unknown` confidence. Refresh outdated facts. LinkedIn import is a future option, not an implemented feature.
+Technical roles can practice coding, debugging, review and system design; code is executed only in a safe, authorized isolation, otherwise it is evaluated as "not executed".

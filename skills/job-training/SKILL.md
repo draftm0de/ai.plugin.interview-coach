@@ -1,0 +1,21 @@
+---
+name: job-training
+description: Interview training for a saved job of one selected candidate — reuse stored posting, research and preparation, refresh time-sensitive facts, ask requirement- and seniority-aligned questions one at a time, evaluate the actual answers, and save each session as an immutable run linked to candidate and job.
+---
+
+# job-training
+
+Read (Read tool) `../_shared/references/candidate-selection.md`, `research.md`, `training.md`, `evaluation.md`, `session-control.md`, `runtime.md`, `storage.md` (in `../_shared/references/`).
+
+## Flow
+
+1. **Check the project, do not infer from the chat.** A missing storage statement in the conversation is not a missing storage decision. Unless the user explicitly chose **Nicht speichern** in this session, first run `project-show --project PROJECT` (one direct `python3` command with absolute paths). Only its result (no decision, unreachable or invalid target) sends you to setup; never tell the user that no storage was chosen without that check. This check is mandatory even when the user supplies the question and the answer in the same message. Then select the candidate (`candidate-resolve`), then the job (`job-list --candidate`; several jobs → ask; none → `job-create`). A stored job alone never means an earlier interview is in progress: continue only an explicitly selected `paused` checkpoint (`session-control.md`).
+2. Load profile (check `profile_reliable`: with a draft, ask the user to confirm the facts before they are used as facts; until then use only what the candidate states in the conversation), `job-show` (latest posting, research, match, preparation), candidate `status` and relevant runs. Reuse existing research; refresh only time-sensitive or missing facts and save refreshed facts as a new research snapshot with date and source. Report two kinds of open points separately: (a) job record gaps from `job-show` → `open_points` (company missing, participants pending/unverified) and (b) research gaps from the latest `research`/`preparation` snapshots (their **Unbekannt** parts, company research not done, unknown interviewers, no web research). An empty `open_points` list only means (a) is complete; it never means the job is fully researched.
+3. Mode: `targeted` (default), `drill`, `mock`, `briefing`. Align questions and evaluation with requirements, seniority, evidenced research and the candidate's gaps. One question per turn; evaluate the actual answer; mock feedback at the end. Technical roles: `technical-interview.md`.
+4. Save each session as its own immutable run with `finish --job-id JOB`. When the user supplied question and answer directly, that exchange is this session's content: after the checks in steps 1–2, evaluate it and save the question and answer as actually exchanged as the run of the selected candidate and job (stop → `stopped_early` with the real answered count, no invented plan), with `state.md` updated only from evidence in that answer. Say **gespeichert** only after `finish` exited 0 and its result was checked; report the actual error otherwise. If **Nicht speichern** was chosen explicitly, none of this runs. Pause/continue only the same candidate and job (`--resume-from`). Several runs per job are normal.
+5. Separate **cross-job learning state** (`state.md` of that candidate) from **job-specific fit gaps** (new `match` snapshot). Never write job-specific gaps into the shared state as general weaknesses. Apply the evidence classes of `job-preparation.md` step 7 in questions, feedback and match updates: an undocumented topic is *zu klären*, not a proven weakness; do not invent candidate facts.
+6. `stop` ends immediately without second confirmation. Report the real location; Git: `git-publish`, **remote gespeichert** only after success. Errors are shown with recovery or a new storage choice.
+
+## Nicht speichern
+
+Training and research stay in the conversation; no runtime call, no file, no export. A stop yields an in-chat summary. Do not promise reuse in a later chat.

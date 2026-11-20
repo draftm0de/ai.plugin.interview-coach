@@ -6,43 +6,33 @@
 
 ## Plattform auswählen
 
-Dieses Repository enthält **Interview Coach** (`interview-coach`), keinen eigenen Marketplace. Die enthaltene Skill-Kennung lautet ebenfalls `interview-coach`. Installationsquelle ist **Draftmode AI Plugins** (`draftmode-ai-plugins`): `https://github.com/draftm0de/ai.plugins`.
+Dieses Repository enthält **Interview Coach** (`interview-coach`) mit fünf Skills (`interview-coach`, `candidate-create`, `candidate-training`, `job-create`, `job-training`) und gemeinsamer Runtime unter `skills/_shared/`; es besitzt keinen eigenen Marketplace. Unterstützte Hosts: **Claude Code** und **Codex**. Installationsquelle ist **Draftmode AI Plugins** (`draftmode-ai-plugins`): `https://github.com/draftm0de/ai.plugins`. Ob die aktuelle Erweiterung dort veröffentlicht ist, ist nicht belegt; ein Repository-Import liefert den veröffentlichten Stand.
 
-Laut Nutzer sind beide Plugins im veröffentlichten Marketplace vorhanden. Die lokale Umbenennung des Skills zu `interview-coach` ist noch nicht veröffentlicht; ein Repository-Import liefert den veröffentlichten Stand. Die GUI-Abnahme der aktuellen Änderungen bleibt separat. Dein Account benötigt Zugriff auf beide Repositories.
+Voraussetzungen: Python 3.10+ für die Runtime; Git nur für den Git-Speicher (optional `gh`/`glab` zur Sichtbarkeitsprüfung); für PDF-Import `pdftotext`, `mutool` oder Python-`pypdf`. **Es wird nichts automatisch installiert**; fehlt etwas, nennt der Coach genau, was fehlt.
 
 ## Installieren
 
-### Claude Desktop
+### Claude Code
 
-1. Öffne **Einstellungen → Anpassungen → Plugins**.
-2. Wähle **+ Hinzufügen → Marketplace hinzufügen → Aus einem Repository hinzufügen**.
-3. Gib `https://github.com/draftm0de/ai.plugins` ein und klicke **Synchronisieren**.
-4. Wähle **Interview Coach** und installiere das Plugin.
-
-### Codex Desktop
-
-1. Öffne **User Icon → Settings → Integration → Plugins**.
-2. Wähle **+ Add → A Marketplace**.
-3. Gib `https://github.com/draftm0de/ai.plugins` ein und synchronisiere den Marketplace.
-4. Wähle **Interview Coach** und installiere das Plugin.
-
-### Optionale Terminal-Installation
-
-In einer Claude-Code-Terminal-Sitzung, nicht im Eingabefeld des Desktop-Code-Reiters:
+In einer Claude-Code-Sitzung:
 
 ```text
 /plugin marketplace add https://github.com/draftm0de/ai.plugins
 /plugin install interview-coach@draftmode-ai-plugins
 ```
 
-Für Codex CLI:
+Danach neue Sitzung öffnen. Einstieg: `/interview-coach:interview-coach setup` oder natürliche Sprache. Die weiteren Skills heißen `/interview-coach:candidate-create`, `…:candidate-training`, `…:job-create`, `…:job-training`. Claude Code findet sie als Verzeichnisse `skills/*/SKILL.md` im Plugin; `skills/_shared/` enthält keinen Skill. Der Claude-Desktop-Dialog (Einstellungen → Anpassungen → Plugins → Marketplace aus Repository hinzufügen) führt zum selben Marketplace; seine Abnahme ist nur teilweise belegt ([Beispiele](screens.md)).
+
+### Codex
 
 ```sh
 codex plugin marketplace add https://github.com/draftm0de/ai.plugins
 codex plugin add interview-coach@draftmode-ai-plugins
 ```
 
-Die technische Plugin-Kennung ist `interview-coach`; angezeigt wird **Interview Coach**. Kein ZIP, Tag oder eigener Katalog ist erforderlich. ChatGPT-Kontoimporte und Organisationsfreigaben sind separat zu prüfen.
+In Codex Desktop: Settings → Plugins → Marketplace hinzufügen → Interview Coach installieren. Das Manifest verweist auf `./skills/`; Einstieg per Skill-Erwähnung `$interview-coach` (Skills: `$candidate-create`, `$candidate-training`, `$job-create`, `$job-training`) oder natürliche Sprache.
+
+Die genauen Aufrufschreibweisen richten sich nach der jeweiligen Host-Version und sind in diesem Repository nicht durch einen isolierten Host-Lauf belegt ([Abnahme](../acceptance.md)). Kein ZIP, Tag oder eigener Katalog ist erforderlich.
 
 ## Aktualisieren
 
@@ -54,7 +44,7 @@ Entferne **Interview Coach** in der Plugin-Verwaltung. Private Trainingsdaten au
 
 ## Erste Nutzung prüfen
 
-Öffne einen neuen Chat und sende **„Start interview coach setup“**. Wähle Deutsch und **Nicht speichern**, übe mit einer fiktiven Frage und beende mit `stop`. Dauerhafte Speicherung benötigt einen freigegebenen privaten Arbeitsbereich und eine passende Python-Laufzeit im Host; siehe [Speicherung](storage.md). Internetrecherche benötigt Internetzugang.
+Öffne eine neue Sitzung und sende **„Starte die Einrichtung von interview-coach“**. Wähle Deutsch und **Nicht speichern**, übe mit einer fiktiven Frage und beende mit `stop`. Dauerhafte Speicherung (Lokal oder privates Git) benötigt ein Ziel, das du ausdrücklich bestätigst; siehe [Speicherung](storage.md). Internetrecherche benötigt Internetzugang.
 
 Prüfe beim Marketplace-Test, dass **Plugin Manager** und **Interview Coach** angeboten werden. [Entwicklung](development.md) · [Prüfstand](release-evidence.md).
 

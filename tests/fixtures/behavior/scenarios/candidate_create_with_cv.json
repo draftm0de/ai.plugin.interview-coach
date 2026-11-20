@@ -1,0 +1,73 @@
+{
+ "id": "candidate_create_with_cv",
+ "title": "Bewerberanlage mit CV",
+ "skills": [
+  "candidate-create"
+ ],
+ "context": "Host: Claude Code or Codex (simulated). Current project folder: {PROJECT}. Files live under {FILES}. This project already has local storage configured at {WS} (verified by project-show). Use --project {PROJECT} for runtime calls.",
+ "preset": {
+  "storage": "local"
+ },
+ "files": {
+  "cv.md": "# Erika Beispiel\n\n## Berufserfahrung\n- Backend-Entwicklerin, Muster GmbH, 2019-2024: Python-Services, PostgreSQL, Kubernetes-Betrieb\n\n## Ausbildung\n- BSc Informatik, Beispiel-Universität, 2018\n\n## Skills\nPython, Go, SQL\n"
+ },
+ "steps": [
+  {
+   "user": "Lege einen neuen Bewerber an.",
+   "must_contain_any": [
+    "Name",
+    "heißt",
+    "Namen"
+   ],
+   "must_not_contain": [
+    "Dateien selbst verwalten"
+   ]
+  },
+  {
+   "user": "Erika Beispiel",
+   "must_contain_any": [
+    "Lebenslauf",
+    "CV"
+   ],
+   "tools_include": [
+    "candidate-create"
+   ]
+  },
+  {
+   "user": "Ja, der Lebenslauf liegt unter {FILES}/cv.md",
+   "must_contain_any": [
+    "Lebenslauf",
+    "CV",
+    "Profil"
+   ],
+   "tools_include": [
+    "cv-import"
+   ],
+   "required_groups": [
+    [
+     "{WS}",
+     "Speicherort",
+     "gespeichert",
+     "lokal"
+    ]
+   ]
+  }
+ ],
+ "artifacts": [
+  {
+   "type": "count",
+   "glob": "ws/candidates/c-*/candidate.json",
+   "equals": 1
+  },
+  {
+   "type": "sha_equals",
+   "glob": "ws/candidates/*/cv/cv-001/original.md",
+   "file": "cv.md"
+  },
+  {
+   "type": "contains",
+   "glob": "ws/candidates/*/cv/cv-001/source.json",
+   "text": "original_sha256"
+  }
+ ]
+}

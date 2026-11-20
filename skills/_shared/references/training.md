@@ -2,9 +2,9 @@
 
 ## Planning
 
-- Read canonical state and at least the last two runs.
+- Select the candidate first (`candidate-selection.md`); read that candidate's `state.md`, profile and at least the last two relevant runs.
 - Define targeted competencies and a flexible question count (roughly 8–12 only as a starting point, not a fixed requirement).
-- For targeted mode, load reusable `jobs/<job-id>/job.md`, `research.md` and `preparation.md` before generating questions. Ask for missing interviewer names/functions once, without blocking when unknown.
+- For targeted mode, load the selected job's latest posting, research, match and preparation snapshots before generating questions. Ask for missing interviewer names/functions once, without blocking when unknown.
 - Adapt tone and assessment to role and seniority: leadership roles emphasize decisions, ownership, people and stakeholder outcomes; developer roles emphasize practical implementation and technical correctness. Use judgment rather than fixed quotas.
 - Mix role-fit/motivation, real behavioral examples, situational trade-offs, leadership, technical judgment at appropriate depth, stakeholder conflict, salary/location when relevant, and candidate questions.
 - For a specific job, ground most questions in vacancy expectations, research and CV evidence.
@@ -12,7 +12,7 @@
 
 ## Modes
 
-- `general`: long-term development regardless of employer.
+- `general`: long-term development regardless of employer; shaped by the candidate's skills, experience, role/seniority and goals from profile and learning state.
 - `targeted`: position- and stakeholder-informed coaching.
 - `drill`: repeated new scenarios for the top learning gap, second attempts mandatory on weak replies.
 - `mock`: full uninterrupted simulation; no model answers between questions, summarize at end.
@@ -24,7 +24,7 @@ After each candidate answer in coached modes, use the role-adapted feedback stru
 
 ## Early stop, pause and language
 
-Before asking the first question, load confirmed interface/interview languages from private `preferences.json`; use the interface language for all coach narration and feedback. Follow `references/session-control.md` for `stop`, `end`, `pause` and resumption. If the user ends early, summarize only the answers actually given, label the run `stopped_early` and persist it with updated state. No extra interview question and no second confirmation.
+Before asking the first question, load confirmed interface/interview languages from private `preferences.json`; use the interface language for all coach narration and feedback. Follow `references/session-control.md` for `stop`, `end`, `pause` and resumption. If the user ends early, summarize only the answers actually given, label the run `stopped_early` and persist it with updated state (that candidate only; pass the job with `--job-id` for job training). No extra interview question and no second confirmation.
 
 ## Ending
 

@@ -1,6 +1,6 @@
 {
   "name": "interview-coach",
-  "description": "Adaptive job interview coaching with role-specific practice, feedback, interviewer research and private training progress.",
+  "description": "Adaptive job interview coaching for Claude Code and Codex: several candidates per project, CV import, job preparation with public research, role-specific practice and evidence-based progress with private storage (local, private Git or none).",
   "author": {
     "name": "Peter Fux",
     "url": "https://draftmode.io"
@@ -13,7 +13,9 @@
     "Job Coach",
     "Jobs",
     "interviews",
-    "career"
+    "career",
+    "Claude Code",
+    "Codex"
   ],
   "displayName": "Interview Coach"
 }

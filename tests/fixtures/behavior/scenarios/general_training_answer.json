@@ -1,0 +1,67 @@
+{
+ "id": "general_training_answer",
+ "title": "Allgemeines Training mit eigener Antwort",
+ "skills": [
+  "candidate-training"
+ ],
+ "context": "Host: Claude Code or Codex (simulated). Current project folder: {PROJECT}. Files live under {FILES}. This project already has local storage configured at {WS} (verified by project-show). Use --project {PROJECT} for runtime calls.",
+ "preset": {
+  "storage": "local",
+  "candidates": [
+   {
+    "name": "Erika Beispiel",
+    "cv": "# Erika Beispiel\n\n## Berufserfahrung\n- Backend-Entwicklerin, Muster GmbH, 2019-2024: Python-Services, PostgreSQL, Kubernetes-Betrieb\n\n## Ausbildung\n- BSc Informatik, Beispiel-Universität, 2018\n\n## Skills\nPython, Go, SQL\n",
+    "profile": "# Profil Erika Beispiel\n- Backend-Entwicklerin, 5 Jahre Python (Quelle: CV)\n- Kubernetes-Betrieb (Quelle: CV)\n"
+   }
+  ]
+ },
+ "steps": [
+  {
+   "user": "Starte allgemeines Training für Erika Beispiel.",
+   "tools_include": [
+    "status"
+   ],
+   "tools_exclude": [
+    "finish"
+   ],
+   "judge": [
+    "one_question"
+   ]
+  },
+  {
+   "user": "Mein Beispiel dazu: Als Verantwortliche für unseren Python-Zahlungs-Service habe ich bei einem Produktionsausfall die Ursache in der Retry-Logik gefunden, zwischen Rollback und Hotfix abgewogen (den Hotfix habe ich wegen des Risikos verworfen), den Fix mit Regressionstest ausgerollt und den Support informiert. Ergebnis: Die Fehlerrate sank von 40 auf 2 Fälle pro Tag, in drei Monaten gab es keine Wiederholung.",
+   "tools_exclude": [
+    "finish"
+   ],
+   "evaluable": true,
+   "judge": [
+    "strengths",
+    "improvements",
+    "no_invention"
+   ]
+  },
+  {
+   "user": "stop",
+   "must_contain_any": [
+    "beendet",
+    "Zusammenfassung"
+   ],
+   "tools_include": [
+    "finish",
+    "stopped_early"
+   ]
+  }
+ ],
+ "artifacts": [
+  {
+   "type": "count",
+   "glob": "ws/candidates/c-*/runs/*.md",
+   "equals": 1
+  },
+  {
+   "type": "contains",
+   "glob": "ws/candidates/c-*/runs/*.md",
+   "text": "\"status\": \"stopped_early\""
+  }
+ ]
+}

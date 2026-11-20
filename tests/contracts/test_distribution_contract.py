@@ -34,24 +34,14 @@ class InstallationTests(unittest.TestCase):
         self.assertNotIn("make install-", readme)
 
 
-    def test_workspace_cli_bundled_and_in_sync(self):
-        bundled = SOURCE / "scripts/interview_workspace.py"
-        self.assertTrue(bundled.is_file())
-        self.assertFalse((ROOT / "scripts/interview_workspace.py").exists(), "Runtime belongs only in the distributable skill")
+    def test_workspace_runtime_is_shared_not_in_root_scripts(self):
+        self.assertTrue((ROOT / "skills/_shared/scripts/interview_workspace.py").is_file())
+        self.assertFalse((ROOT / "scripts/interview_workspace.py").exists(), "Runtime belongs only in the distributable skills")
+        self.assertFalse((SOURCE / "scripts").exists())
 
-    def test_storage_type_selection_precedes_path(self):
-        setup = (SOURCE / "references/setup.md").read_text()
-        self.assertIn("selection first, details second", setup)
-        self.assertIn("Do not require a path in the first reply", setup)
-        for choice in ("Lokales Verzeichnis", "Privates Git-Repository", "Dateien selbst verwalten", "Nicht speichern"):
-            self.assertIn(choice, setup)
-
-    def test_setup_confirmation_pattern(self):
-        text = (SOURCE / "references/setup.md").read_text()
-        for phrase in ("native choice/question tool", "weiterverwenden", "Wait for permission", "natural-language question"):
-            self.assertIn(phrase, text)
-
-    def test_setup_contract_present(self):
-        text = (SOURCE / "references/setup.md").read_text().lower()
-        for term in ("access verification", "cv", "linkedin", "local", "git", "chatgpt"):
-            self.assertIn(term, text)
+    def test_all_five_skills_declared_by_manifest_layout(self):
+        names = sorted(p.parent.name for p in (ROOT / "skills").glob("*/SKILL.md"))
+        self.assertEqual(["candidate-create", "candidate-training", "interview-coach", "job-create", "job-training"], names)
+        codex = json.loads((ROOT / ".codex-plugin/plugin.json").read_text())
+        self.assertEqual("./skills/", codex["skills"])
+        self.assertEqual("Interview Coach", codex["interface"]["displayName"])

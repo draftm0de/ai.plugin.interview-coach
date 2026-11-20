@@ -9,14 +9,14 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-SKILL = ROOT / "skills/interview-coach"
 
-def skill_context():
-    paths = [SKILL / "SKILL.md", SKILL / "references/training.md",
-             SKILL / "references/evaluation.md", SKILL / "references/session-control.md",
-             SKILL / "references/research.md", SKILL / "references/storage.md",
-             SKILL / "references/setup.md", SKILL / "references/technical-interview.md"]
-    return "\n\n".join(p.read_text(encoding="utf-8") for p in paths)
+def skill_context(skills=None):
+    """All public skill instructions plus shared references (what a host would load on demand)."""
+    shared = ROOT / "skills/_shared/references"
+    names = skills or ("interview-coach", "candidate-create", "candidate-training", "job-create", "job-training")
+    paths = [ROOT / "skills" / name / "SKILL.md" for name in names] + sorted(shared.glob("*.md"))
+    return "\n\n".join(f"=== {p.relative_to(ROOT)} ===\n" + p.read_text(encoding="utf-8") for p in paths)
+
 
 def check(case, output, exit_code=0):
     lower = output.casefold()
@@ -34,11 +34,16 @@ def check(case, output, exit_code=0):
     return errors
 
 def run(cli, prompt, timeout):
-    if cli == "codex":
-        cmd = ["codex", "exec", "--skip-git-repo-check", "--sandbox", "read-only", prompt]
-    else:
-        cmd = ["claude", "-p", prompt, "--output-format", "text"]
-    result = subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True, timeout=timeout, check=False)
+    """Text-only model call from an empty temporary directory: host tools disabled, no session persistence."""
+    import tempfile
+    with tempfile.TemporaryDirectory(prefix="coach-behavior-") as workdir:
+        if cli == "codex":
+            cmd = ["codex", "exec", "--skip-git-repo-check", "--ephemeral", "--ignore-user-config", "--ignore-rules",
+                   "--sandbox", "read-only", "-C", workdir, prompt]
+        else:
+            cmd = ["claude", "-p", prompt, "--output-format", "text", "--tools", "", "--no-session-persistence",
+                   "--disable-slash-commands", "--strict-mcp-config", "--setting-sources", "project"]
+        result = subprocess.run(cmd, cwd=workdir, text=True, capture_output=True, timeout=timeout, check=False)
     return result.returncode, result.stdout, result.stderr
 
 def main():

@@ -1,0 +1,68 @@
+{
+ "id": "job_training_insufficient_answer",
+ "title": "Unzureichende Antwort: Rückfrage statt erfundener Bewertung",
+ "skills": [
+  "job-training"
+ ],
+ "context": "Host: Claude Code or Codex (simulated). Current project folder: {PROJECT}. Files live under {FILES}. This project already has local storage configured at {WS} (verified by project-show). Use --project {PROJECT} for runtime calls.",
+ "preset": {
+  "storage": "local",
+  "candidates": [
+   {
+    "name": "Erika Beispiel",
+    "cv": "# Erika Beispiel\n\n## Berufserfahrung\n- Backend-Entwicklerin, Muster GmbH, 2019-2024: Python-Services, PostgreSQL, Kubernetes-Betrieb\n\n## Ausbildung\n- BSc Informatik, Beispiel-Universität, 2018\n\n## Skills\nPython, Go, SQL\n",
+    "profile": "# Profil Erika Beispiel\n- Backend-Entwicklerin, 5 Jahre Python (Quelle: CV)\n- Kubernetes-Betrieb (Quelle: CV)\n"
+   }
+  ],
+  "jobs": [
+   {
+    "title": "Senior Backend Engineer",
+    "company": "Beispiel AG",
+    "posting": "# Senior Backend Engineer (m/w/d)\nBeispiel AG, Zürich\nAufgaben: Entwicklung von Python-APIs, Betrieb auf Kubernetes, Mentoring.\nAnforderungen: 5+ Jahre Python, Erfahrung mit Cloud-Betrieb, Teamarbeit.\n",
+    "research": "Fakt: Beispiel AG betreibt Python-Plattform auf Kubernetes (Quelle: example.com/beispiel-ag/ueber-uns, 2026-11-01).",
+    "participants_unknown": true
+   }
+  ]
+ },
+ "steps": [
+  {
+   "user": "Trainiere mich für die Stelle bei der Beispiel AG (Erika Beispiel).",
+   "tools_include": [
+    "job-show"
+   ],
+   "tools_exclude": [
+    "finish"
+   ],
+   "judge": [
+    "one_question",
+    "reuses_research"
+   ]
+  },
+  {
+   "user": "Ich würde das Ganze irgendwie strukturiert angehen und mit allen reden.",
+   "needs_evidence": true,
+   "judge": [
+    "reason",
+    "followup",
+    "single_followup",
+    "score_cautious",
+    "no_invention"
+   ],
+   "tools_exclude": [
+    "finish"
+   ]
+  },
+  {
+   "user": "stop",
+   "must_contain_any": [
+    "beendet",
+    "Zusammenfassung",
+    "Training"
+   ],
+   "tools_attempted": [
+    "finish"
+   ]
+  }
+ ],
+ "artifacts": []
+}

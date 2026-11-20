@@ -9,7 +9,7 @@ CASE ?=
 OUT ?= .tmp/tests/behavior/$(CLI)
 JOURNEY ?= teamlead_coaching
 
-.PHONY: help test test-unit test-contracts test-behavior test-journey test-smoke test-list check-plugin sync-plugin
+.PHONY: help test test-unit test-contracts test-behavior test-journey test-smoke test-scenarios test-host test-research test-list check-plugin sync-plugin
 
 help:
 	@echo 'Tests: test (unit + integration + contracts), test-unit, test-integration, test-contracts, test-native, test-behavior'
@@ -18,6 +18,9 @@ help:
 	@echo "make test-list             List behavior scenarios"
 	@echo "make test-behavior         LLM simulations (CLI=codex|claude; optional CASE=id)"
 	@echo "make test-journey          Scripted multi-step coaching test (CLI=codex|claude)"
+	@echo "make test-scenarios       Multi-step model scenarios with restricted tool channel (CLI=codex|claude; optional SCENARIO=id)"
+	@echo "make test-host              Native host acceptance in a temporary project (CLI=claude|codex)"
+	@echo "make test-research          Native live-web research acceptance with a real public posting (CLI=claude|codex)"
 	@echo "make test-smoke            Basic LLM smoke checks (CLI=codex|claude)"
 
 # Test layers: deterministic checks by default; native/model tests are explicit.
@@ -34,6 +37,15 @@ test-behavior:
 
 test-journey:
 	$(PYTHON) tests/behavior/run_journey.py --cli $(CLI) --journey $(JOURNEY) --output-dir .tmp/tests/journey/$(CLI)/$(JOURNEY)
+
+test-scenarios:
+	$(PYTHON) tests/behavior/run_scenarios.py --cli $(CLI) $(if $(SCENARIO),--scenario $(SCENARIO),) --output-dir .tmp/tests/scenarios/$(CLI)
+
+test-host:
+	$(PYTHON) tests/native/run_native.py --host $(CLI) $(if $(ONLY),--only $(ONLY),) --output .tmp/tests/native/$(CLI).json
+
+test-research:
+	$(PYTHON) tests/native/run_native.py --host $(CLI) --research --output .tmp/tests/native/$(CLI)-research.json
 
 test-smoke:
 	$(PYTHON) tests/behavior/run_smoke.py --cli $(CLI) --output-dir .tmp/tests/smoke/$(CLI)

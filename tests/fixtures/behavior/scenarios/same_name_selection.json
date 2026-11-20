@@ -1,0 +1,49 @@
+{
+ "id": "same_name_selection",
+ "title": "Auswahl zwischen gleichnamigen Bewerbern",
+ "skills": [
+  "candidate-training"
+ ],
+ "context": "Host: Claude Code or Codex (simulated). Current project folder: {PROJECT}. Files live under {FILES}. This project already has local storage configured at {WS} (verified by project-show). Use --project {PROJECT} for runtime calls.",
+ "preset": {
+  "storage": "local",
+  "candidates": [
+   {
+    "name": "Erika Beispiel",
+    "profile": "# Profil Erika (A) Beispiel\n- Backend-Entwicklerin, 5 Jahre Python (Quelle: CV)\n- Kubernetes-Betrieb (Quelle: CV)\n"
+   },
+   {
+    "name": "Erika Beispiel",
+    "profile": "# Profil\n- Produktmanagerin, 8 Jahre (Quelle: Nutzerangabe)\n"
+   }
+  ]
+ },
+ "steps": [
+  {
+   "user": "Ich möchte allgemeines Training für Erika Beispiel.",
+   "must_contain_any": [
+    "welche",
+    "welcher",
+    "Welche",
+    "Welcher",
+    "zwei",
+    "mehrere"
+   ],
+   "tools_include": [
+    "candidate-"
+   ],
+   "tools_exclude": [
+    "finish"
+   ]
+  },
+  {
+   "user": "Die Produktmanagerin bitte (die zweite).",
+   "must_contain_any": [
+    "?"
+   ],
+   "tools_exclude": [
+    "finish"
+   ]
+  }
+ ]
+}

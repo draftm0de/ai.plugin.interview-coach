@@ -1,0 +1,100 @@
+{
+ "id": "stop_pause_resume",
+ "title": "Stop, Pause und Fortsetzung",
+ "skills": [
+  "candidate-training"
+ ],
+ "context": "Host: Claude Code or Codex (simulated). Current project folder: {PROJECT}. Files live under {FILES}. This project already has local storage configured at {WS} (verified by project-show). Use --project {PROJECT} for runtime calls.",
+ "preset": {
+  "storage": "local",
+  "candidates": [
+   {
+    "name": "Erika Beispiel",
+    "cv": "# Erika Beispiel\n\n## Berufserfahrung\n- Backend-Entwicklerin, Muster GmbH, 2019-2024: Python-Services, PostgreSQL, Kubernetes-Betrieb\n\n## Ausbildung\n- BSc Informatik, Beispiel-Universität, 2018\n\n## Skills\nPython, Go, SQL\n",
+    "profile": "# Profil Erika Beispiel\n- Backend-Entwicklerin, 5 Jahre Python (Quelle: CV)\n- Kubernetes-Betrieb (Quelle: CV)\n"
+   }
+  ]
+ },
+ "steps": [
+  {
+   "user": "Starte allgemeines Training für Erika Beispiel, geplant sind 4 Fragen.",
+   "judge": [
+    "one_question"
+   ],
+   "tools_exclude": [
+    "finish"
+   ]
+  },
+  {
+   "user": "Mein Beispiel dazu: Als Verantwortliche für unseren Python-Zahlungs-Service habe ich bei einem Produktionsausfall die Ursache in der Retry-Logik gefunden, zwischen Rollback und Hotfix abgewogen (den Hotfix habe ich wegen des Risikos verworfen), den Fix mit Regressionstest ausgerollt und den Support informiert. Ergebnis: Die Fehlerrate sank von 40 auf 2 Fälle pro Tag, in drei Monaten gab es keine Wiederholung.",
+   "evaluable": true,
+   "judge": [
+    "strengths",
+    "improvements",
+    "no_invention"
+   ],
+   "tools_exclude": [
+    "finish"
+   ]
+  },
+  {
+   "user": "pause",
+   "tools_include": [
+    "finish",
+    "paused"
+   ]
+  },
+  {
+   "user": "Setze das pausierte Training fort.",
+   "tools_include": [
+    "resume"
+   ],
+   "judge": [
+    "one_question"
+   ]
+  },
+  {
+   "user": "Zu deiner letzten Frage, ganz konkret mit einem Beispiel: Situation – nach einem Release stieg die Antwortzeit unseres Python-Services stark an. Meine Aufgabe – ich war für die Diagnose und die Entscheidung verantwortlich. Meine Entscheidung – ich habe zwischen Rollback und Hotfix abgewogen und den Hotfix verworfen, weil er ohne Regressionstest in den Zahlungsfluss eingegriffen hätte. Ergebnis – nach dem Rollback sank die Antwortzeit von 2,1 s auf 0,4 s, und wir haben den Fix danach mit Test nachgeliefert.",
+   "evaluable": true,
+   "judge": [
+    "strengths",
+    "improvements",
+    "no_invention"
+   ],
+   "tools_exclude": [
+    "finish"
+   ]
+  },
+  {
+   "user": "stop",
+   "tools_include": [
+    "finish",
+    "stopped_early",
+    "--resume-from"
+   ]
+  }
+ ],
+ "artifacts": [
+  {
+   "type": "run_field",
+   "equals": {
+    "status": "paused",
+    "planned_count": 4,
+    "answered_count": 1,
+    "resume_from": null
+   }
+  },
+  {
+   "type": "continuation"
+  },
+  {
+   "type": "unchanged_since_step",
+   "step": 3
+  },
+  {
+   "type": "count",
+   "glob": "ws/candidates/*/runs/*.md",
+   "equals": 2
+  }
+ ]
+}

@@ -6,43 +6,33 @@
 
 ## Choose your platform
 
-This repository contains **Interview Coach** (`interview-coach`), with no marketplace of its own. Its bundled skill identity is also `interview-coach`. Install through **Draftmode AI Plugins** (`draftmode-ai-plugins`): `https://github.com/draftm0de/ai.plugins`.
+This repository contains **Interview Coach** (`interview-coach`) with five skills (`interview-coach`, `candidate-create`, `candidate-training`, `job-create`, `job-training`) and a shared runtime under `skills/_shared/`; it has no marketplace of its own. Supported hosts: **Claude Code** and **Codex**. The installation source is **Draftmode AI Plugins** (`draftmode-ai-plugins`): `https://github.com/draftm0de/ai.plugins`. Whether the current extension is published there is not evidenced; a repository import delivers the published state.
 
-The user confirms both plugins are in the published marketplace. The local skill rename to `interview-coach` is not yet published; repository import delivers the published content. GUI acceptance of the current changes remains separate. Your account needs access to both repositories.
+Prerequisites: Python 3.10+ for the runtime; Git only for Git storage (optionally `gh`/`glab` for the visibility check); `pdftotext`, `mutool` or Python `pypdf` for PDF import. **Nothing is installed automatically**; if something is missing the coach names exactly what.
 
 ## Install
 
-### Claude Desktop
+### Claude Code
 
-1. Open **Settings → Customizations → Plugins**.
-2. Select **+ Add → Add marketplace → Add from a repository**.
-3. Enter `https://github.com/draftm0de/ai.plugins` and select **Sync**.
-4. Select **Interview Coach** and install the plugin.
-
-### Codex Desktop
-
-1. Open **User Icon → Settings → Integration → Plugins**.
-2. Select **+ Add → A Marketplace**.
-3. Enter `https://github.com/draftm0de/ai.plugins` and sync the marketplace.
-4. Select **Interview Coach** and install the plugin.
-
-### Optional terminal installation
-
-Inside a Claude Code terminal session, not the Desktop Code tab input:
+Inside a Claude Code session:
 
 ```text
 /plugin marketplace add https://github.com/draftm0de/ai.plugins
 /plugin install interview-coach@draftmode-ai-plugins
 ```
 
-For Codex CLI:
+Then open a new session. Entry: `/interview-coach:interview-coach setup` or natural language. The other skills are `/interview-coach:candidate-create`, `…:candidate-training`, `…:job-create`, `…:job-training`. Claude Code finds them as `skills/*/SKILL.md` directories in the plugin; `skills/_shared/` holds no skill. The Claude Desktop dialog (Settings → Customize → Plugins → add marketplace from repository) leads to the same marketplace; its acceptance is only partly evidenced ([examples](screens.md)).
+
+### Codex
 
 ```sh
 codex plugin marketplace add https://github.com/draftm0de/ai.plugins
 codex plugin add interview-coach@draftmode-ai-plugins
 ```
 
-The technical plugin identity is `interview-coach`; the display name is **Interview Coach**. No ZIP, tag or separate catalog is required. ChatGPT account imports and organization permissions require separate acceptance.
+In Codex Desktop: Settings → Plugins → add marketplace → install Interview Coach. The manifest points to `./skills/`; entry by skill mention `$interview-coach` (skills: `$candidate-create`, `$candidate-training`, `$job-create`, `$job-training`) or natural language.
+
+The exact invocation spellings depend on the host version and are not proven by an isolated host run in this repository ([acceptance](../acceptance.md)). No ZIP, tag or catalog of its own is required.
 
 ## Update
 
@@ -54,7 +44,7 @@ Remove **Interview Coach** in plugin settings. Keep private training data outsid
 
 ## Verify first use
 
-Open a new chat and send **“Start interview coach setup”**. Select English and **Do not save**, practice with a fictional question and finish with `stop`. Persistent storage needs an authorized private workspace and a compatible Python runtime in the host; see [Storage](storage.md). Internet research requires internet access.
+Open a new session and send **“Start interview-coach setup”**. Select English and **Do not save**, practice with a fictional question and finish with `stop`. Persistent storage (Local or private Git) needs a target you explicitly confirm; see [Storage](storage.md). Internet research requires internet access.
 
 Check that both **Plugin Manager** and **Interview Coach** are offered by the marketplace. [Development](development.md) · [Evidence](release-evidence.md).
 

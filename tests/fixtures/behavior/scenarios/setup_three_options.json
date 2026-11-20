@@ -1,0 +1,70 @@
+{
+ "id": "setup_three_options",
+ "title": "Erstsetup mit drei Optionen",
+ "skills": [
+  "interview-coach"
+ ],
+ "context": "Host: Claude Code or Codex (simulated). Current project folder: {PROJECT}. Uploaded/accessible files live under {FILES}. No storage decision has been made for this project yet.",
+ "steps": [
+  {
+   "user": "Ich möchte ein Interview üben.",
+   "must_contain_any": [
+    "Lokal"
+   ],
+   "required_groups": [
+    [
+     "Lokal"
+    ],
+    [
+     "Git"
+    ],
+    [
+     "Nicht speichern"
+    ]
+   ],
+   "must_not_contain": [
+    "Dateien selbst verwalten",
+    "Wie lautet der Pfad",
+    "Wie lautet die Repository-URL"
+   ],
+   "tools_exclude": [
+    "project-init",
+    "candidate-create"
+   ]
+  },
+  {
+   "user": "Lokal.",
+   "must_contain_any": [
+    "Pfad",
+    "Verzeichnis",
+    "Ordner"
+   ],
+   "tools_exclude": [
+    "project-init"
+   ]
+  },
+  {
+   "user": "Ja, bitte lokal in {WS} speichern. Das ist bestätigt.",
+   "must_contain_any": [
+    "{WS}",
+    "eingerichtet",
+    "Einrichtung",
+    "gespeichert",
+    "angelegt"
+   ],
+   "tools_include": [
+    "project-init"
+   ]
+  }
+ ],
+ "artifacts": [
+  {
+   "type": "exists",
+   "glob": "ws/workspace.json"
+  },
+  {
+   "type": "exists",
+   "glob": "cfg/*.json"
+  }
+ ]
+}

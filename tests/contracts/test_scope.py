@@ -4,19 +4,27 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 
+
 class ScopeContractTests(unittest.TestCase):
-    def test_confirmed_requirements_have_existing_public_evidence(self):
+    def test_confirmed_requirements_have_existing_public_evidence_pointers(self):
         text = (ROOT / 'SCOPE.md').read_text()
         sections = re.split(r'(?m)^## R\d+:', text)[1:]
-        self.assertEqual(len(sections), 9)
-        for section in sections:
-            self.assertIn('Status: confirmed', section)
-            self.assertIn('Acceptance:', section)
+        ids = re.findall(r'(?m)^## (R\d+):', text)
+        self.assertEqual([f'R{i}' for i in range(1, 20)], ids)
+        for identifier, section in zip(ids, sections):
+            self.assertIn('Status: confirmed', section, identifier)
+            self.assertIn('Acceptance:', section, identifier)
             for kind in ('Source', 'Test'):
                 paths = re.findall(r'^' + kind + r': (.+)$', section, re.M)
-                self.assertTrue(paths)
-                for name in paths:
-                    self.assertNotIn('..', Path(name).parts)
-                    self.assertTrue((ROOT / name).is_file(), name)
-        for name in ('AGENTS.md', 'CLAUDE.md', 'docs/architecture.md'):
-            self.assertTrue((ROOT / name).is_file())
+                self.assertTrue(paths, f'{identifier}: {kind}')
+            for name in re.findall(r'^(?:Source|Test|Fixture): (.+)$', section, re.M):
+                self.assertNotIn('..', Path(name).parts)
+                self.assertTrue((ROOT / name).is_file(), f'{identifier}: {name}')
+        for name in ('AGENTS.md', 'CLAUDE.md', 'docs/architecture.md', 'docs/acceptance.md'):
+            self.assertTrue((ROOT / name).is_file(), name)
+
+    def test_scope_names_both_hosts_three_options_and_no_fourth_mode(self):
+        text = (ROOT / 'SCOPE.md').read_text()
+        for term in ('Claude Code', 'Codex', 'genau drei Speicheroptionen', 'mehrere', 'Git-Speicherablauf'):
+            self.assertIn(term, text)
+        self.assertNotRegex(text, r'vier Speicheroptionen')

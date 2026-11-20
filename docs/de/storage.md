@@ -4,85 +4,68 @@
 
 [Start](../../README.md) · [Dokumentation](README.md) · [Installation](installation.md) · [Nutzung](usage.md) · [Beispiele](screens.md) · [FAQ](faq.md) · [Speicherung](storage.md) · [Entwicklung](development.md)
 
-## Speichermodell
+Die maßgebliche Beschreibung steht in [storage.md der Skills](../../skills/_shared/references/storage.md); diese Seite erklärt sie für Nutzer.
 
-Der Python-Helfer implementiert ausschließlich lokale Speicherung. Der private Arbeitsbereich enthält:
+## Drei Speicheroptionen
+
+Beim ersten Gebrauch (oder mit `setup`) fragt der Coach zuerst nach der Speicherart und danach nach dem konkreten Ziel. Der aktuelle Projektordner darf vorgeschlagen werden, wird aber nie ungefragt Speicherziel.
+
+| Option | Bedeutung |
+|---|---|
+| **Lokal** | Ein von dir benanntes, dauerhaft zugängliches Verzeichnis. Lese-/Schreibrechte werden vor der Einrichtung geprüft. |
+| **Git** | Ein ausdrücklich genanntes **privates** GitHub- oder GitLab-Repository. Speichern heißt: Änderungen werden im gewählten Repository committed und gepusht. |
+| **Nicht speichern** | Nichts wird persistiert: keine Dateien, Zeiger, Sperren, Journale, Exporte, CV-Kopien, Stellen, Runs oder Lernstände. Mehrere Bewerber und Stellen bleiben nur im Chat unterscheidbar; ein späterer Chat kennt sie nicht. `stop` liefert eine Zusammenfassung im Chat. |
+
+„Dateien selbst verwalten“ gibt es nicht mehr, weder als Modus noch als Fallback. Bei Speicherfehlern zeigt der Coach den Fehler und bietet Wiederherstellung oder eine neue Speicherwahl an; er exportiert nichts ungefragt und wechselt den Modus nicht.
+
+## Projektbezogene Zuordnung
+
+Jeder Projektordner hat einen eigenen Zeiger auf sein Speicherziel (`~/.config/zyris/interview-coach/projects/<hash>.json` bzw. unter `$XDG_CONFIG_HOME`). Zwei Projekte schalten einander nicht um, ein Wechsel des Ziels braucht eine ausdrückliche Bestätigung (`--switch`). Alte globale Zeiger werden weder gesucht noch gelesen.
+
+## Datenstruktur (Format 3)
 
 ```text
-workspace/
-  README.md
-  state.md
-  candidate/profile.md
-  jobs/<job-id>/job.md
-  jobs/<job-id>/research.md
-  jobs/<job-id>/preparation.md
-  runs/
-  preferences.json
+<Speicherziel>/
+  workspace.json  preferences.json  README.md  .gitignore
+  candidates/<candidate-id>/
+    candidate.json  profile.md  profile-history/NNN.md  state.md
+    cv/cv-NNN/{original.<ext>, extracted.md, source.json}
+    jobs/<job-id>/{job.json, postings/, research/, match/, preparation/}
+    runs/<run-id>.md
+  .journal/      (Sperren/Journale/Staging, geschützt, nicht in Git)
 ```
 
-`preferences.json` entsteht bei bestätigter Sprachspeicherung. Ein Original-Lebenslauf ist optional und benötigt Zustimmung. Alternative Workspace-Pfadzuordnungen werden nicht unterstützt. Reale Kandidatendaten gehören nie in dieses öffentliche Repository.
+- **Bewerber-IDs** (`c-erika-beispiel-3f9a1c2b`) sind stabil und eindeutig; gleiche Namen sind erlaubt. Namen sind Daten und werden nie zu Pfaden.
+- **CV**: Das Original bleibt bytegleich (SHA-256 in `source.json`); `extracted.md` bildet den Inhalt ab, nicht das Layout. Status `complete` oder `partial` (Lücken wie Bilder, nicht lesbare Seiten, Kopf-/Fußzeilen, fehlende Textebene). Teilimporte gelten nicht als fertig.
+- **Profil**: `missing`, `draft` oder `confirmed`. Bestätigt gilt es erst, nachdem du die fachlichen Angaben bestätigt hast. Quelle der Aussagen (CV, Nutzerangabe, Modellvorschlag) bleibt erkennbar.
+- **Stellen** gehören genau einem Bewerber. Ausschreibung, Recherche (mit Quellen und Abrufdatum), Abgleich und Vorbereitung sind fortlaufend nummerierte Snapshots; frühere Stände und die Original-Ausschreibung bleiben erhalten.
+- **Runs** sind unveränderlich; der Kopf nennt `candidate_id` und optional `job_id`. Der **Lernstand** (`state.md`) gilt pro Bewerber und bewerberübergreifend über Stellen; stellenspezifische Passungslücken stehen im `match`-Snapshot der Stelle.
 
-Für private GitHub-/GitLab-Arbeitsbereiche braucht der Agent einen autorisierten Connector oder eine separat authentifizierte Git-CLI. Schreibvorgänge müssen ausdrücklich ausgeführt und verifiziert werden; der Python-Helfer bietet keine entfernte Git-Speicherung.
+## Git im Detail
 
-In ChatGPT können Dateien als Anhänge oder Projektdateien bereitgestellt werden. Fehlt eine dauerhaft beschreibbare Schnittstelle, muss der Agent vollständige aktualisierte Dateien zum manuellen Speichern liefern. Ein Anhang ist kein automatisch beschreibbarer Speicher.
+- Nur `github.com` und `gitlab.com`. Es werden keine Tokens oder Passwörter erfragt oder gespeichert; Zugriff nutzt dein vorhandenes `git`/`gh`/`glab` oder einen autorisierten Connector.
+- Vor der Einrichtung werden Lesezugriff, **privater** Status und Schreibrecht für genau dieses Repository bestätigt (über `gh`/`glab` oder eine Connector-Bestätigung, die das Repository nennt und deine Bestätigung trägt). Eine Connector-Bestätigung ist ein weitergereichter Hinweis, kein unabhängiger Beweis; sie wird nie als Nachweis gespeichert und bei jedem Setup/Publish neu verlangt. Ein Wechsel von Ziel, Speicherart oder Repository wird vor jeder Änderung geprüft und braucht `--switch`. Es gibt keinen Test-Commit zur Rechteprüfung.
+- Jeder Speichervorgang verlangt zuerst einen **sauberen** Git-Arbeitsbaum (keine gestagten, geänderten oder fremden Dateien, auch nicht in verwalteten Ordnern) und committet danach genau seine eigenen Änderungen lokal. Unerwartete Änderungen brechen ab; nichts wird gestasht, zurückgesetzt oder veröffentlicht – du klärst sie selbst. Alle Speicher- und Veröffentlichungsvorgänge laufen unter einer gemeinsamen kooperativen Git-Workspace-Sperre (auch bei verschiedenen Bewerbern); committet werden nur die Pfade, die der Vorgang selbst geschrieben hat, per ausdrücklichem Pfad (nie `git add -A`); Reste eines fehlgeschlagenen Vorgangs werden mit SHA-256 festgehalten und nur bei unverändertem Inhalt fortgesetzt, unbekannte Journalformate nie. `git-pull`/`git-status` nutzen dieselbe Sperre. Gestagte Änderungen jeder Art (auch unter `.journal/`) werden nie ausgeblendet und brechen Speichern und Veröffentlichen mit den betroffenen Pfaden ab (nichts wird automatisch entstagt, gelöscht oder zurückgesetzt); unveröffentlichte Commits mit `.journal`- (oder alten `.zyris`-)Pfadsegmenten werden nicht gepusht. Nicht geschützt: Programme, die die kooperative Sperre ignorieren. `git-publish` stagt nie selbst: Es prüft erneut Privatheit und Schreibrecht und dass `origin` (Fetch- und Push-URL) weiterhin genau das autorisierte Repository bzw. die beim Setup festgehaltenen URLs bezeichnet (mehrere Push-Ziele, abweichende `pushurl`, jedes Ziel ohne beweisbare Identität des autorisierten Repositorys – etwa per `insteadOf` auf einen lokalen Pfad umgeleitet → Abbruch vor jedem Schreiben, ohne Remote-Umkonfiguration und ohne Ausnahme-Schalter), arbeitet Fremdänderungen per Rebase ein, pusht **ohne Force** und prüft den Remote-Stand am Push-Ziel (ein passender Stand am Fetch-Ziel beweist nichts). Erst dann meldet der Coach **remote gespeichert**. Eine nur lokale Änderung oder ein Commit ist kein Remote-Erfolg.
+- Konflikt in derselben Datei, abgelehnter oder unterbrochener Push, fehlende Rechte oder nicht bestätigter Remote-Stand enden in einem Fehler; lokale Commits bleiben, fremde Änderungen werden nicht überschrieben.
+- Zu Sitzungsbeginn holt `git-pull` Fremdänderungen (nur Fast-Forward).
+- Grenzen: Die Zuordnung eigener Änderungen setzt voraus, dass während eines Speichervorgangs niemand anderes im Arbeitsbaum schreibt. Die Runtime koordiniert, wann ein Speichern als remote erfolgreich gilt; Transport und Anmeldung liegen bei externen Werkzeugen. Ein Provider-SDK gibt es nicht. Live-Verhalten gegen GitHub/GitLab ist nicht getestet (siehe [Abnahme](../acceptance.md)).
 
-## Einrichtung und Konfiguration
+## Fehler und Wiederherstellung (lokal und Git-Arbeitskopie)
 
-Für lokale Speicherung brauchst du Python 3.10+ und ein beschreibbares lokales Verzeichnis; Git ist nicht erforderlich. Ersetze `<installed-skill-directory>` durch das tatsächliche Skill-Verzeichnis:
+Jeder Bewerber hat eigene Sperre und eigenes Journal. Ein Lauf wird erst nach Inhaltsprüfung als gespeichert gemeldet. Bericht und Lernstand sind keine gemeinsam atomare Mehrdatei-Transaktion; `.journal/pending.json` hält die Absicht fest.
 
-```bash
-python3 <installed-skill-directory>/scripts/interview_workspace.py init --path ~/interview-workspace
-python3 <installed-skill-directory>/scripts/interview_workspace.py status
-python3 <installed-skill-directory>/scripts/interview_workspace.py validate
-```
+- Ausstehendes Journal → `recover`; Konflikte mit externen Änderungen manuell lösen, Journal behalten.
+- Kein Journal, Schreibfehler → Ursache beheben, gleiche Run-ID mit ursprünglichem State-Hash wiederholen.
+- Inhalte vorhanden, Dauerhaftigkeit unbestätigt → prüfen, nicht überschreiben, keinen zweiten Lauf anlegen.
+- „busy“ → warten, `.journal/lock` nicht löschen. „stale state“ → neu lesen und inhaltlich abgleichen.
+- Unterbrochene Bewerber- oder Stellenanlage bleibt ein nicht nutzbarer Entwurf (`creating`); `candidate-recover` schließt ihn ab, ohne Vorhandenes zu überschreiben. Unterbrochenes CV-Staging unter `.journal/stage-*` wird nie automatisch gelöscht.
 
-Der Zeiger liegt in `~/.config/zyris/interview-coach/config.json` oder unter `$XDG_CONFIG_HOME/zyris/interview-coach/config.json`. Er wird nicht zu ChatGPT synchronisiert. `init` erhält vorhandene Dateien; `init --path NEW_PATH --force` wechselt nur den Zeiger. Die globale Option `--config PATH` steht vor dem Unterbefehl, und ihre Datei muss außerhalb des Arbeitsbereichs liegen. Nur der aktuelle Konfigurationspfad wird gelesen; ältere Zeiger bleiben unberührt und werden weder gesucht noch migriert.
+## Das Verzeichnis `.journal`
 
-Nach Bestätigung speichert `set-language --interface de --interview en` die Bedien- und Interviewsprache; andere Einstellungsschlüssel bleiben erhalten.
+`.journal/` ist geschützte interne Verwaltungs- und Wiederherstellungsdaten (Sperren, ausstehende Transaktionen, Import-Staging); sie können Trainingsantworten oder Lebenslauftext enthalten. Nicht manuell löschen oder verschieben; nie in Git veröffentlichen.
 
-## Speichern und fortsetzen
+## Formatgrenzen
 
-Lies vor dem Vorbereiten eines neuen Lernstands `status` und bewahre dessen `state_sha256` zusammen mit dem gelesenen Zustand auf. Erstelle einen vollständigen Markdown-Bericht und aktualisierten Zustand. Die folgenden Platzhalter musst du durch tatsächliche Werte ersetzen:
+Es wird nur das aktuelle Format 2 unterstützt. Verzeichnisse mit dem früheren Layout (`state.md`, `candidate/profile.md`, `runs/` im Stamm), fremde Dateien, falsche Schema-Versionen, doppelte JSON-Schlüssel, Run-Dateien ohne aktuelle Metadaten oder mit fremder Bewerber-/Stellenzuordnung werden **vor jedem Schreibzugriff** mit konkretem Grund abgelehnt. Vorhandene Daten werden weder migriert noch gelöscht noch überschrieben; wähle für neue Daten ein leeres Ziel oder gleiche manuell ab.
 
-```bash
-python3 <installed-skill-directory>/scripts/interview_workspace.py finish \
-  --run-id 2026-11-17-example \
-  --expected-state-sha256 <hash-from-status-before-editing> \
-  --status stopped_early --answered-count 2 --planned-count 3 \
-  --run-file /path/to/new-run.md \
-  --state-file /path/to/new-state.md
-```
-
-Hash und Lebenszyklusargumente sind verpflichtend; ältere `finish`-Aufrufe müssen angepasst werden. Ein Checkpoint verwendet `--status paused`:
-
-```bash
-python3 <installed-skill-directory>/scripts/interview_workspace.py resume --run-id <checkpoint-id>
-```
-
-`resume` liest Bericht, Metadaten und aktuellen Zustand samt Hash, ohne den Checkpoint zu verändern. Speichere die Fortsetzung unter einer neuen ID mit `--resume-from <checkpoint-id>`. Antwortzahlen sind kumulativ; eine geplante Anzahl bleibt erhalten. `completed` setzt bei bekanntem Plan alle Antworten voraus. Bereits fortgesetzte, gestoppte oder abgeschlossene Checkpoints sind nicht fortsetzbar. Nicht unterstützte Run-Formate blockieren Workspace-Operationen vor Schreibzugriffen. Es erfolgt keine Konvertierung oder Löschung. Neue Berichte erhalten einen maschinenlesbaren HTML-Kommentar vor dem unveränderten Berichtstext.
-
-## Fehler und Wiederherstellung
-
-Die CLI sperrt kooperierende Schreibprozesse mit einer Betriebssystem-Dateisperre und lehnt veraltete Zustände ab. Berichte überschreiben keine vorhandenen Läufe. Temporäre Dateien werden vor Veröffentlichung geschrieben und synchronisiert; vorhandene Dateirechte bleiben erhalten. Verwaltete Symlinks und ungültige Pfadtypen werden abgelehnt.
-
-Bericht und Lernstand sind **keine gemeinsam atomare Mehrdatei-Transaktion**. `.zyris/pending.json` hält die Wiederherstellungsabsicht fest. Bei einem unvollständigen Vorgang darf kein Erfolg gemeldet werden:
-
-```bash
-python3 <installed-skill-directory>/scripts/interview_workspace.py recover
-```
-
-Wiederherstellung prüft vorhandene Inhalte und vollendet denselben Vorgang. Externe Konflikte müssen manuell abgeglichen werden. Journal bis zum Erfolg erhalten; keinen zweiten Lauf als Umgehung anlegen. Bis zur Wiederherstellung schlagen weitere Schreibvorgänge sowie `status` und `resume` ausdrücklich fehl.
-
-Bei „busy“ auf das Ende des anderen Prozesses warten; `.zyris/lock` nicht löschen. Das Betriebssystem gibt die Sperre bei Prozessende frei. Bei „stale state“ Zustand neu lesen und Änderungen inhaltlich abgleichen; nicht bloß den Hash austauschen.
-
-## Einschränkungen
-
-Diese Garantien gelten für kooperierende CLI-Prozesse auf lokalen Dateisystemen. Direkte externe Änderungen nehmen nicht an der Sperre teil. Netzwerk- und Cloud-Sync-Dateisysteme sind kein unterstütztes Transaktionsbackend. Tests mit fiktiven Daten prüfen Prozesse, unterbrochene Schreibvorgänge, Wiederherstellung und den paketierten Helfer, aber keine dauerhafte Speicherung in gehosteten Plattformen.
-
-Bei **Nicht speichern** wird kein Workspace-Befehl aufgerufen: keine Initialisierung, Sperre, Checkpoint, Präferenz, Journal oder Exportdatei. Anpassung und Feedback bleiben im aktiven Gespräch; Host-Chat-Aufbewahrung ist separat.
-
-Run-Publikation verwendet temporäre Dateien unter `.zyris/`, nicht unter `runs/`. Das aktuelle Lifecycle-Format verlangt alle sechs Metadatenfelder; unbekannte Planzahl und fehlender Vorgänger werden ausdrücklich als null gespeichert. Ungültige Strukturen werden vor Anlage von Kontrollpfaden abgelehnt.
-
-JSON-Metadaten müssen eindeutige Schlüssel und die ganzzahlige Schema-Version 1 enthalten; Boolean und Fließkommazahl sind ungültig. Ausstehende Transaktionen blockieren init vor neuen Konfigurationspfaden oder Locks. Ungültige Journale werden vor Recovery-Schreibzugriffen abgelehnt. Bestehende Erweiterungsfelder in Konfiguration und Präferenzen bleiben erhalten.
-
-Gespeicherte Sprachwerte werden vor Änderungen geprüft. Fortsetzungen benötigen einen vorhandenen pausierten Vorgänger: keine Verzweigungen oder Zyklen, keine sinkenden Antwortzahlen und kein Verlust bekannter Planzahlen. Dies gilt auch bei Recovery. Das Run-Staging wird explizit gewählt; ein Konfigurationsordner namens runs bleibt ein normaler Konfigurationspfad.
+Garantien gelten für kooperierende Prozesse auf lokalen Dateisystemen; Netzwerk- oder Cloud-Sync-Verzeichnisse sind kein unterstütztes Transaktionsbackend.

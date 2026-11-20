@@ -1,0 +1,69 @@
+{
+ "id": "job_create_missing_company",
+ "title": "job-create mit fehlendem Unternehmen",
+ "skills": [
+  "job-create"
+ ],
+ "context": "Host: Claude Code or Codex (simulated). Current project folder: {PROJECT}. Files live under {FILES}. This project already has local storage configured at {WS} (verified by project-show). Use --project {PROJECT} for runtime calls.",
+ "preset": {
+  "storage": "local",
+  "candidates": [
+   {
+    "name": "Erika Beispiel",
+    "cv": "# Erika Beispiel\n\n## Berufserfahrung\n- Backend-Entwicklerin, Muster GmbH, 2019-2024: Python-Services, PostgreSQL, Kubernetes-Betrieb\n\n## Ausbildung\n- BSc Informatik, Beispiel-Universität, 2018\n\n## Skills\nPython, Go, SQL\n",
+    "profile": "# Profil Erika Beispiel\n- Backend-Entwicklerin, 5 Jahre Python (Quelle: CV)\n- Kubernetes-Betrieb (Quelle: CV)\n"
+   }
+  ]
+ },
+ "files": {
+  "posting.md": "# Senior Backend Engineer (m/w/d)\nAufgaben: Entwicklung von Python-APIs, Betrieb auf Kubernetes, Mentoring.\nAnforderungen: 5+ Jahre Python, Cloud-Betrieb.\n"
+ },
+ "steps": [
+  {
+   "user": "Bereite die Stelle aus der Datei {FILES}/posting.md für Erika Beispiel vor. Es ist ein Senior Backend Engineer.",
+   "must_contain_any": [
+    "Unternehmen",
+    "Firma"
+   ],
+   "required_groups": [
+    [
+     "Unternehmen",
+     "Firma"
+    ]
+   ],
+   "tools_exclude": [
+    "research"
+   ],
+   "tools_include": [
+    "job-create"
+   ]
+  },
+  {
+   "user": "Das Unternehmen ist die Beispiel AG.",
+   "tools_include": [
+    "job-update",
+    "Beispiel AG"
+   ],
+   "judge": [
+    "participants_question"
+   ]
+  }
+ ],
+ "artifacts": [
+  {
+   "type": "count",
+   "glob": "ws/candidates/*/jobs/j-*/job.json",
+   "equals": 1
+  },
+  {
+   "type": "exists",
+   "glob": "ws/candidates/*/jobs/j-*/postings/001.md"
+  },
+  {
+   "type": "json_field",
+   "glob": "ws/candidates/*/jobs/j-*/job.json",
+   "path": "company",
+   "equals": "Beispiel AG"
+  }
+ ]
+}

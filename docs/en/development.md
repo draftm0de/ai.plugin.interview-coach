@@ -6,9 +6,9 @@
 
 ## Source of truth
 
-`skills/interview-coach/` contains the coaching runtime; its folder and skill identity are now `interview-coach`. `plugin.json` defines `interview-coach` with display name **Interview Coach**. `make sync-plugin` derives `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`; `make check-plugin` detects drift. All manifests remain versionless. The shared marketplace lives in the separate `ai.plugins` repository; this plugin has no catalog of its own.
+Five public skills live under `skills/` (`interview-coach`, `candidate-create`, `candidate-training`, `job-create`, `job-training`); `skills/_shared/` holds, without a `SKILL.md`, the shared runtime (`scripts/`: `interview_workspace.py`, `coach_core.py`, `coach_extract.py`, `coach_git.py`) and the shared references (`references/`). Root `scripts/` contains development tooling only. `plugin.json` defines `interview-coach` with display name **Interview Coach**. `make sync-plugin` derives `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`; `make check-plugin` detects drift. All manifests remain versionless. The shared marketplace lives in the separate `ai.plugins` repository; this plugin has no catalog of its own.
 
-Management tools require Git and Python 3.10+; Make is an optional convenience wrapper. No additional Python packages. The host CLI is needed only for automatic local installation/updates and explicitly selected model tests. The workspace helper itself needs Python 3.10+ but not Git. Missing tools are not installed automatically.
+Management tools require Git and Python 3.10+; Make is an optional convenience wrapper. No additional Python packages. The host CLI is needed only for automatic local installation/updates and explicitly selected model tests. The runtime needs Python 3.10+; Git only for Git storage. Missing tools are not installed automatically.
 
 ## Checks
 
@@ -66,6 +66,22 @@ Generated model-test artifacts are kept under the repository-local ignored `.tmp
 
 The runners create the directories on demand. The entire `.tmp/` tree is gitignored; test fixtures and source files remain versioned under `tests/`. Use `OUT=.tmp/tests/behavior/custom` to override the behavior output location.
 
+### Multi-step scenarios (`make test-scenarios`)
+
+`tests/behavior/run_scenarios.py` replays 13 multi-step scenarios (setup, candidates with/without CV, equal-name candidates, training, job creation, job training, stop/pause, do-not-save, save failure). The model may only emit `TOOL: python3 <runtime> …` lines; the harness executes exclusively the runtime against a temporary fictional project, logs every call and checks artifacts (hashes, files, statuses). Host tools are disabled. This is **heuristic** and not a native host run. The runs use the already signed-in CLI (no credentials are read or copied); an isolated profile without sign-in cannot call a model, so genuinely isolated host runs are `NOT RUN` ([acceptance](../acceptance.md)).
+
+### Scenario checks: structure, rubric and tool results
+
+The scenarios check the domain contract rather than single words: (1) tool calls count only with exit code 0 (exception: `candidate-resolve` exit 2 = "ask the user"); a failed `finish` can never be turned into a success by matching text. (2) Saved artifacts are checked (hashes, status, assignment; continuation with predecessor reference, growing counter, unchanged checkpoint). (3) Evaluable answers require an overall score x/10, criteria and substantial feedback (structural) plus, by rubric, concrete strengths, concrete improvements and no invented facts. (4) Insufficient answers require a concrete reason, one fitting follow-up and a cautious score — no confident grade. (5) The rubric is judged by a second model call (the "judge"); without a judge the semantic items stay unchecked = FAIL. Invention accusations count only with a verbatim quote that occurs in the reply and contains content words outside the candidate's message. The judge is itself a model and can be wrong.
+
+### Native check logic
+
+`tests/native/run_native.py` counts a runtime call as successful only if it is provably ONE call (`parse_runtime_call`: shlex with quoting, optionally one `sh|bash|zsh -c` wrapper; `;`, `&&`, `||`, pipes, redirects, variable prefixes → not proven) and its own tool result has exit code 0 (unknown ≠ 0). For training, project, candidate and job IDs of `job-show` must match. `training_question` is a bounded deterministic heuristic (posting vocabulary + a question/task that is not a selection/confirmation/preparation clarification); it does not understand meaning and proves no interview quality. A real run can therefore fail more strictly (compound shell commands are not evidence).
+
+### Git tests
+
+`tests/integration/git/` uses temporary local bare repositories behind a `github.com` URL (via `url.<bare>.insteadOf`), a fake `gh` and a logging `git` wrapper (asserting that force is never used). This exercises real git flows but is **not a live GitHub or GitLab acceptance**; private repositories, real authentication and connectors are untested. Write tests against personal repositories are not part of development.
+
 ### Scripted multi-step coaching regression
 
 `make test-journey CLI=codex` (or `CLI=claude`) runs the fictional
@@ -86,6 +102,7 @@ Manually inspect the content before treating the journey as a release signal.
 make test
 make test-journey CLI=codex
 make test-journey CLI=claude
+make test-scenarios CLI=claude          # multi-step scenarios with a restricted tool channel
 ```
 
 Journey checks normalize Markdown for pattern matching and check competence caution separately from affirmative stability claims. They remain German-language heuristics: passing checks cannot establish factual correctness, and valid alternative wording may still require review. Diagnose failures as product, runner or scenario issues before changing checks.
@@ -136,7 +153,7 @@ Confirmed requirements are in [SCOPE.md](../../SCOPE.md), shared development rul
 the same rules. Source/test references are not acceptance; model checks are heuristic.
 Read-only review never executes source or tests.
 
-Runs without current lifecycle metadata are rejected before writes and remain intact. Follow the specific save diagnostic: pending journal → recover; no
+Runs without current metadata (workspace format 3) or with a foreign candidate/job assignment are rejected before writes and remain intact. Follow the specific save diagnostic: pending journal → recover; no
 recorded intent → resolve the write error and retry the same run ID with the original
 state hash; intended contents exist without confirmed final durability → inspect them
 without overwriting.

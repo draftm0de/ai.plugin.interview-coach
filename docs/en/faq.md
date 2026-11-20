@@ -8,7 +8,7 @@
 
 ### Is this an application or a skill?
 
-It is a plugin with a portable coaching skill, a local Python workspace helper and derived host manifests. It runs inside a supported agent host; it does not provide its own model, chat application or hosted backend.
+It is a plugin with five coaching skills, a local Python runtime and derived host manifests for Claude Code and Codex. It runs inside a supported agent host; it does not provide its own model, chat application or hosted backend.
 
 ### Does a public repository mean there is a paid license or an open-source license?
 
@@ -18,7 +18,7 @@ The project is licensed under [MIT](../../LICENSE), as declared in [plugin.json]
 
 ### Do I need Git or Python to practise?
 
-Add `https://github.com/draftm0de/ai.plugins` as a marketplace and select Interview Coach. No ZIP or local checkout is needed. The local storage helper requires Python 3.10+, but not Git. Host-side execution and persistence capabilities still need verification.
+Add `https://github.com/draftm0de/ai.plugins` as a marketplace and select Interview Coach. No ZIP or local checkout is needed. The runtime requires Python 3.10+; Git only for Git storage. Host-side execution and persistence capabilities still need verification.
 
 ## Privacy and persistence
 
@@ -26,9 +26,33 @@ Add `https://github.com/draftm0de/ai.plugins` as a marketplace and select Interv
 
 Only when the host can read the verified persistent workspace again. Local paths on your computer do not automatically exist in a cloud sandbox. Attached files are not automatically writable state. See [storage](storage.md).
 
-### What does “Nicht speichern” mean?
+### What does “Nicht speichern” (do not save) mean?
 
-The skill creates no workspace, saved run, preference, research archive or automatic export. Conversation history may still be retained by the host under its own settings. It is not a promise that the platform records nothing.
+Nothing is persisted: no files, pointers, locks, journals, exports, CV copies, jobs, runs or learning state. Several candidates and jobs stay distinguishable inside the chat only; a later chat does not know them. The host may still retain the conversation under its own settings; this is not a promise that the platform records nothing.
+
+### Which storage options exist?
+
+Exactly three: **Local**, **Git** (private GitHub/GitLab repository only) and **Do not save**. "Manage files yourself" no longer exists; on save errors the coach offers recovery or a new storage choice.
+
+### When is something "remote saved"?
+
+Only after a successful push without force whose remote head was verified. A local change or commit alone is not a remote success. On conflicts, permission or transfer errors everything stays local and the coach says so openly.
+
+### Can one project hold several candidates?
+
+Yes, including equal names. Each candidate has their own ID and data; the coach asks when a choice is ambiguous. Learning states are never mixed.
+
+### Why is my existing folder rejected?
+
+Only the current format 3 is supported (the earlier format 2 with control folder `.zyris` is refused as well). Older layouts or unrelated files are rejected before any write and left unchanged; there is no migration. Choose an empty target.
+
+### Why does a CV import report "partial" or a missing tool?
+
+Images, unreadable pages, headers/footers or a missing text layer are disclosed. For PDF the runtime needs `pdftotext`, `mutool` or `pypdf`; it installs nothing and invents no extraction.
+
+### Does the plugin support ChatGPT or Claude chat?
+
+No. Supported hosts are Claude Code and Codex with local project folders. A hosted sandbox path is not automatically your computer; the coach claims no durability it cannot verify.
 
 ### Can I put my CV in this repository?
 
@@ -39,10 +63,6 @@ No. Keep all real candidate data in a separate private workspace or supply it pr
 ### Why does the skill not appear?
 
 Check the Draftmode AI Plugins marketplace, repository access and permissions. Sync the catalog, select Interview Coach and start a new session. See [Installation](installation.md); local CLI installation does not establish web or account UI visibility.
-
-### Why can I not upload a ChatGPT plugin?
-
-This workflow uses a repository marketplace instead of upload. If marketplace import is unavailable, ask your administrator to check account and workspace permissions. See [Installation](installation.md).
 
 ### Why am I still using an old version?
 
@@ -72,4 +92,4 @@ The current gallery contains a rendered preview and selected text from fictional
 
 ### What has been verified?
 
-Deterministic tests cover manifests, packaging and local persistence, including concurrency, failure recovery and a packaged-CLI lifecycle. Optional CLI journeys test conversational heuristics with fictional data. Native platform UI, permissions and durable cross-chat storage still need platform acceptance. See [development](development.md).
+Deterministic tests cover manifests, the installable payload, candidate/job/run logic, CV extraction, recovery and the Git flow against local bare repositories – **not** GitHub/GitLab live. Model scenarios are heuristic. Isolated Claude Code/Codex runs and live Git remain open; see the [acceptance matrix](../acceptance.md) and [development](development.md).

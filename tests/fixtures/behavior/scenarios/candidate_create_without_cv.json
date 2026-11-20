@@ -1,0 +1,64 @@
+{
+ "id": "candidate_create_without_cv",
+ "title": "Bewerberanlage ohne CV bis zur Bestätigung",
+ "skills": [
+  "candidate-create"
+ ],
+ "context": "Host: Claude Code or Codex (simulated). Current project folder: {PROJECT}. Files live under {FILES}. This project already has local storage configured at {WS} (verified by project-show). Use --project {PROJECT} for runtime calls.",
+ "preset": {
+  "storage": "local"
+ },
+ "steps": [
+  {
+   "user": "Lege den Bewerber Max Muster an. Ich habe keinen Lebenslauf.",
+   "must_contain_any": [
+    "?"
+   ],
+   "tools_include": [
+    "candidate-create"
+   ],
+   "tools_exclude": [
+    "cv-import",
+    "--user-confirmed",
+    "--status confirmed"
+   ]
+  },
+  {
+   "user": "Berufserfahrung: 5 Jahre Backend-Entwickler bei Beispiel GmbH (Python, Go). Ausbildung: BSc Informatik, Beispiel-Uni. Skills: Python, Go, SQL. Projekte: Aufbau einer Zahlungs-API. Ziel: Team Lead werden.",
+   "tools_exclude": [
+    "--user-confirmed",
+    "--status confirmed"
+   ],
+   "judge": [
+    "confirm_question",
+    "no_invention"
+   ]
+  },
+  {
+   "user": "Ja, das stimmt alles so.",
+   "tools_include": [
+    "profile-save",
+    "--user-confirmed"
+   ]
+  }
+ ],
+ "artifacts": [
+  {
+   "type": "json_field",
+   "glob": "ws/candidates/*/candidate.json",
+   "path": "profile.status",
+   "equals": "confirmed"
+  },
+  {
+   "type": "json_field",
+   "glob": "ws/candidates/*/candidate.json",
+   "path": "profile.origin",
+   "equals": "interview"
+  },
+  {
+   "type": "contains",
+   "glob": "ws/candidates/*/cv/cv-*/source.json",
+   "text": "draft_unconfirmed"
+  }
+ ]
+}

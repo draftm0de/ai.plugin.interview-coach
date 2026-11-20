@@ -1,0 +1,74 @@
+{
+ "id": "no_storage_no_writes",
+ "title": "Nicht speichern ohne Schreibaktionen",
+ "skills": [
+  "interview-coach",
+  "candidate-training"
+ ],
+ "context": "Host: Claude Code or Codex (simulated). Current project folder: {PROJECT}. Uploaded/accessible files live under {FILES}. No storage decision has been made for this project yet.",
+ "steps": [
+  {
+   "user": "Nicht speichern. Ich möchte allgemein für eine Team-Lead-Rolle üben.",
+   "must_contain_any": [
+    "?"
+   ],
+   "no_tool_calls": true,
+   "must_not_contain": [
+    "Dateien selbst verwalten"
+   ]
+  },
+  {
+   "user": "Mein Beispiel dazu: Als Verantwortliche für unseren Python-Zahlungs-Service habe ich bei einem Produktionsausfall die Ursache in der Retry-Logik gefunden, zwischen Rollback und Hotfix abgewogen (den Hotfix habe ich wegen des Risikos verworfen), den Fix mit Regressionstest ausgerollt und den Support informiert. Ergebnis: Die Fehlerrate sank von 40 auf 2 Fälle pro Tag, in drei Monaten gab es keine Wiederholung.",
+   "no_tool_calls": true,
+   "evaluable": true,
+   "judge": [
+    "strengths",
+    "improvements",
+    "no_invention"
+   ]
+  },
+  {
+   "user": "stop",
+   "must_contain_any": [
+    "beendet",
+    "Zusammenfassung",
+    "Resümee"
+   ],
+   "required_groups": [
+    [
+     "nicht gespeichert",
+     "nichts gespeichert",
+     "ohne Speicherung",
+     "keine Dateien",
+     "nur in diesem Chat",
+     "nur im Chat",
+     "Nichts wurde gespeichert",
+     "nichts wurde gespeichert",
+     "nur hier im Chat",
+     "gilt nur hier"
+    ]
+   ],
+   "no_tool_calls": true,
+   "must_not_contain": [
+    "gespeichert unter",
+    "state.md aktualisiert",
+    "remote gespeichert",
+    "Nächste Frage"
+   ]
+  }
+ ],
+ "artifacts": [
+  {
+   "type": "absent",
+   "path": "ws"
+  },
+  {
+   "type": "absent",
+   "path": "cfg"
+  },
+  {
+   "type": "no_files",
+   "path": "project"
+  }
+ ]
+}

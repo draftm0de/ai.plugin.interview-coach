@@ -5,11 +5,11 @@
 
 <img src="docs/assets/zyris-icon.png" width="48" alt="ZYRIS documentation icon">
 
-Practice job interviews with role-specific questions, concrete feedback and evidence-based learning progress in Claude, ChatGPT or Codex.
+Practice job interviews with role-specific questions, concrete feedback and evidence-based learning progress in **Claude Code** and **Codex**. One project manages several candidates, each with their own profile, CV, jobs, runs and learning state.
 
-**[Install](docs/en/installation.md) · [Usage](docs/en/usage.md) · [Examples](docs/en/screens.md) · [FAQ](docs/en/faq.md) · [Documentation](docs/en/README.md)**
+**[Install](docs/en/installation.md) · [Usage](docs/en/usage.md) · [Storage](docs/en/storage.md) · [Examples](docs/en/screens.md) · [FAQ](docs/en/faq.md) · [Documentation](docs/en/README.md) · [Acceptance](docs/acceptance.md)**
 
-**Installation:** [Claude](docs/en/installation.md#claude-desktop) · [Claude Code](docs/en/installation.md#optional-terminal-installation) · [Codex Desktop](docs/en/installation.md#codex-desktop). Marketplace: `https://github.com/draftm0de/ai.plugins`. The user confirms both plugins are present in the published marketplace. Local changes and their GUI acceptance are separate.
+**Installation:** [Claude Code](docs/en/installation.md#claude-code) · [Codex](docs/en/installation.md#codex). Marketplace: `https://github.com/draftm0de/ai.plugins`. The publication state of this extension is not evidenced; host and live acceptance are open ([acceptance](docs/acceptance.md)).
 
 ## Who it is for
 
@@ -23,10 +23,10 @@ The coach adapts questions and criteria to your role and seniority. It distingui
 
 *English translation of rendered excerpts from a fictional Codex CLI test, not a screenshot of Claude or ChatGPT. Scores illustrate one response, not a guaranteed result. [Read the example and its provenance](docs/en/screens.md).*
 
-1. Choose your language, training goal and whether to save progress.
-2. Answer one question at a time in coached modes.
-3. Receive an overall score out of 10, relevant criteria, strengths and specific improvements.
-4. Try again in your own words; a coached revision is not proof of stable competence.
+1. Set up: choose a storage type – exactly three options: **Local**, **Git** (private GitHub/GitLab) or **Do not save** – then the path or repository.
+2. Create a candidate (`candidate-create`): import a CV (PDF, DOCX, Markdown) or build a profile without one.
+3. Train generally (`candidate-training`), or prepare a job (`job-create`) and train for it (`job-training`).
+4. In coached modes answer one question at a time; receive an overall score, criteria, strengths and improvements.
 5. Say `stop` whenever you want to finish.
 
 ## Capabilities and modes
@@ -43,37 +43,35 @@ Research uses available public professional sources and marks uncertainty. Emplo
 
 ## Quick start
 
-Open the [installation guide](docs/en/installation.md) and choose Claude or Codex. After installation, select the plugin in a new chat and send the documented first prompt. This user path does not require a source checkout.
+Open the [installation guide](docs/en/installation.md). Then use `/interview-coach:interview-coach setup` in Claude Code or `$interview-coach` in Codex – or simply write "Start interview-coach setup". Setup runs on first use or on `setup`; no automatic activation when a project opens is claimed.
 
-## Usage
+| Skill | Purpose | Claude Code | Codex |
+|---|---|---|---|
+| `interview-coach` | Entry point, setup | `/interview-coach:interview-coach` | `$interview-coach` |
+| `candidate-create` | Create a candidate | `/interview-coach:candidate-create` | `$candidate-create` |
+| `candidate-training` | General training | `/interview-coach:candidate-training` | `$candidate-training` |
+| `job-create` | Prepare a job | `/interview-coach:job-create` | `$job-create` |
+| `job-training` | Train for a job | `/interview-coach:job-training` | `$job-training` |
 
-After installation, ask:
-
-> Use interview-coach and run setup. I want to practise for a Team Lead role. Use English. Do not save anything.
-
-For targeted preparation, provide your approved profile/CV and the job posting privately. Do not add them to this repository. Unknown interviewer names do not prevent training.
+The invocation spellings follow host documentation; a native `:job-create` command is not claimed. See [usage](docs/en/usage.md).
 
 | Control | Result |
 |---|---|
-| `stop` / `beenden` | End questioning immediately; summarize the answers given |
-| `pause` | Request a resumable checkpoint when verified storage is available |
-| Do not save (`Nicht speichern`) | No skill-managed files, workspace, exports or saved learning state |
-
-In `mock`, feedback is deferred until the end. Platform chat history has separate retention settings.
+| `stop` / `end` | End questioning immediately; summarize the answers given |
+| `pause` | Save a resumable checkpoint (only with a chosen storage) |
+| **Do not save** (`Nicht speichern`) | Nothing is persisted: no files, pointers, exports or learning state |
 
 ## Storage and privacy
 
-You can practise without persistence. For learning across sessions, use a separate private workspace and a verified storage adapter. A hosted sandbox or an uploaded attachment does not automatically provide durable cross-chat storage.
-
-The local Python CLI supports `init`, `status`, `finish`, `resume`, `recover`, `validate` and language preferences. It protects immutable runs, checks for stale state and supports recovery after partial writes. See [storage and recovery](docs/en/storage.md) for commands and limitations.
+Exactly three options: **Local** (a directory you name), **Git** (only a *private* GitHub/GitLab repository; "remote saved" is reported only after a confirmed push, never via force-push) and **Do not save**. "Manage files yourself" no longer exists. Private data lives outside the installed plugin. No tokens are requested. See [storage, formats and recovery](docs/en/storage.md).
 
 ## Project status
 
 This MVP uses versionless plugin manifests and repository import through Draftmode AI Plugins. There is no customer portal, payment system, license server or claimed listing in an additional official plugin directory.
 
-Local persistence and packaging have deterministic tests. CLI model journeys use fictional scenarios and heuristic checks. Native Claude/ChatGPT/Codex platform acceptance remains separate; a passing model test does not prove host UI or storage integration.
+Local persistence, the Git flow (against local bare repositories, **not** a live GitHub/GitLab acceptance), extraction and packaging have deterministic tests. Model scenarios use fictional data and heuristic checks. Host acceptance for Claude Code and Codex with isolated profiles is open; results and gaps are in the [acceptance matrix](docs/acceptance.md).
 
-License: [MIT](LICENSE). Isolated native CLI checks are recorded in the [release evidence](docs/en/release-evidence.md); graphical acceptance remains pending.
+License: [MIT](LICENSE). The earlier [release evidence](docs/en/release-evidence.md) is history.
 
 ## Development
 
@@ -85,9 +83,9 @@ make test          # deterministic unit, integration and contract tests; no mode
 make check-plugin  # validate versionless host manifests
 ```
 
-Tests require no additional Python packages such as pytest. Management tools require Git and Python 3.10+; the local workspace helper requires Python 3.10+ but not Git. Make is optional. See [development and testing](docs/en/development.md) for model tests and repository boundaries.
+Tests require no additional Python packages such as pytest. Management tools require Git and Python 3.10+; the runtime requires Python 3.10+; Git is needed only for Git storage, optionally `gh`/`glab` for the visibility check. PDF import needs `pdftotext`, `mutool` or `pypdf` (never installed automatically). Make is optional. See [development and testing](docs/en/development.md) for model tests and repository boundaries.
 
-The [canonical skill](skills/interview-coach/SKILL.md) is the single runtime source. User documentation lives in [docs/](docs/en/README.md).
+The five skills under [skills/](skills/) and the shared runtime under [skills/_shared/](skills/_shared/) define the behavior; [SCOPE.md](SCOPE.md) is authoritative. User documentation lives in [docs/](docs/en/README.md).
 
 Publisher: **draftmode** · [draftmode.io](https://draftmode.io) · Author: **Peter Fux**.
 
