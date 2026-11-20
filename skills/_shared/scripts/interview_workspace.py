@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Interview Coach runtime (workspace format 3): projects, candidates, CVs, jobs, runs, Git coordination.
+"""Interview Coach runtime (workspace format 3): projects, candidates, CVs, jobs, runs, local storage.
 
 Only the current format is supported. Unsupported layouts are rejected before any
 write and are never migrated, deleted or overwritten.
 """
 import argparse
-from contextlib import contextmanager, nullcontext
+from contextlib import contextmanager
 import datetime
 import hashlib
 import json
@@ -15,12 +15,11 @@ import re
 import shutil
 import sys
 import tempfile
+import unicodedata
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import coach_core as core  # noqa: E402
 import coach_extract as extractor  # noqa: E402
-import coach_git as gitstore  # noqa: E402
 from coach_core import (CANDIDATE_ID, CONTROL, LEGACY_CONTROL, JOB_ID, RUN_ID, checked_path, clean_text, file_lock,  # noqa: E402
                         new_identifier, safe_root, strict_json, sync_directory, write_atomic)
 
@@ -30,6 +29,7 @@ SCHEMA = 3   # 3: internal control folder `.journal` (format 2 used `.zyris`); n
 DEFAULT_CONFIG_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "zyris" / APP / "projects"
 LANGUAGE = re.compile(r"^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$")
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+RUN_SCHEMA = 4   # 4: runs carry the structured follow-up dialogue (main questions, follow-ups, retries); run format 3 is refused, never migrated
 HEADER = "<!-- zyris-run: "
 ARTIFACT_HEADER = "<!-- zyris-artifact: "
 STATUSES = ("completed", "paused", "stopped_early")
@@ -103,16 +103,6 @@ def reject_legacy_layout(root):
         raise ValueError(message)
 
 
-def check_workspace_target(path):
-    """Read-only check of existing content BEFORE any lock, journal or write: old/unsafe layout, wrong format, foreign files.
-
-    A genuinely empty target (only `.git`/`.journal`) passes and stays initializable; a valid format-3 workspace passes and is reused.
-    """
-    reject_legacy_layout(path)
-    if [e for e in Path(path).iterdir() if e.name not in (".git", CONTROL)]:
-        require_workspace(path)
-
-
 def workspace_problems(root):
     """Read-only structural validation of the workspace (no writes)."""
     root = safe_root(root)
@@ -136,14 +126,7 @@ def workspace_problems(root):
             raise ValueError(f"Unsupported workspace manifest (format {FORMAT}, schema {SCHEMA} required)")
         for name, kind in (("candidates", "dir"), (CONTROL, "dir"), ("preferences.json", "file")):
             checked_path(root, name, kind)
-        prefs = root / "preferences.json"
-        if prefs.is_file():
-            value = strict_json(prefs.read_text(encoding="utf-8"))
-            if not isinstance(value, dict) or value.get("schema_version") != SCHEMA or type(value.get("schema_version")) is not int:
-                raise ValueError("Unsupported preferences schema")
-            for field in ("interface_language", "interview_language"):
-                if field in value and (not isinstance(value[field], str) or not LANGUAGE.fullmatch(value[field])):
-                    raise ValueError("Invalid preferences language tag: " + field)
+        validate_preferences(root)
         folder = checked_path(root, "candidates", "dir")
         if not folder.is_dir():
             raise ValueError("missing candidates/")
@@ -152,6 +135,19 @@ def workspace_problems(root):
     except (OSError, ValueError) as exc:
         problems.append(str(exc))
     return problems
+
+
+def validate_preferences(root):
+    prefs = checked_path(root, "preferences.json", "file")
+    if prefs.is_file():
+        value = strict_json(prefs.read_text(encoding="utf-8"))
+        if not isinstance(value, dict) or value.get("schema_version") != SCHEMA or type(value.get("schema_version")) is not int:
+            raise ValueError("Unsupported preferences schema")
+        if "interview_language" in value:
+            raise ValueError("Unsupported project interview_language; language belongs to candidate/job. No migration performed; data unchanged")
+        for field in ("interface_language",):
+            if field in value and (not isinstance(value[field], str) or not LANGUAGE.fullmatch(value[field])):
+                raise ValueError("Invalid preferences language tag: " + field)
 
 
 def require_workspace(root):
@@ -196,19 +192,53 @@ def init_workspace(root):
     return root
 
 
-def set_language(root, interface_language, interview_language=None):
+def set_language(root, interface_language):
     root = safe_root(root)
-    if not LANGUAGE.fullmatch(interface_language) or (interview_language and not LANGUAGE.fullmatch(interview_language)):
+    if not isinstance(interface_language, str) or not LANGUAGE.fullmatch(interface_language):
         raise ValueError("Invalid language tag")
     require_workspace(root)
     with file_lock(checked_path(root, CONTROL + "/lock", "file")):
         target = checked_path(root, "preferences.json", "file")
         data = strict_json(target.read_text(encoding="utf-8"))
         data["interface_language"] = interface_language
-        if interview_language:
-            data["interview_language"] = interview_language
         write_atomic(target, dump(data))
         return data
+
+
+def validate_interview_language(language):
+    if language is not None and (not isinstance(language, str) or not LANGUAGE.fullmatch(language)):
+        raise ValueError("Invalid interview language tag")
+
+
+def effective_interview_language(candidate, job=None):
+    language = job["interview_language"] if job and job["interview_language"] is not None else candidate["interview_language"]
+    return {"interview_language": language,
+            "language_source": "job" if job and job["interview_language"] is not None else ("candidate" if language else "unconfirmed")}
+
+
+def set_interview_language(root, candidate_id, language=None, *, job_id=None, inherit=False):
+    validate_interview_language(language)
+    if inherit:
+        if job_id is None or language is not None:
+            raise ValueError("Inherit requires a job and no language tag")
+    elif language is None:
+        raise ValueError("Confirm an interview language first")
+    # Validate all existing records before creating any lock or writing data.
+    require_workspace(safe_root(root))
+    with candidate_lock(root, candidate_id) as cdir:
+        candidate = read_candidate(cdir)
+        meta = read_job(cdir, job_id) if job_id else candidate
+        if meta["status"] != "active":
+            raise ValueError("Cannot set language on an incomplete record")
+        before = meta["interview_language"]
+        meta["interview_language"] = language
+        if job_id and before != language:
+            meta["changes"].append({"at": now(), "field": "interview_language", "from": before, "to": language})
+        target = job_dir(cdir, job_id) / "job.json" if job_id else cdir / "candidate.json"
+        write_atomic(target, dump(meta))
+        saved = read_job(cdir, job_id) if job_id else read_candidate(cdir)
+        return {"candidate_id": candidate_id, "job_id": job_id,
+                **effective_interview_language(candidate if job_id else saved, saved if job_id else None)}
 
 
 # ----------------------------------------------------------------- projects
@@ -228,21 +258,20 @@ def read_project_config(project, config_dir=DEFAULT_CONFIG_DIR):
     if path.is_symlink() or not path.is_file():
         raise FileNotFoundError(f"No storage configured for project {project}. Run setup (project-init) first")
     data = strict_json(path.read_text(encoding="utf-8"))
+    if isinstance(data, dict) and (data.get("storage") == "git" or "git" in data):
+        raise ValueError("Git storage is no longer supported. Existing configuration and data are unchanged; no automatic conversion to local storage")
     if (not isinstance(data, dict) or data.get("schema_version") != SCHEMA or type(data.get("schema_version")) is not int
-            or data.get("project") != str(project) or data.get("storage") not in ("local", "git")
+            or data.get("project") != str(project) or data.get("storage") != "local"
             or not isinstance(data.get("workspace"), str)):
         raise ValueError("Unsupported project configuration; no fallback or migration performed")
-    if data["storage"] == "git" and not (isinstance(data.get("git"), dict) and data["git"].get("visibility") == "private"):
-        raise ValueError("Git project configuration lacks confirmed private repository evidence")
     return data
 
 
-def check_switch(existing, storage, workspace, remote, switch):
+def check_switch(existing, storage, workspace, switch):
     """Refuse a change of target, storage type or repository unless explicitly confirmed. Read-only."""
     if existing is None or switch:
         return
-    same = (existing["workspace"] == str(workspace) and existing["storage"] == storage
-            and (storage != "git" or existing["git"]["remote"] == remote))
+    same = (existing["workspace"] == str(workspace) and existing["storage"] == storage)
     if not same:
         raise ValueError("This project already uses another storage target or type. Confirm switching explicitly (--switch); "
                          "nothing was changed")
@@ -255,12 +284,10 @@ def existing_config(project, config_dir):
     return None
 
 
-def write_pointer(project, workspace, storage, config_dir, git_evidence, switch, remote):
+def write_pointer(project, workspace, storage, config_dir, switch):
     """Write the pointer; the caller holds the per-project lock."""
-    check_switch(existing_config(project, config_dir), storage, workspace, remote, switch)
+    check_switch(existing_config(project, config_dir), storage, workspace, switch)
     data = {"schema_version": SCHEMA, "project": str(project), "storage": storage, "workspace": str(workspace)}
-    if git_evidence:
-        data["git"] = dict(git_evidence, checked_at=now())
     write_atomic(project_config_path(project, config_dir), dump(data))
     return data
 
@@ -274,14 +301,10 @@ def project_workspace(project, config_dir=DEFAULT_CONFIG_DIR):
     return root, config
 
 
-def setup_project(project, storage, path, *, config_dir=DEFAULT_CONFIG_DIR, switch=False, remote=None, attest=None):
-    """Storage setup. 'none' is refused: Nicht speichern writes nothing at all.
-
-    Order: (1) read-only preflight incl. the switch decision, (2) the same decision again under the
-    per-project lock, (3) only then any mutation (clone, workspace files, remote publish, pointer).
-    """
-    if storage not in ("local", "git"):
-        raise ValueError("Nicht speichern creates no workspace or pointer; only local and git are configurable")
+def setup_project(project, storage, path, *, config_dir=DEFAULT_CONFIG_DIR, switch=False):
+    """Local setup only. No-storage mode never invokes the runtime."""
+    if storage != "local":
+        raise ValueError("Unsupported storage: only local can be configured. Git storage is removed; Nicht speichern creates no workspace or pointer")
     project = safe_root(project)
     if not project.is_dir():
         raise ValueError(f"Project folder does not exist: {project}")
@@ -291,119 +314,31 @@ def setup_project(project, storage, path, *, config_dir=DEFAULT_CONFIG_DIR, swit
     config_dir = Path(config_dir).expanduser()
     if config_dir.resolve().is_relative_to(path):
         raise ValueError("Configuration must be outside the workspace")
-    if storage == "git":
-        if not remote:
-            raise ValueError("An explicit private GitHub/GitLab repository is required")
-        gitstore.parse_remote(remote)
-    check_switch(existing_config(project, config_dir), storage, path, remote, switch)  # (1) no side effects so far
+    check_switch(existing_config(project, config_dir), storage, path, switch)
     if config_dir.exists() and not config_dir.is_dir():
         raise ValueError("Expected directory: " + str(config_dir))
-    if path.exists():  # unsupported/legacy/foreign content is rejected before anything is created
+    if path.exists():
         for ancestor in (path, *path.parents):
             if ancestor.exists() and not ancestor.is_dir():
                 raise ValueError("Expected directory: " + str(ancestor))
         if [e for e in path.iterdir() if e.name not in (".git", CONTROL)]:
             require_workspace(path)
-    evidence = None
-    if storage == "git":  # read-only checks first
-        gitstore.check_rewrite(remote)
-        evidence = gitstore.verify_target(remote, attest=attest)
+    reused = (path / "workspace.json").is_file()
     config_dir.mkdir(parents=True, exist_ok=True)
     pointer = project_config_path(project, config_dir)
-    with file_lock(pointer.with_name(pointer.name + ".lock")):  # serializes concurrent setups of this project
-        check_switch(existing_config(project, config_dir), storage, path, remote, switch)  # (2)
-        result = {}
-        if storage == "git":
-            result["clone"] = gitstore.prepare_clone(path, remote)
-            # The clone itself is the only unavoidable write so far. Everything after it starts only if the cloned content is
-            # an empty repository or a valid format-3 workspace: check read-only BEFORE any lock, journal, commit, push or pointer.
-            check_workspace_target(path)
-            evidence["targets"] = gitstore.resolve_targets(path, remote)
-            root = safe_root(path)
-            with git_save_guard(root, "Initialize interview coach workspace", create=True):
-                init_workspace(path)
-            with git_lock(root):
-                result["publish"] = gitstore.publish(root, evidence["targets"])
-        else:
-            root = init_workspace(path)
-            if str(root).startswith(TEMP_PREFIXES):
-                result["warning"] = "Directory is in a temporary location and may not be durable"
-        config = write_pointer(project, root, storage, config_dir, evidence, switch, remote)
-    return dict(result, project=str(project), storage=storage, workspace=str(root),
-                reused=bool(result.get("clone") == "existing"), config=config)
-
-
-def interrupted_path(root):
-    return Path(root) / CONTROL / "interrupted.json"
-
-
-def git_lock(root):
-    """One cooperative lock per Git workspace for saving AND publishing (order: pointer lock -> git lock -> workspace/candidate locks)."""
-    control = Path(root) / CONTROL
-    control.mkdir(mode=0o700, exist_ok=True)
-    return file_lock(checked_path(root, CONTROL + "/git.lock", "file"))
-
-
-def read_interrupted(root):
-    """{relative path: sha256|None} left by a failed save. Unknown formats are refused, never resumed silently."""
-    path = interrupted_path(root)
-    if not path.exists() and not path.is_symlink():
-        return {}
-    try:
-        data = strict_json(path.read_text(encoding="utf-8"))
-        files = data.get("files") if isinstance(data, dict) else None
-        if (not isinstance(data, dict) or set(data) != {"schema_version", "files"} or data["schema_version"] != SCHEMA
-                or type(data["schema_version"]) is not int or not isinstance(files, dict)
-                or not all(isinstance(k, str) and (v is None or (isinstance(v, str) and re.fullmatch(r"[0-9a-f]{64}", v))) for k, v in files.items())):
-            raise ValueError("unsupported format")
-    except (OSError, ValueError) as exc:
-        raise gitstore.GitStorageError(f"Unsupported interrupted-save journal ({exc}); it is left untouched. Inspect {path} "
-                                       "and the workspace manually; nothing is resumed automatically") from exc
-    return files
-
-
-def record_interrupted(root, touched):
-    """Remember what a failed save wrote, with content hashes, so unchanged leftovers can be resumed and changed ones cannot."""
-    root = Path(root)
-    try:
-        known = read_interrupted(root)
-    except gitstore.GitStorageError:
-        return  # keep the unreadable journal as it is
-    changed = set(gitstore.changed_paths(root))
-    for relative in changed & touched | (changed & set(known)):
-        known[relative] = gitstore.file_digest(root, relative)
-    if (root / CONTROL).is_dir() and not (root / CONTROL).is_symlink() and known:
-        write_atomic(interrupted_path(root), dump({"schema_version": SCHEMA, "files": dict(sorted(known.items()))}))
-
-
-@contextmanager
-def git_save_guard(root, message, create=False):
-    """Git storage: under the workspace Git lock refuse foreign/staged changes, run the save, commit exactly its own paths.
-
-    Own paths = what this process wrote through the managed writers plus unchanged leftovers of an interrupted save.
-    Anything else that appears is never committed. Limit: programs that ignore the cooperative lock can still race.
-    """
-    root = Path(root)
-    if create:
-        (root / CONTROL).mkdir(parents=True, exist_ok=True)
-    with git_lock(root):
-        leftovers = read_interrupted(root)
-        gitstore.baseline(root, allowed=leftovers)
-        with core.recording() as touched:
-            try:
-                yield
-                relative = {str(Path(t).resolve().relative_to(root.resolve())) for t in touched if Path(t).resolve().is_relative_to(root.resolve())}
-                gitstore.commit_own(root, message, relative | set(leftovers))
-            except BaseException:
-                inside = {str(Path(t).resolve().relative_to(root.resolve())) for t in touched if Path(t).resolve().is_relative_to(root.resolve())}
-                record_interrupted(root, inside)
-                raise
-        interrupted_path(root).unlink(missing_ok=True)
+    with file_lock(pointer.with_name(pointer.name + ".lock")):
+        check_switch(existing_config(project, config_dir), storage, path, switch)
+        root = init_workspace(path)
+        config = write_pointer(project, root, storage, config_dir, switch)
+    result = dict(project=str(project), storage=storage, workspace=str(root), reused=reused, config=config)
+    if str(root).startswith(TEMP_PREFIXES):
+        result["warning"] = "Directory is in a temporary location and may not be durable"
+    return result
 
 
 # --------------------------------------------------------------- candidates
 
-CANDIDATE_KEYS = {"schema_version", "candidate_id", "display_name", "status", "created_at", "profile", "cv_sources"}
+CANDIDATE_KEYS = {"schema_version", "candidate_id", "display_name", "status", "created_at", "profile", "cv_sources", "interview_language"}
 PROFILE_KEYS = {"status", "origin", "cv_source", "updated_at"}
 
 
@@ -422,7 +357,8 @@ def read_candidate(cdir):
             or not isinstance(data["cv_sources"], list)
             or not isinstance(data["profile"], dict) or set(data["profile"]) != PROFILE_KEYS
             or data["profile"]["status"] not in PROFILE_STATUS):
-        raise ValueError("Unsupported or inconsistent candidate record")
+        raise ValueError("Unsupported or inconsistent candidate record (current interview_language field required); data unchanged")
+    validate_interview_language(data["interview_language"])
     return data
 
 
@@ -482,7 +418,7 @@ def create_candidate(root, name):
             raise RuntimeError("Could not allocate a unique candidate identifier")
         meta = {"schema_version": SCHEMA, "candidate_id": candidate_id, "display_name": name, "status": "creating",
                 "created_at": now(), "profile": {"status": "missing", "origin": "none", "cv_source": None, "updated_at": None},
-                "cv_sources": []}
+                "cv_sources": [], "interview_language": None}
         try:
             write_atomic(cdir / "candidate.json", dump(meta), create_only=True)
             materialize_candidate(cdir)
@@ -515,6 +451,7 @@ def require_workspace_shallow(root):
     data = strict_json(manifest.read_text(encoding="utf-8"))
     if data.get("format") != FORMAT or data.get("schema_version") != SCHEMA:
         raise ValueError("Unsupported workspace format")
+    validate_preferences(root)
 
 
 def list_candidates(root):
@@ -593,7 +530,7 @@ def candidate_lock(root, candidate_id, *, recovering=False):
 
 # --------------------------------------------------------------------- jobs
 
-JOB_KEYS = {"schema_version", "job_id", "candidate_id", "status", "title", "company", "created_at", "participants", "changes"}
+JOB_KEYS = {"schema_version", "job_id", "candidate_id", "status", "title", "company", "created_at", "participants", "changes", "interview_language"}
 
 
 def job_dir(cdir, job_id):
@@ -616,7 +553,8 @@ def read_job(cdir, job_id):
             or not isinstance(people, dict) or set(people) != {"status", "people"}
             or people["status"] not in ("pending", "provided", "unknown") or not isinstance(people["people"], list)
             or not isinstance(data["changes"], list)):
-        raise ValueError(f"Unsupported or foreign job record: {job_id} does not belong to candidate {cdir.name}")
+        raise ValueError(f"Unsupported or foreign job record (current interview_language field required): {job_id}, candidate {cdir.name}; data unchanged")
+    validate_interview_language(data["interview_language"])
     return data
 
 
@@ -703,7 +641,7 @@ def create_job(root, candidate_id, title, company=None, *, posting_file=None, po
         else:
             raise RuntimeError("Could not allocate a unique job identifier")
         meta = {"schema_version": SCHEMA, "job_id": job_id, "candidate_id": cdir.name, "status": "creating", "title": title,
-                "company": company, "created_at": now(), "participants": {"status": "pending", "people": []}, "changes": []}
+                "company": company, "created_at": now(), "participants": {"status": "pending", "people": []}, "changes": [], "interview_language": None}
         try:
             write_atomic(jdir / "job.json", dump(meta), create_only=True)
             for folder in ARTIFACT_KINDS.values():
@@ -713,7 +651,6 @@ def create_job(root, candidate_id, title, company=None, *, posting_file=None, po
                 digest = extractor.sha256_file(original)
                 stored = jdir / "postings" / ("001.original" + original.suffix.lower())
                 shutil.copyfile(original, stored)
-                core.touch(stored)
                 if extractor.sha256_file(stored) != digest:
                     raise RuntimeError("Original posting copy did not verify")
                 extra.update(original=stored.name, original_sha256=digest, original_name=original.name,
@@ -796,6 +733,7 @@ def list_jobs(root, candidate_id):
     for entry in sorted(checked_path(cdir, "jobs", "dir").iterdir()):
         meta = read_job(cdir, entry.name)
         jobs.append({"job_id": meta["job_id"], "title": meta["title"], "company": meta["company"], "status": meta["status"],
+                     **effective_interview_language(read_candidate(cdir), meta),
                      "open_points": job_open_points(meta),
                      "artifacts": {k: len(artifact_seqs(job_dir(cdir, entry.name), k)) for k in ARTIFACT_KINDS}})
     return jobs
@@ -812,7 +750,8 @@ def show_job(root, candidate_id, job_id):
         if seqs:
             info, body = read_artifact(jdir, cdir, kind, seqs[-1])
             latest[kind] = {"seq": seqs[-1], "history": seqs, "meta": info, "content": body}
-    return {"job": meta, "open_points": job_open_points(meta), "latest": latest}
+    return {"job": meta, **effective_interview_language(read_candidate(cdir), meta),
+            "open_points": job_open_points(meta), "latest": latest}
 
 
 # ------------------------------------------------------------ CV and profile
@@ -870,7 +809,6 @@ def import_cv(root, candidate_id, file_path, *, transcription_file=None, which=s
         (stage / "source.json").write_text(dump(record), encoding="utf-8")
         target = checked_path(cdir, "cv/" + source_id)
         os.rename(stage, target)
-        core.touch_tree(target)
         sync_directory(target.parent)
         meta["cv_sources"].append(source_id)
         write_atomic(cdir / "candidate.json", dump(meta))
@@ -948,13 +886,187 @@ def validate_lifecycle(status, answered_count, planned_count):
         raise ValueError("Incomplete interview must be paused or stopped_early")
 
 
-RUN_KEYS = {"schema_version", "run_id", "candidate_id", "job_id", "status", "answered_count", "planned_count", "resume_from"}
+RUN_KEYS = {"schema_version", "run_id", "candidate_id", "job_id", "status", "answered_count", "planned_count", "resume_from",
+            "followup_count", "followup_answered_count", "retry_count", "dialogue"}
+
+# ---- follow-up dialogue (one block per main question) -------------------------------------------------------------
+FOLLOWUP_KINDS = ("clarification", "completion", "deepening")
+RESOLUTIONS = ("pending", "closed", "open")
+BLOCK_KEYS = {"key", "question", "initial_answer", "initial_assessment", "block_assessment", "followups", "retries", "other_open_gaps"}
+FOLLOWUP_KEYS = {"id", "kind", "reason", "text", "answer", "hints_before", "gap", "resolution"}
+RETRY_KEYS = {"answer", "after_coaching"}
+DIALOGUE_TEXT_LIMIT = 8000
+
+
+def dialogue_text(value, field, *, optional=False):
+    """Verbatim dialogue text: non-empty string, newlines allowed, other control characters not."""
+    if value is None and optional:
+        return None
+    if (not isinstance(value, str) or not value.strip() or len(value) > DIALOGUE_TEXT_LIMIT
+            or any(unicodedata.category(c).startswith("C") and c not in "\n\t\r" for c in value)):
+        raise ValueError(f"Invalid dialogue field {field}")
+    return value
+
+
+def dialogue_flag(value, field):
+    if type(value) is not bool:
+        raise ValueError(f"Invalid dialogue field {field}: boolean required")
+    return value
+
+
+def exact_keys(record, keys, what):
+    if not isinstance(record, dict) or set(record) != keys:
+        raise ValueError(f"Invalid dialogue {what}: exactly the fields {sorted(keys)} are required")
+
+
+def validate_dialogue(dialogue, status):
+    """Validate the current-format dialogue; return the separately counted totals.
+
+    Main questions (answered_count), follow-ups and retry attempts are counted independently. A follow-up never raises
+    the main-question count. Only the very last follow-up (or main question) of an unfinished run may be unanswered.
+    """
+    if not isinstance(dialogue, list):
+        raise ValueError("Invalid dialogue: a list of main-question blocks is required (use [] without questions)")
+    answered = followups = followups_answered = retries = 0
+    for index, block in enumerate(dialogue):
+        exact_keys(block, BLOCK_KEYS, "block")
+        last_block = index == len(dialogue) - 1
+        if block["key"] != f"q-{index + 1}":
+            raise ValueError(f"Invalid dialogue block key {block['key']!r}: expected q-{index + 1}")
+        dialogue_text(block["question"], block["key"] + ".question")
+        has_answer = dialogue_text(block["initial_answer"], block["key"] + ".initial_answer", optional=True) is not None
+        for field in ("initial_assessment", "block_assessment"):
+            dialogue_text(block[field], f"{block['key']}.{field}", optional=True)
+        for field in ("followups", "retries", "other_open_gaps"):
+            if not isinstance(block[field], list):
+                raise ValueError(f"Invalid dialogue field {block['key']}.{field}: list required")
+        for gap in block["other_open_gaps"]:
+            dialogue_text(gap, block["key"] + ".other_open_gaps")
+        if not has_answer:
+            if status == "completed" or not last_block:
+                raise ValueError(f"{block['key']}: only the last main question of a paused or stopped run may be unanswered")
+            if (block["followups"] or block["retries"] or block["other_open_gaps"]
+                    or block["initial_assessment"] is not None or block["block_assessment"] is not None):
+                raise ValueError(f"{block['key']}: an unanswered main question has no follow-ups, retries, gaps or assessment")
+        else:
+            answered += 1
+        for position, followup in enumerate(block["followups"]):
+            exact_keys(followup, FOLLOWUP_KEYS, "follow-up")
+            where = f"{block['key']}.followups[{position}]"
+            if followup["id"] != f"{block['key']}-f{position + 1}":
+                raise ValueError(f"{where}: id must be {block['key']}-f{position + 1}")
+            if followup["kind"] not in FOLLOWUP_KINDS:
+                raise ValueError(f"{where}: kind must be one of {', '.join(FOLLOWUP_KINDS)}")
+            dialogue_text(followup["reason"], where + ".reason")
+            dialogue_text(followup["text"], where + ".text")
+            answer = dialogue_text(followup["answer"], where + ".answer", optional=True)
+            dialogue_flag(followup["hints_before"], where + ".hints_before")
+            gap = dialogue_text(followup["gap"], where + ".gap", optional=True)
+            if followup["kind"] == "deepening":
+                if gap is not None or followup["resolution"] == "open":
+                    raise ValueError(f"{where}: a deepening follow-up is not a gap of the original answer (gap must be null, resolution not open)")
+            elif gap is None:
+                raise ValueError(f"{where}: clarification and completion follow-ups name the gap they address")
+            if followup["resolution"] not in RESOLUTIONS or (followup["resolution"] == "pending") != (answer is None):
+                raise ValueError(f"{where}: resolution must be pending exactly while the follow-up is unanswered")
+            if not has_answer:
+                raise ValueError(f"{where}: follow-up without an answer to the main question")
+            followups += 1
+            if answer is None:
+                if status == "completed" or not (last_block and position == len(block["followups"]) - 1):
+                    raise ValueError(f"{where}: only the last follow-up of a paused or stopped run may stay unanswered")
+            else:
+                followups_answered += 1
+        for position, retry in enumerate(block["retries"]):
+            exact_keys(retry, RETRY_KEYS, "retry")
+            dialogue_text(retry["answer"], f"{block['key']}.retries[{position}].answer")
+            dialogue_flag(retry["after_coaching"], f"{block['key']}.retries[{position}].after_coaching")
+            retries += 1
+    return dict(answered_count=answered, followup_count=followups, followup_answered_count=followups_answered, retry_count=retries)
+
+
+def followup_evidence(followup):
+    """none = unanswered; supported = content hints/coaching came first; after_followup = own answer to a neutral prompt."""
+    if followup["answer"] is None:
+        return "none"
+    return "supported" if followup["hints_before"] else "after_followup"
+
+
+def describe_dialogue(dialogue):
+    """Evidence view for resumption and state updates (derived, never stored)."""
+    return [dict(key=b["key"], initial_answer_given=b["initial_answer"] is not None,
+                 followups=[dict(id=f["id"], kind=f["kind"], resolution=f["resolution"], evidence=followup_evidence(f)) for f in b["followups"]],
+                 retries=[dict(evidence="supported" if r["after_coaching"] else "independent_retry") for r in b["retries"]],
+                 open_gaps=[f["gap"] for f in b["followups"] if f["resolution"] == "open"] + list(b["other_open_gaps"]))
+            for b in dialogue]
+
+
+def open_followup(dialogue):
+    if dialogue and dialogue[-1]["followups"] and dialogue[-1]["followups"][-1]["answer"] is None:
+        return dialogue[-1]["followups"][-1]["id"]
+    return None
+
+
+def continuation_problem(previous, current):
+    """Why `current` may not continue `previous` (None when valid).
+
+    Allowed: fill a pending main answer; answer a pending follow-up (resolution may leave `pending`); raise `hints_before` of a
+    pending follow-up false->true; append follow-ups, retries and main questions; fill a null `initial_assessment`; replace
+    `block_assessment` or drop `other_open_gaps` entries of the LAST checkpoint block only if that block gained new evidence.
+    Everything else is rejected: earlier blocks stay byte-equal; answered content, kinds, reasons, wording, gaps, hint flags and
+    documented resolutions never change; a documented hint is never removed; gaps never vanish without new evidence.
+    """
+    old, new = previous["dialogue"], current["dialogue"]
+    if len(new) < len(old):
+        return "continuation drops main questions of the checkpoint"
+    for index, before in enumerate(old):
+        after = new[index]
+        key = before["key"]
+        if index < len(old) - 1:
+            if after != before:
+                return f"{key}: a closed main question of the checkpoint changed"
+            continue
+        if after["question"] != before["question"]:
+            return f"{key}: main question changed"
+        if before["initial_answer"] is not None and after["initial_answer"] != before["initial_answer"]:
+            return f"{key}: original answer changed"
+        if before["initial_assessment"] is not None and after["initial_assessment"] != before["initial_assessment"]:
+            return f"{key}: first-answer assessment changed"
+        if len(after["followups"]) < len(before["followups"]) or len(after["retries"]) < len(before["retries"]):
+            return f"{key}: follow-ups or retries were dropped"
+        new_evidence = before["initial_answer"] is None and after["initial_answer"] is not None
+        for position, later in enumerate(after["followups"]):
+            if position >= len(before["followups"]):
+                new_evidence = new_evidence or later["answer"] is not None
+                continue
+            earlier = before["followups"][position]
+            if any(earlier[f] != later[f] for f in ("id", "kind", "reason", "text", "gap")):
+                return f"{earlier['id']}: follow-up changed"
+            if earlier["answer"] is not None:
+                if any(earlier[f] != later[f] for f in ("answer", "hints_before", "resolution")):
+                    return f"{earlier['id']}: answered follow-up changed or was repeated"
+            else:
+                if earlier["hints_before"] and not later["hints_before"]:
+                    return f"{earlier['id']}: a documented hint (hints_before) was removed"
+                new_evidence = new_evidence or later["answer"] is not None
+        if before["retries"] != after["retries"][:len(before["retries"])]:
+            return f"{key}: earlier retries changed"
+        new_evidence = new_evidence or len(after["retries"]) > len(before["retries"])
+        if not new_evidence:
+            if after["block_assessment"] != before["block_assessment"]:
+                return f"{key}: block assessment changed without new evidence"
+            if any(gap not in after["other_open_gaps"] for gap in before["other_open_gaps"]):
+                return f"{key}: documented open gap disappeared without new evidence"
+    return None
 
 
 def parse_run(text, run_id, candidate_id):
     metadata, body = parse_header(text, HEADER, "run")
+    if isinstance(metadata, dict) and metadata.get("schema_version") != RUN_SCHEMA:
+        raise ValueError(f"Unsupported run format {metadata.get('schema_version')!r}: current run format {RUN_SCHEMA} "
+                         "(structured follow-up dialogue) is required; no migration performed")
     if (not isinstance(metadata, dict) or set(metadata) != RUN_KEYS or type(metadata.get("schema_version")) is not int
-            or metadata["schema_version"] != SCHEMA or metadata["run_id"] != run_id):
+            or metadata["run_id"] != run_id):
         raise ValueError("Invalid run lifecycle metadata")
     if metadata["candidate_id"] != candidate_id:
         raise ValueError("Run belongs to another candidate")
@@ -962,6 +1074,9 @@ def parse_run(text, run_id, candidate_id):
     if job is not None and (not isinstance(job, str) or not JOB_ID.fullmatch(job)):
         raise ValueError("Invalid run job identifier")
     validate_lifecycle(metadata["status"], metadata["answered_count"], metadata["planned_count"])
+    counts = validate_dialogue(metadata["dialogue"], metadata["status"])
+    if any(metadata[key] != value for key, value in counts.items()):
+        raise ValueError(f"Run counters do not match the dialogue: expected {counts}")
     source = metadata["resume_from"]
     if source is not None and (not isinstance(source, str) or not RUN_ID.fullmatch(source) or ".." in source):
         raise ValueError("Invalid continuation identifier")
@@ -1004,7 +1119,8 @@ def validate_run_links(records):
         previous = records.get(source)
         if (source == identifier or previous is None or previous["status"] != "paused" or source in successors
                 or metadata["answered_count"] < previous["answered_count"] or previous["job_id"] != metadata["job_id"]
-                or (previous["planned_count"] is not None and metadata["planned_count"] != previous["planned_count"])):
+                or (previous["planned_count"] is not None and metadata["planned_count"] != previous["planned_count"])
+                or continuation_problem(previous, metadata)):
             raise ValueError("Unsupported run continuation: " + identifier + "; manual reconciliation required; files unchanged")
         successors.add(source)
         seen = {identifier}
@@ -1035,7 +1151,7 @@ def snapshot(root, candidate_id):
         state = checked_path(cdir, "state.md", "file").read_bytes()
         meta = read_candidate(cdir)
         jobs = [read_job(cdir, p.name) for p in sorted(checked_path(cdir, "jobs", "dir").iterdir())]
-        return {"candidate": meta, "profile_reliable": meta["profile"]["status"] == "confirmed",
+        return {"candidate": meta, **effective_interview_language(meta), "profile_reliable": meta["profile"]["status"] == "confirmed",
                 "state": state.decode("utf-8"), "state_sha256": hashlib.sha256(state).hexdigest(),
                 "jobs": [{"job_id": j["job_id"], "title": j["title"], "company": j["company"]} for j in jobs],
                 "runs": sorted(p.stem for p in checked_path(cdir, "runs", "dir").glob("*.md"))}
@@ -1045,7 +1161,8 @@ def resume(root, candidate_id, run_id):
     with candidate_lock(root, candidate_id) as cdir:
         metadata, body = require_resumable(cdir, run_id)
         state = checked_path(cdir, "state.md", "file").read_bytes()
-        return {"run": metadata, "transcript": body, "state": state.decode("utf-8"),
+        return {"run": metadata, "transcript": body, "open_followup": open_followup(metadata["dialogue"]),
+                "dialogue_evidence": describe_dialogue(metadata["dialogue"]), "state": state.decode("utf-8"),
                 "state_sha256": hashlib.sha256(state).hexdigest()}
 
 
@@ -1101,8 +1218,14 @@ def recover(root, candidate_id):
 
 
 def finish(root, candidate_id, run_id, run_text, state_text, *, expected_state_sha256, status="completed",
-           answered_count=0, planned_count=None, resume_from=None, job_id=None):
+           answered_count=0, planned_count=None, resume_from=None, job_id=None, dialogue=None):
     validate_lifecycle(status, answered_count, planned_count)
+    if dialogue is None:
+        raise ValueError("A dialogue record is required (use an empty list when no question was asked)")
+    counts = validate_dialogue(dialogue, status)
+    if counts["answered_count"] != answered_count:
+        raise ValueError(f"answered_count {answered_count} does not match the {counts['answered_count']} main questions answered "
+                         "in the dialogue; follow-ups and retries never raise it")
     if not run_text.strip() or not state_text.strip():
         raise ValueError("Run and state must not be empty")
     with candidate_lock(root, candidate_id) as cdir:
@@ -1123,10 +1246,17 @@ def finish(root, candidate_id, run_id, run_text, state_text, *, expected_state_s
             validate_lifecycle(status, answered_count, planned_count)
             if answered_count < previous["answered_count"]:
                 raise ValueError("Answered count cannot decrease on continuation")
-        metadata = dict(schema_version=SCHEMA, run_id=run_id, candidate_id=cdir.name, job_id=job_id, status=status,
-                        answered_count=answered_count, planned_count=planned_count, resume_from=resume_from)
+        metadata = dict(schema_version=RUN_SCHEMA, run_id=run_id, candidate_id=cdir.name, job_id=job_id, status=status,
+                        answered_count=answered_count, planned_count=planned_count, resume_from=resume_from,
+                        followup_count=counts["followup_count"], followup_answered_count=counts["followup_answered_count"],
+                        retry_count=counts["retry_count"], dialogue=dialogue)
+        if resume_from is not None:
+            problem = continuation_problem(previous, metadata)
+            if problem:
+                raise ValueError("Unsupported continuation: " + problem)
+        header = json.dumps(metadata, allow_nan=False, ensure_ascii=False).replace("-->", "--\\u003e")
         transaction = dict(schema_version=SCHEMA, run_id=run_id,
-                           run_text=HEADER + json.dumps(metadata, allow_nan=False, ensure_ascii=False) + " -->\n" + run_text,
+                           run_text=HEADER + header + " -->\n" + run_text,
                            state_text=state_text, expected_state_sha256=expected_state_sha256)
         try:
             write_atomic(candidate_journal(cdir), json.dumps(transaction, allow_nan=False, ensure_ascii=False) + "\n", create_only=True)
@@ -1150,54 +1280,10 @@ def finish(root, candidate_id, run_id, run_text, state_text, *, expected_state_s
             raise RuntimeError("Save incomplete; do not claim success. " + guidance) from exc
 
 
-# ---------------------------------------------------------------------- git
-
-def git_workspace(project, config_dir):
-    root, config = project_workspace(project, config_dir)
-    if config["storage"] != "git":
-        raise ValueError("This project does not use Git storage")
-    return root, config
-
-
 def pending_journals(root):
-    return [c.name for c in checked_path(root, "candidates", "dir").iterdir() if not c.name.startswith(".") and candidate_journal(c).exists()]
+    return [c.name for c in checked_path(root, "candidates", "dir").iterdir()
+            if not c.name.startswith(".") and candidate_journal(c).exists()]
 
-
-def git_targets(root, config, attest=None):
-    """Re-verify, immediately before touching the remote, that the real fetch/push target is the authorized private repo."""
-    evidence = config["git"]
-    gitstore.verify_target(evidence["remote"], attest=attest)  # current privacy + write evidence for exactly this repository
-    return gitstore.resolve_targets(root, evidence["remote"], pinned=evidence.get("targets"))
-
-
-def git_pull(project, config_dir):
-    """Fast-forward pull under the same Git-workspace lock as saving and publishing; every state is checked after acquiring it."""
-    root, config = git_workspace(project, config_dir)
-    with git_lock(root):
-        if pending_journals(root):
-            raise gitstore.GitStorageError("Pending transactions exist (" + ", ".join(pending_journals(root)) + "); run recover first")
-        targets = gitstore.resolve_targets(root, config["git"]["remote"], pinned=config["git"].get("targets"))
-        return gitstore.pull(root, targets)
-
-
-def git_status(project, config_dir):
-    """Status fetches (updates tracking refs), so it also runs under the Git-workspace lock."""
-    root, config = git_workspace(project, config_dir)
-    with git_lock(root):
-        targets = gitstore.resolve_targets(root, config["git"]["remote"], pinned=config["git"].get("targets"))
-        return gitstore.status(root, targets)
-
-
-def git_publish(project, message, config_dir, attest=None):
-    root, config = git_workspace(project, config_dir)
-    with git_lock(root):
-        if pending_journals(root):
-            raise gitstore.GitStorageError("Pending transactions exist (" + ", ".join(pending_journals(root)) + "); run recover first")
-        targets = git_targets(root, config, attest)
-        return gitstore.publish(root, targets)
-
-
-# ---------------------------------------------------------------------- CLI
 
 def build_parser():
     p = argparse.ArgumentParser(description="Interview Coach runtime (format 3)")
@@ -1214,16 +1300,16 @@ def build_parser():
     arg = lambda *names, **kw: (names, kw)  # noqa: E731
     cand = arg("--candidate", required=True)
     job = arg("--job", required=True)
-    command("project-init", arg("--storage", required=True, choices=["local", "git", "none"]), arg("--path"), arg("--remote"),
-            arg("--switch", action="store_true"),
-            arg("--attest-private", action="store_true"),
-            arg("--attest-write", action="store_true"), arg("--attest-source"), arg("--attest-repository"),
-            arg("--attest-user-confirmed", action="store_true"),
-            help="Configure storage for this project (local or git). 'none' is refused: nothing is stored")
+    command("project-init", arg("--storage", required=True, choices=["local", "none"]), arg("--path"),
+            arg("--switch", action="store_true"), help="Configure local storage; Nicht speichern never calls the runtime")
     command("project-show")
     command("validate", arg("--path"), project=False)
     sub.choices["validate"].add_argument("--project")
-    command("set-language", arg("--interface", required=True, dest="interface_language"), arg("--interview", dest="interview_language"))
+    command("set-language", arg("--interface", required=True, dest="interface_language"))
+    language_cmd = command("set-interview-language", cand, arg("--job"))
+    language_choice = language_cmd.add_mutually_exclusive_group(required=True)
+    language_choice.add_argument("--language")
+    language_choice.add_argument("--inherit", action="store_true")
     command("candidate-create", arg("--name", required=True))
     command("candidate-list")
     command("candidate-resolve", arg("--id"), arg("--name"))
@@ -1248,12 +1334,8 @@ def build_parser():
     command("finish", cand, arg("--run-id", required=True), arg("--run-file", type=Path, required=True),
             arg("--state-file", type=Path, required=True), arg("--expected-state-sha256", required=True),
             arg("--status", choices=STATUSES, required=True), arg("--answered-count", type=int, required=True),
-            arg("--planned-count", type=int), arg("--resume-from"), arg("--job-id"))
-    command("git-status")
-    command("git-pull")
-    command("git-publish", arg("--message"), arg("--attest-private", action="store_true"),
-            arg("--attest-write", action="store_true"), arg("--attest-source"), arg("--attest-repository"),
-            arg("--attest-user-confirmed", action="store_true"))
+            arg("--planned-count", type=int), arg("--resume-from"), arg("--job-id"),
+            arg("--dialogue-file", type=Path, required=True))
     return p
 
 
@@ -1261,28 +1343,12 @@ def emit(data):
     print(json.dumps(data, ensure_ascii=False, indent=2))
 
 
-MUTATING = {"set-language", "candidate-create", "candidate-recover", "cv-import", "cv-draft-save", "profile-save",
-            "job-create", "job-add", "job-update", "recover", "finish"}
-
-
-def parse_attest(args):
-    if not (args.attest_private or args.attest_write or args.attest_source or args.attest_repository):
-        return None
-    if not (args.attest_private and args.attest_write and args.attest_source and args.attest_repository
-            and args.attest_user_confirmed):
-        raise ValueError("Connector attestation needs --attest-private, --attest-write, --attest-source NAME, "
-                         "--attest-repository OWNER/REPO and --attest-user-confirmed (the user saw the connector's answer)")
-    return {"private": True, "write": True, "source": clean_text(args.attest_source, "attestation source", 80),
-            "repository": args.attest_repository, "user_confirmed": True}
-
-
 def main(argv=None):
     args = build_parser().parse_args(argv)
     cfg = args.config_dir
     try:
         if args.cmd == "project-init":
-            emit(setup_project(args.project, args.storage, args.path, config_dir=cfg, switch=args.switch, remote=args.remote,
-                               attest=parse_attest(args)))
+            emit(setup_project(args.project, args.storage, args.path, config_dir=cfg, switch=args.switch))
             return 0
         if args.cmd == "validate" and args.path:
             problems = workspace_problems(args.path)
@@ -1291,10 +1357,7 @@ def main(argv=None):
         if args.cmd == "validate" and not args.project:
             raise ValueError("--project or --path is required")
         root, config = project_workspace(args.project, cfg)
-        git_mode = config["storage"] == "git"
-        guard = git_save_guard(root, f"interview-coach: {args.cmd}") if git_mode and args.cmd in MUTATING else nullcontext()
-        with guard:
-            return run_command(args, root, config, cfg)
+        return run_command(args, root, config, cfg)
     except LookupError as exc:
         print(exc.args[0], file=sys.stderr)
         return 2
@@ -1311,7 +1374,9 @@ def run_command(args, root, config, cfg):
         print("VALID" if not problems else "\n".join(problems))
         return int(bool(problems))
     elif args.cmd == "set-language":
-        emit(set_language(root, args.interface_language, args.interview_language))
+        emit(set_language(root, args.interface_language))
+    elif args.cmd == "set-interview-language":
+        emit(set_interview_language(root, args.candidate, args.language, job_id=args.job, inherit=args.inherit))
     elif args.cmd == "candidate-create":
         emit(create_candidate(root, args.name))
     elif args.cmd == "candidate-list":
@@ -1355,16 +1420,9 @@ def run_command(args, root, config, cfg):
         run = finish(root, args.candidate, args.run_id, args.run_file.read_text(encoding="utf-8"),
                      args.state_file.read_text(encoding="utf-8"), expected_state_sha256=args.expected_state_sha256,
                      status=args.status, answered_count=args.answered_count, planned_count=args.planned_count,
-                     resume_from=args.resume_from, job_id=args.job_id)
+                     resume_from=args.resume_from, job_id=args.job_id,
+                     dialogue=strict_json(args.dialogue_file.read_text(encoding="utf-8")))
         print(f"Saved and verified run (local): {run}")
-        if config["storage"] == "git":
-            print("Git storage: committed locally only, NOT saved remotely. Run git-publish and report remote saved only if it succeeds.")
-    elif args.cmd == "git-status":
-        emit(git_status(args.project, cfg))
-    elif args.cmd == "git-pull":
-        emit(git_pull(args.project, cfg))
-    elif args.cmd == "git-publish":
-        emit(git_publish(args.project, args.message or "interview-coach: publish", cfg, parse_attest(args)))
     return 0
 
 

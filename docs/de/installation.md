@@ -8,7 +8,7 @@
 
 Dieses Repository enthält **Interview Coach** (`interview-coach`) mit fünf Skills (`interview-coach`, `candidate-create`, `candidate-training`, `job-create`, `job-training`) und gemeinsamer Runtime unter `skills/_shared/`; es besitzt keinen eigenen Marketplace. Unterstützte Hosts: **Claude Code** und **Codex**. Installationsquelle ist **Draftmode AI Plugins** (`draftmode-ai-plugins`): `https://github.com/draftm0de/ai.plugins`. Ob die aktuelle Erweiterung dort veröffentlicht ist, ist nicht belegt; ein Repository-Import liefert den veröffentlichten Stand.
 
-Voraussetzungen: Python 3.10+ für die Runtime; Git nur für den Git-Speicher (optional `gh`/`glab` zur Sichtbarkeitsprüfung); für PDF-Import `pdftotext`, `mutool` oder Python-`pypdf`. **Es wird nichts automatisch installiert**; fehlt etwas, nennt der Coach genau, was fehlt.
+Voraussetzungen: Python 3.10+ für die Runtime; für PDF-Import `pdftotext`, `mutool` oder Python-`pypdf`. **Es wird nichts automatisch installiert**; fehlt etwas, nennt der Coach genau, was fehlt.
 
 ## Installieren
 
@@ -44,7 +44,7 @@ Entferne **Interview Coach** in der Plugin-Verwaltung. Private Trainingsdaten au
 
 ## Erste Nutzung prüfen
 
-Öffne eine neue Sitzung und sende **„Starte die Einrichtung von interview-coach“**. Wähle Deutsch und **Nicht speichern**, übe mit einer fiktiven Frage und beende mit `stop`. Dauerhafte Speicherung (Lokal oder privates Git) benötigt ein Ziel, das du ausdrücklich bestätigst; siehe [Speicherung](storage.md). Internetrecherche benötigt Internetzugang.
+Öffne eine neue Sitzung und sende **„Starte die Einrichtung von interview-coach“**. Wähle Deutsch und **Nicht speichern**, übe mit einer fiktiven Frage und beende mit `stop`. Dauerhafte Speicherung (Lokal) benötigt ein Ziel, das du ausdrücklich bestätigst; siehe [Speicherung](storage.md). Internetrecherche benötigt Internetzugang.
 
 Prüfe beim Marketplace-Test, dass **Plugin Manager** und **Interview Coach** angeboten werden. [Entwicklung](development.md) · [Prüfstand](release-evidence.md).
 

@@ -29,13 +29,11 @@ Interview Coach (Claude Code and Codex): five public skills (`interview-coach` e
 `candidate-training`, `job-create`, `job-training`) share `skills/_shared/`:
 
 - `scripts/interview_workspace.py` CLI and domain logic (projects, candidates, CV, profile, jobs, runs, recovery);
-  `coach_core.py` safe paths/locks/atomic writes/identifiers; `coach_extract.py` Markdown/DOCX/PDF extraction;
-  `coach_git.py` Git coordination. Local runtime only; no network client of its own.
+  `coach_core.py` safe paths/locks/atomic writes/identifiers; `coach_extract.py` Markdown/DOCX/PDF extraction. Local runtime only; no network client of its own.
 - `references/` shared dialog and storage contracts. Coaching/research behavior is defined by SKILL.md and
   references, not by a Python dialogue engine.
 
-Boundaries. Own storage coordination: layout, formats, locks, journals, "remote saved" semantics. External tools:
-`git` transport, `gh`/`glab` visibility checks, host connectors, extraction tools (`pdftotext`, `mutool`, `pypdf`).
+Boundaries. Own storage coordination: layout, formats, locks, journals, verified local saves. External tools: extraction tools (`pdftotext`, `mutool`, `pypdf`).
 No provider SDK, no credential handling, no installation of tools.
 
 Resolution is per project: `project-init` stores a pointer for exactly one project folder under the machine-local
@@ -43,12 +41,8 @@ config directory; there is no global pointer and no discovery of old pointers. P
 storage target (workspace format 3, see `skills/_shared/references/storage.md`), never in the installed plugin.
 Format 1 and any other layout are rejected before writes, never migrated. "Nicht speichern" calls no runtime command.
 
-Git safety (see storage.md): the setup/switch decision precedes every mutation under a per-project lock; saving commands require a
-clean tree and commit only their own changes (`.journal/interrupted.json` adopts leftovers of a failed save); `git-publish` never stages, re-checks
-privacy/write evidence and the pinned fetch/push URLs, never forces and verifies the remote head at the push target.
-
-All Git paths that touch the working tree or refs (save, publish, pull, status) share `.journal/git.lock`. Staged control files are visible to the guard and refused.
+Storage is local only. Former Git pointers are refused without mutation or migration.
 
 Evidence: `docs/acceptance.md` holds the requirement-to-source-to-test matrix with actual results and open gaps.
 
-The internal control folder is `.journal` (single constant `CONTROL` in `coach_core.py`; Git protection uses `CONTROL_SEGMENTS`). The previous `.zyris` is recognized only to be refused; it is never migrated or read.
+The internal control folder is `.journal` (single constant `CONTROL` in `coach_core.py`). The previous `.zyris` is recognized only to be refused; it is never migrated or read.

@@ -322,10 +322,11 @@ def phases(run):
         return [f"missing skill name {s}" for s in SKILLS if s not in text] + (
             [] if any("_shared/scripts/interview_workspace.py" in x["command"] for x in r["commands"]) else ["runtime was not run from the payload layout"])
 
-    def three(r):
+    def two(r):
         t = r["text"]
-        p = [f"option missing: {o}" for o in ("Lokal", "Git", "Nicht speichern") if o not in t]
-        p += ["offers a fourth mode" for _ in [0] if "selbst verwalten" in t.lower() and "nicht" not in t.lower()]
+        p = [f"option missing: {o}" for o in ("Lokal", "Nicht speichern") if o not in t]
+        p += ["offers removed Git storage" for _ in [0] if "Git" in t]
+        p += ["offers an unsupported mode" for _ in [0] if "selbst verwalten" in t.lower() and "nicht" not in t.lower()]
         p += ["runtime changed state before the decision" for _ in [0] if set(subcommands(r)) & {"project-init", "candidate-create"}]
         p += ["files created before the decision" for _ in [0] if any(run.project.glob("storage")) or any(run.config.glob("zyris"))]
         return p
@@ -395,20 +396,35 @@ def phases(run):
         runs = list(run.ws.glob("candidates/*/runs/*.md"))
         return [] if runs and "finish" in subcommands(r, ok_only=True) and any('"stopped_early"' in p.read_text() for p in runs) else ["run not saved as stopped_early"]
 
+    def followup_adr(r):
+        # Observed host behavior of ONE turn (heuristic): single targeted follow-up, nothing revealed, no save, no new main question.
+        text = r["text"]
+        p = []
+        if text.count("?") != 1:
+            p.append(f"expected exactly one question mark (one follow-up), found {text.count('?')}")
+        if not re.search(r"(?i)termin|zeit|deadline|release|druck", text):
+            p.append("follow-up does not address the schedule/deadline aspect")
+        if re.search(r"(?<![\d.,])\d{1,2}(?:[.,]\d)?\s*/\s*10\b", text) or re.search(r"(?i)musterantwort|bessere gesprochene|was ich verbessern|einzelbewertung", text):
+            p.append("rating, improvement list or model answer before the follow-up")
+        if "finish" in subcommands(r):
+            p.append("run was saved although the question block was still open")
+        return p
+
     def reload(r):
         names = [p.stem for p in run.ws.glob("candidates/*/runs/*.md")]
         return [] if names and any(n in r["text"] for n in names) else ["new chat did not find the saved run"]
 
     return [
         ("discovery", "interview-coach", "status. Nenne außerdem alle Skills dieses Plugins (nur Namen).", discovery),
-        ("three_options", "interview-coach", "Ich möchte ein Interview üben. (Noch keine Speicherentscheidung; stelle nur den ersten Einrichtungsschritt.)", three),
+        ("two_options", "interview-coach", "Ich möchte ein Interview üben. (Noch keine Speicherentscheidung; stelle nur den ersten Einrichtungsschritt.)", two),
         ("setup_local", "interview-coach", f"setup: Speicherart Lokal, Ziel {c['ws']}, ich bestätige das Ziel. Sprache Deutsch für Bedienung und Interview.", setup),
-        ("candidate_with_cv", "candidate-create", f"Bewerber: Erika Beispiel. Ja, ein Lebenslauf liegt vor: {c['f']}/cv.md", with_cv),
+        ("candidate_with_cv", "candidate-create", f"Bewerber: Erika Beispiel, Interviewsprache Deutsch. Ja, ein Lebenslauf liegt vor: {c['f']}/cv.md", with_cv),
         ("candidate_without_cv_unconfirmed", "candidate-create", "Bewerber: Max Muster, kein Lebenslauf. Meine Angaben: 5 Jahre Backend-Entwickler bei Beispiel GmbH (Python, Go), BSc Informatik, Projekt Zahlungs-API, Ziel Team Lead. Speichere sie als Entwurf und frage mich danach zur Bestätigung, bevor sie als verifiziert gelten.", unconfirmed),
         ("candidate_confirm_new_chat", "candidate-create", "Für Max Muster: Ja, die Angaben (5 Jahre Backend, Python/Go, BSc Informatik, Zahlungs-API, Ziel Team Lead) stimmen alle. Bitte bestätigen.", confirmed),
         ("candidate_confirm_erika", "candidate-create", "Für Erika Beispiel (die mit dem Lebenslauf cv.md): Ja, die aus dem Lebenslauf übernommenen Angaben stimmen alle, auch die Lücken sind akzeptiert. Bitte als bestätigt speichern.", erika_confirmed),
         ("job_create", "job-create", f"Bereite die Stelle aus {c['f']}/posting.md für Erika Beispiel vor. Das Unternehmen ist die Beispiel AG. Die Interviewer sind unbekannt. Recherchiere nicht im Web, vermerke das als offen.", job),
         ("job_training", "job-training", "Starte das Training für die gespeicherte Stelle bei der Beispiel AG für Erika Beispiel. Stelle nur die erste Interviewfrage.", job_training),
+        ("followup_adr_deadline", "candidate-training", "Allgemeines Training für Erika Beispiel (Interviewsprache Deutsch, bitte als Standard speichern), geplant sind 3 Fragen. Deine erste Hauptfrage war: 'Zwei Teams streiten über die Architektur eines neuen Moduls, und der Release-Termin in drei Wochen steht fest. Wie lösen Sie diesen Architekturkonflikt?' Meine Antwort: Ich würde die beiden Optionen in einem ADR festhalten, Pro und Contra mit Kriterien wie Wartbarkeit und Betriebsaufwand aufschreiben, mit beiden Teams durchgehen und am Ende als Verantwortliche die Entscheidung treffen und im ADR begründen.", followup_adr),
         ("same_name_selection", "candidate-training", "__SAME_NAME__", same_name),
         ("training_saved", "candidate-training", f"Allgemeines Training für Max Muster. Deine Frage war: 'Beschreibe einen Produktionsfehler, den du gelöst hast.' Meine Antwort: {ANSWER} Bewerte sie kurz und beende dann mit stop.", training_saved),
         ("reload_new_chat", "interview-coach", "Welche Trainingsläufe gibt es für Max Muster? Nenne die Run-IDs.", reload),

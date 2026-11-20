@@ -38,5 +38,5 @@ general company research, and general training that relies only on what the cand
 ## Result report
 
 Show: candidate name and ID, what was imported or drafted, extraction status and warnings, profile status, open
-points, and the actual storage location. In Git mode say whether the change is **remote gespeichert**.
+points, and the actual storage location.
 In **Nicht speichern** mode nothing is stored; say so and keep the profile in the conversation only.

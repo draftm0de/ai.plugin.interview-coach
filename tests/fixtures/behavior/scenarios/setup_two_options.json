@@ -1,6 +1,6 @@
 {
- "id": "setup_three_options",
- "title": "Erstsetup mit drei Optionen",
+ "id": "setup_two_options",
+ "title": "Erstsetup mit zwei Optionen",
  "skills": [
   "interview-coach"
  ],
@@ -16,16 +16,14 @@
      "Lokal"
     ],
     [
-     "Git"
-    ],
-    [
      "Nicht speichern"
     ]
    ],
    "must_not_contain": [
     "Dateien selbst verwalten",
     "Wie lautet der Pfad",
-    "Wie lautet die Repository-URL"
+    "Wie lautet die Repository-URL",
+    "Git"
    ],
    "tools_exclude": [
     "project-init",
@@ -41,6 +39,32 @@
    ],
    "tools_exclude": [
     "project-init"
+   ],
+   "required_groups": [
+    [
+     "{PROJECT}/interview-data"
+    ],
+    [
+     "Ja, hier speichern"
+    ],
+    [
+     "Nein, anderen Ordner wählen"
+    ]
+   ],
+   "must_not_contain": [
+    "Gib bitte einen absoluten Pfad an"
+   ]
+  },
+  {
+   "user": "Nein, anderen Ordner wählen.",
+   "must_contain_any": [
+    "Pfad",
+    "Ordner",
+    "Verzeichnis"
+   ],
+   "tools_exclude": [
+    "project-init",
+    "candidate-create"
    ]
   },
   {
@@ -65,6 +89,10 @@
   {
    "type": "exists",
    "glob": "cfg/*.json"
+  },
+  {
+   "type": "absent",
+   "path": "project/interview-data"
   }
  ]
 }

@@ -22,7 +22,7 @@ Die Schreibweisen folgen der jeweiligen Host-Dokumentation und sind in den isoli
 
 > Starte die Einrichtung von interview-coach. Verwende Deutsch.
 
-Der Coach bietet genau drei Speicheroptionen an: **Lokal**, **Git** (privates GitHub/GitLab-Repository), **Nicht speichern**. Danach fragt er nach Pfad bzw. Repository und bestätigt das Ziel. Bei Git gehören Commits und Pushes im gewählten Repository zum Speichern. Details: [Speicherung](storage.md).
+Der Coach bietet genau zwei Speicheroptionen an: **Lokal**, **Nicht speichern**. Danach fragt er nach lokalem Pfad und bestätigt das Ziel. Details: [Speicherung](storage.md).
 
 ## 2. Bewerber anlegen (`candidate-create`)
 
@@ -55,9 +55,10 @@ Bewerber und Stelle wählen → vorhandene Recherche wird wiederverwendet, zeita
 | `mock` | Ununterbrochene Simulation | am Ende |
 | `briefing` | Kompakte Vorbereitung | ohne Antwortbewertung |
 
+- **Nachfragen:** Fehlt in deiner Antwort eine wesentliche, tatsächlich gestellte Anforderung oder ist etwas mehrdeutig, stellt der Interviewer genau eine konkrete Nachfrage zur selben Hauptfrage – ohne vorher Lösung, Musterantwort, Bewertung oder Verbesserungsliste zu geben. Du musst nicht die ganze Antwort wiederholen. Bei vollständigen Antworten gibt es keine künstliche Nachfrage; es gibt keine feste Quote und keine endlose Schleife. Die Bewertung trennt Erstantwort und Ergänzungen (spontan, nach Nachfrage selbst konkretisiert, offen, mit Hilfe); die Anzahl der Nachfragen allein kostet keine Punkte. Im Mock-Modus gibt es natürliche Nachfragen, Bewertung erst am Ende. Details: `skills/_shared/references/followup.md`.
 - `stop` / `beenden` / `abbrechen` beendet sofort ohne zweite Bestätigung; bei gespeichertem Bewerber entsteht ein Teilrun (`stopped_early`).
 - `pause` speichert einen Checkpoint; die Fortsetzung läuft unter neuer Run-ID, nur beim selben Bewerber und derselben Stelle.
-- Bedien- und Interviewsprache sind getrennt einstellbar.
+- Die Bediensprache gilt für das Projekt. Die Interviewsprache wird pro Bewerber bestätigt; jede Stelle kann eine eigene Abweichung verwenden. Ohne Abweichung gilt der Bewerberstandard. Andere Sprachen als Deutsch/Englisch sind möglich.
 - Fortschritt: nur unabhängige Antworten zählen; `improving` nach zwei spontanen erfolgreichen Antworten in verschiedenen Szenarien, `stable` erst nach Bestätigung in einem späteren Lauf ohne Coaching. Modellantworten sind keine Kompetenznachweise.
 
 Technische Rollen können Coding, Debugging, Review und Systemdesign üben; Code wird nur in sicherer, autorisierter Isolation ausgeführt, sonst als „nicht ausgeführt“ bewertet.

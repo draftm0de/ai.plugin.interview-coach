@@ -16,7 +16,7 @@ Ein Plugin mit fünf Coaching-Skills und einer lokalen Python-Runtime für Claud
 
 ## Voraussetzungen
 
-Für die Installation füge den Marketplace `https://github.com/draftm0de/ai.plugins` hinzu und wähle Interview Coach. Kein ZIP oder lokaler Checkout ist nötig. Die Runtime benötigt Python 3.10+; Git nur für den Git-Speicher. Host-Ausführung und dauerhafte Speicherung müssen verfügbar und geprüft sein.
+Für die Installation füge den Marketplace `https://github.com/draftm0de/ai.plugins` hinzu und wähle Interview Coach. Kein ZIP oder lokaler Checkout ist nötig. Die Runtime benötigt Python 3.10+. Host-Ausführung und dauerhafte Speicherung müssen verfügbar und geprüft sein.
 
 ## Datenschutz und Speicherung
 
@@ -30,7 +30,7 @@ Nichts wird persistiert: keine Dateien, Zeiger, Sperren, Journale, Exporte, CV-K
 
 ### Welche Speicheroptionen gibt es?
 
-Genau drei: **Lokal**, **Git** (nur privates GitHub/GitLab-Repository) und **Nicht speichern**. „Dateien selbst verwalten“ gibt es nicht mehr; bei Speicherfehlern bietet der Coach Wiederherstellung oder eine neue Speicherwahl an.
+Genau zwei: **Lokal**, **Nicht speichern**. „Dateien selbst verwalten“ gibt es nicht mehr; bei Speicherfehlern bietet der Coach Wiederherstellung oder eine neue Speicherwahl an.
 
 ### Wann ist etwas „remote gespeichert“?
 
@@ -74,4 +74,4 @@ Nur strukturierte `paused`-Checkpoints ohne bereits gespeicherte Fortsetzung sin
 
 Eine höhere Note bewertet eine konkrete Antwort, nicht stabile Kompetenz oder Einstellungschancen. Ein überarbeiteter Versuch nach Coaching ist kein unabhängiger Kompetenznachweis.
 
-Die [Beispiele](screens.md) enthalten gerenderte Auszüge eines fiktiven CLI-Tests, keine Host-Screenshots. Deterministische Tests decken Manifeste, Paketierung, Bewerber-/Stellen-/Run-Logik, Extraktion, Wiederherstellung und den Git-Ablauf gegen lokale Bare-Repositories ab – **nicht** GitHub/GitLab live. Modellszenarien sind heuristisch. Isolierte Claude-Code-/Codex-Läufe und Live-Git bleiben offen; siehe die [Abnahmematrix](../acceptance.md).
+Die [Beispiele](screens.md) enthalten gerenderte Auszüge eines fiktiven CLI-Tests, keine Host-Screenshots. Deterministische Tests decken Manifeste, Paketierung, Bewerber-/Stellen-/Run-Logik, Extraktion, Wiederherstellung ab. Modellszenarien sind heuristisch. Isolierte Claude-Code-/Codex-Läufe bleiben offen; siehe die [Abnahmematrix](../acceptance.md).

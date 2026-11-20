@@ -4,6 +4,8 @@
 
 ### Added
 
+- Realistic follow-up dialogue (`skills/_shared/references/followup.md`): one concrete follow-up per turn on the same main question (clarification, completion, deepening), no hints or rating before it, no blanket deduction, role-fit clarification, STOP first. Run format 4 stores main questions, follow-ups and retries with separate counters; `finish` requires `--dialogue-file`; run format 3 is refused without migration.
+
 - Skills `candidate-create`, `candidate-training`, `job-create`, `job-training` next to the `interview-coach` entry point.
 - Several candidates per project with stable IDs (equal names allowed), CV import (PDF, DOCX, Markdown) with byte-exact originals, Markdown and provenance, and profile building without a CV with confirmation status.
 - Candidate-owned jobs with append-only posting, research, match and preparation snapshots; runs carry candidate and job assignment.

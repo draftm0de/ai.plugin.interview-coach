@@ -8,7 +8,7 @@
 
 This repository contains **Interview Coach** (`interview-coach`) with five skills (`interview-coach`, `candidate-create`, `candidate-training`, `job-create`, `job-training`) and a shared runtime under `skills/_shared/`; it has no marketplace of its own. Supported hosts: **Claude Code** and **Codex**. The installation source is **Draftmode AI Plugins** (`draftmode-ai-plugins`): `https://github.com/draftm0de/ai.plugins`. Whether the current extension is published there is not evidenced; a repository import delivers the published state.
 
-Prerequisites: Python 3.10+ for the runtime; Git only for Git storage (optionally `gh`/`glab` for the visibility check); `pdftotext`, `mutool` or Python `pypdf` for PDF import. **Nothing is installed automatically**; if something is missing the coach names exactly what.
+Prerequisites: Python 3.10+ for the runtime; `pdftotext`, `mutool` or Python `pypdf` for PDF import. **Nothing is installed automatically**; if something is missing the coach names exactly what.
 
 ## Install
 
@@ -44,7 +44,7 @@ Remove **Interview Coach** in plugin settings. Keep private training data outsid
 
 ## Verify first use
 
-Open a new session and send **“Start interview-coach setup”**. Select English and **Do not save**, practice with a fictional question and finish with `stop`. Persistent storage (Local or private Git) needs a target you explicitly confirm; see [Storage](storage.md). Internet research requires internet access.
+Open a new session and send **“Start interview-coach setup”**. Select English and **Do not save**, practice with a fictional question and finish with `stop`. Persistent storage (Local) needs a target you explicitly confirm; see [Storage](storage.md). Internet research requires internet access.
 
 Check that both **Plugin Manager** and **Interview Coach** are offered by the marketplace. [Development](development.md) · [Evidence](release-evidence.md).
 

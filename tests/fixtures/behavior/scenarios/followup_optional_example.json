@@ -1,0 +1,69 @@
+{
+ "id": "followup_optional_example",
+ "title": "F: optionales reales Beispiel fehlt – kein Abzug",
+ "skills": [
+  "candidate-training"
+ ],
+ "context": "Host: Claude Code or Codex (simulated). Current project folder: {PROJECT}. Files live under {FILES}. This project already has local storage configured at {WS} (verified by project-show). Use --project {PROJECT} for runtime calls.",
+ "preset": {
+  "storage": "local",
+  "candidates": [
+   {
+    "name": "Erika Beispiel",
+    "cv": "# Erika Beispiel\n\n## Berufserfahrung\n- Backend-Entwicklerin, Muster GmbH, 2019-2024: Python-Services, PostgreSQL, Kubernetes-Betrieb\n\n## Ausbildung\n- BSc Informatik, Beispiel-Universität, 2018\n\n## Skills\nPython, Go, SQL\n",
+    "profile": "# Profil Erika Beispiel\n- Backend-Entwicklerin, 5 Jahre Python (Quelle: CV)\n- Kubernetes-Betrieb (Quelle: CV)\n",
+    "interview_language": "de"
+   }
+  ]
+ },
+ "steps": [
+  {
+   "user": "Starte allgemeines Training für Erika Beispiel, geplant sind 3 Fragen. Stelle mir bitte genau diese Frage als erste Hauptfrage: Stellen Sie sich vor, ein wichtiger Kunde fordert kurzfristig ein Feature, das Ihr Sprintziel gefährdet. Wie gehen Sie vor? Wenn möglich, nennen Sie ein reales Beispiel.",
+   "judge": [
+    "one_question"
+   ],
+   "tools_exclude": [
+    "finish"
+   ]
+  },
+  {
+   "user": "Ich würde mit dem Kunden und dem Team Aufwand und Wert klären, mit dem Product Owner priorisieren, entscheiden, ob das Feature in den Sprint passt oder verschoben wird, und das Ergebnis dem Kunden transparent mitteilen. Ein reales Beispiel habe ich dafür gerade nicht parat.",
+   "judge": [
+    "no_invention",
+    "no_deduction_optional_example",
+    "no_artificial_completion"
+   ],
+   "tools_exclude": [
+    "finish"
+   ],
+   "judge_if_rated": [
+    "strengths",
+    "no_false_missing"
+   ]
+  },
+  {
+   "user": "stop",
+   "tools_include": [
+    "finish",
+    "stopped_early",
+    "--dialogue-file"
+   ],
+   "no_resume_promise": true
+  }
+ ],
+ "artifacts": [
+  {
+   "type": "run_field",
+   "equals": {
+    "answered_count": 1
+   }
+  },
+  {
+   "type": "run_dialogue",
+   "allowed_kinds": [
+    "deepening"
+   ],
+   "no_gaps": true
+  }
+ ]
+}

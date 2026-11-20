@@ -1,6 +1,6 @@
 ---
 name: interview-coach
-description: Central entry point and setup for adaptive job-interview coaching in Claude Code and Codex. Choose where data is stored (Lokal, Git, Nicht speichern), then create candidates, train generally, prepare jobs and train for a job. Use for setup, status and routing.
+description: Central entry point and setup for adaptive job-interview coaching in Claude Code and Codex. Choose where data is stored (Lokal, Nicht speichern), then create candidates, train generally, prepare jobs and train for a job. Use for setup, status and routing.
 ---
 
 # Interview Coach
@@ -21,16 +21,15 @@ Natural language works as well ("lege einen Bewerber an", "trainiere mich für d
 
 ## Language and session controls
 
-**Before the first response in every chat**, load `../_shared/references/session-control.md` and the workspace `preferences.json` if storage is configured. Reply in the configured interface language; with no confirmed preference use the user's current language. Never default to English because this skill is written in English. Interview language is separate.
+**Before the first response in every chat**, load `../_shared/references/session-control.md` and the workspace `preferences.json` if storage is configured. Reply in the configured interface language; with no confirmed preference use the user's current language. Never default to English because this skill is written in English. Interview language is separate: candidate default, optionally overridden for one selected job. Project setup confirms only the interface language; follow `session-control.md` for candidate/job language selection.
 
 When the user says `stop`, `end`, `beenden`, `abbrechen` (or the host-native form of the stop command), immediately end questioning, summarize the available evidence and persist a partial run plus updated state marked `stopped_early` — without a second confirmation. `pause` saves a resumable checkpoint. In **Nicht speichern** mode stop gives an in-chat summary only.
 
 ## Setup and storage
 
-If the project has no storage decision, the user asks for `setup`, or a stored target is unreachable, follow `../_shared/references/setup.md` before anything else. Exactly three options: **Lokal**, **Git**, **Nicht speichern** — type first, then the concrete path or private repository. Contracts: `../_shared/references/storage.md`, runtime commands: `../_shared/references/runtime.md`.
+If the project has no storage decision, the user asks for `setup`, or a stored target is unreachable, follow `../_shared/references/setup.md` before anything else. Exactly two options: **Lokal**, **Nicht speichern** — type first, then the concrete local path. Contracts: `../_shared/references/storage.md`, runtime commands: `../_shared/references/runtime.md`.
 
 - **Nicht speichern**: no skill-managed persistence at all — no workspace, pointer, lock, journal, export, CV copy, job, run or learning state; never run the runtime. Work continues in the conversation only; do not promise availability in a later chat.
-- **Git**: private GitHub/GitLab only; saving means committing and pushing to the chosen repository. Report **remote gespeichert** only after `git-publish` succeeded; a local-only change is not a remote save.
 - A save error is shown with recovery or a new storage choice; never export files or change the mode unasked. "Dateien selbst verwalten" is not an offered mode.
 
 ## Routing after setup
@@ -51,7 +50,8 @@ If the project has no storage decision, the user asks for `setup`, or a stored t
 
 1. Briefly name the interview type, 2–3 prioritized learning goals and evidence gaps.
 2. In coached modes ask **one question at a time** and wait for the user's own answer; never pre-answer.
-3. After each answer give a role-relative **Gesamtbewertung x/10**, a short breakdown by relevant criteria, concrete strengths, specific improvements and, when useful, a natural spoken model answer derived only from facts the candidate provided (`../_shared/references/evaluation.md`). In `mock`, evaluate only at the end.
+2a. After each answer follow `../_shared/references/followup.md`: if an essential requirement of the question is open, ambiguous or contradictory, ask exactly one concrete follow-up (one question mark, no second question joined by "und") on the same main question — no model answer, hint, rating or improvement list before it, no complete retry demanded, no endless loop. Complete answers get no completion question: at most one meaningful `deepening` follow-up (no deduction, no rating or solution first, never required), otherwise close and rate the block. Follow-ups are counted apart from main questions; `stop` beats any open follow-up. `mock` allows natural follow-ups with feedback only at the end.
+3. When the question block is closed, give a role-relative **Gesamtbewertung x/10**, a short breakdown by relevant criteria, concrete strengths, specific improvements and, when useful, a natural spoken model answer derived only from facts the candidate provided (`../_shared/references/evaluation.md`). In `mock`, evaluate only at the end.
 4. Require a second independently worded attempt when an important weakness recurs and compare.
 5. Adapt later questions to observed performance and role; do not recycle questions verbatim.
 6. Situational answers: goal/context → 2–3 concrete steps → decision/owner → stakeholder communication → intended or evidenced effect.
@@ -65,7 +65,7 @@ If the project has no storage decision, the user asks for `setup`, or a stored t
 
 ## Completion contract
 
-For each finished or stopped session of a stored candidate: `status` → prepare run and updated `state.md` (that candidate only) → `finish` (with `--job-id` for job training) → report the actual location. In Git mode then `git-publish` and report remote status honestly. A weakness is never "resolved" on one coached answer: improving needs two spontaneous successful answers in different scenarios, stable needs confirmation in a later run without coaching. No unverified test, research or save claims.
+For each finished or stopped session of a stored candidate: `status` → prepare run and updated `state.md` (that candidate only) → `finish` (with `--job-id` for job training and the validated `--dialogue-file`, `followup.md`) → report the actual location. A weakness is never "resolved" on one coached answer: improving needs two spontaneous successful answers in different scenarios, stable needs confirmation in a later run without coaching. No unverified test, research or save claims.
 
 ## Validation
 

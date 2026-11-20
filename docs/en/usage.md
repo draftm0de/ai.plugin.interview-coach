@@ -22,7 +22,7 @@ The spellings follow each host's documentation and are **not** proven by isolate
 
 > Start interview-coach setup. Use English.
 
-The coach offers exactly three storage options: **Local**, **Git** (private GitHub/GitLab repository), **Do not save**. It then asks for the path or repository and confirms the target. With Git, commits and pushes in the chosen repository are part of saving. Details: [Storage](storage.md).
+The coach offers exactly two storage options: **Local**, **Do not save**. It then asks for the local path and confirms the target. Details: [Storage](storage.md).
 
 ## 2. Create a candidate (`candidate-create`)
 
@@ -55,9 +55,10 @@ Choose candidate and job → existing research is reused, time-sensitive facts r
 | `mock` | Uninterrupted simulation | at the end |
 | `briefing` | Compact preparation | no answer scoring |
 
+- **Follow-up questions:** If your answer leaves an essential, actually asked requirement open or is ambiguous, the interviewer asks exactly one concrete follow-up on the same main question — without giving a solution, model answer, rating or improvement list first. You do not have to repeat the whole answer. A complete answer gets no artificial follow-up; there is no fixed quota and no endless loop. The rating keeps your first answer and your additions apart (spontaneous, concretized after a follow-up, still open, needed help); the number of follow-ups alone costs no points. In `mock` follow-ups are natural and the rating comes at the end. Details: `skills/_shared/references/followup.md`.
 - `stop` / `end` ends immediately without a second confirmation; for a stored candidate a partial run (`stopped_early`) is saved.
 - `pause` saves a checkpoint; continuing happens under a new run ID, only for the same candidate and job.
-- Interface and interview language are configurable separately.
+- Interface language belongs to the project. Interview language defaults belong to candidates; each job can override its candidate’s default independently, including jobs at the same company. Language choices are not limited to German/English.
 - Progress: only independent answers count; `improving` after two spontaneous successes in different scenarios, `stable` only after confirmation in a later run without coaching. Model answers are not evidence of competence.
 
 Technical roles can practice coding, debugging, review and system design; code is executed only in a safe, authorized isolation, otherwise it is evaluated as "not executed".

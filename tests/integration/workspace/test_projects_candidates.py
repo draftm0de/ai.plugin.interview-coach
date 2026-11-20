@@ -197,7 +197,7 @@ class CandidateIdentity(Base):
         outside.mkdir()
         link = self.root / 'candidates' / 'c-link-12345678'
         link.symlink_to(outside)
-        with self.assertRaisesRegex(ValueError, 'symlink'):
+        with self.assertRaisesRegex(ValueError, 'symlink|symbolic link'):
             iw.snapshot(self.root, 'c-link-12345678')
         self.assertTrue(self.cdir(cid).is_dir())
         self.assertEqual([], list(outside.iterdir()))

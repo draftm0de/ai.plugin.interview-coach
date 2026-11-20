@@ -1,4 +1,4 @@
-"""Shared helpers: fictional fixtures, runtime import, fake provider CLI and local bare Git repositories."""
+"""Shared helpers: fictional fixtures, runtime import, local workspaces."""
 import contextlib
 import io
 import json
@@ -19,11 +19,9 @@ sys.path.insert(0, str(SCRIPTS))
 sys.dont_write_bytecode = True
 import interview_workspace as iw  # noqa: E402
 import coach_extract as extract  # noqa: E402
-import coach_git as gitstore  # noqa: E402
 import coach_core as core  # noqa: E402
 
 RUNTIME = SCRIPTS / 'interview_workspace.py'
-REMOTE = 'https://github.com/example-owner/interview-data.git'
 
 
 def make_docx(path, paragraphs=('Erika Beispiel',), *, headings=(), image=False, footer=None, table=None, textbox=None):
@@ -78,6 +76,26 @@ def snapshot(base):
             and not (p.name == 'lock' and p.parent.name == '.journal' and p.stat().st_size == 0)}
 
 
+def block(n, *, answer='Eigene Antwort.', followups=(), retries=(), open_gaps=()):
+    """Fictional dialogue block for main question n (1-based)."""
+    return dict(key=f'q-{n}', question=f'Frage {n}?', initial_answer=answer,
+                initial_assessment=None if answer is None else 'Erstantwort: solide.',
+                block_assessment=None if answer is None else 'Frageblock: solide.',
+                followups=list(followups), retries=list(retries), other_open_gaps=list(open_gaps))
+
+
+def followup(block_n, n, *, kind='completion', answer='Ergänzung.', hints=False, gap='Termindruck nicht behandelt',
+             resolution=None, text=None):
+    if kind == 'deepening':
+        gap = None
+    return dict(id=f'q-{block_n}-f{n}', kind=kind, reason='Konkreter Anlass', text=text or f'Nachfrage {n}?', answer=answer,
+                hints_before=hints, gap=gap, resolution=resolution or ('pending' if answer is None else 'closed'))
+
+
+def dialogue(answered):
+    return [block(i + 1) for i in range(answered)]
+
+
 class Base(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -114,82 +132,8 @@ class Base(unittest.TestCase):
     def finish(self, cid, run_id, **kw):
         defaults = dict(status='completed', answered_count=3, planned_count=3)
         defaults.update(kw)
+        if 'dialogue' not in defaults:
+            defaults['dialogue'] = dialogue(defaults['answered_count'])
         if 'expected_state_sha256' not in defaults:
             defaults['expected_state_sha256'] = self.state_hash(cid)
         return iw.finish(self.root, cid, run_id, f'# Run {run_id}\nQ1 ...\n', defaults.pop('state_text', f'# State after {run_id}\n'), **defaults)
-
-
-class GitCase(Base):
-    """Local bare repository behind a github.com URL (rewritten by git config); fake `gh`; logging git wrapper."""
-    gh_private = 'true'
-    gh_permission = 'WRITE'
-
-    def setUp(self):
-        super().setUp()
-        self.bare = self.base / 'remote.git'
-        subprocess.run(['git', 'init', '-q', '--bare', '-b', 'main', str(self.bare)], check=True)
-        self.bin = self.base / 'bin'
-        self.bin.mkdir()
-        self.gitlog = self.base / 'git-calls.log'
-        real = shutil.which('git')
-        self._script('git', f'#!/bin/sh\nprintf "%s\\n" "$*" >> "{self.gitlog}"\nexec "{real}" "$@"\n')
-        self._script('gh', '#!/bin/sh\nprintf \'{"isPrivate": %s, "viewerPermission": "%s"}\' "$FAKE_GH_PRIVATE" "$FAKE_GH_PERMISSION"\n')
-        self.clone = self.base / 'clone'
-        self.env = {'PATH': f'{self.bin}{os.pathsep}{os.environ["PATH"]}', 'FAKE_GH_PRIVATE': self.gh_private,
-                    'FAKE_GH_PERMISSION': self.gh_permission,
-                    'GIT_CONFIG_COUNT': '1', 'GIT_CONFIG_KEY_0': f'url.{self.bare}.insteadOf', 'GIT_CONFIG_VALUE_0': REMOTE,
-                    'GIT_AUTHOR_NAME': 'Test', 'GIT_AUTHOR_EMAIL': 'test@example.invalid',
-                    'GIT_COMMITTER_NAME': 'Test', 'GIT_COMMITTER_EMAIL': 'test@example.invalid',
-                    'GIT_CONFIG_GLOBAL': str(self.base / 'gitconfig'), 'GIT_CONFIG_NOSYSTEM': '1'}
-        (self.base / 'gitconfig').write_text('')
-        patcher = mock.patch.dict(os.environ, self.env)
-        patcher.start()
-        self.addCleanup(patcher.stop)
-        # Controlled test double: the local bare repository stands for the authorized GitHub repository. Anything else
-        # (other paths, other hosts) keeps its real, unprovable identity. Production code has no such bypass.
-        self.real_identity = gitstore.identity_of
-        authorized = gitstore._normalized(REMOTE)
-        self.bare_str = str(self.bare)
-        double = lambda url: authorized if url == self.bare_str else self.real_identity(url)  # noqa: E731
-        identity = mock.patch.object(gitstore, 'identity_of', side_effect=double)
-        identity.start()
-        self.addCleanup(identity.stop)
-        self.extra_env = self.env
-
-    def _script(self, name, text):
-        path = self.bin / name
-        path.write_text(text)
-        path.chmod(path.stat().st_mode | stat.S_IEXEC)
-
-    def setup_git(self, **kw):
-        return iw.setup_project(self.project, 'git', self.clone, config_dir=self.cfg, remote=REMOTE, **kw)
-
-    def cli(self, *args, project=None, expect=0):
-        """CLI run in a subprocess with the same identity test double (separate process, so it is applied by a launcher)."""
-        launcher = (f"import sys; sys.path.insert(0, {str(SCRIPTS)!r}); import coach_git as g, interview_workspace as iw; "
-                    f"a = g._normalized({REMOTE!r}); real = g.identity_of; "
-                    f"g.identity_of = lambda u: a if u == {self.bare_str!r} else real(u); "
-                    "sys.exit(iw.main(sys.argv[1:]))")
-        done = subprocess.run([sys.executable, '-B', '-c', launcher, '--config-dir', str(self.cfg), *map(str, args)],
-                              capture_output=True, text=True, env=dict(os.environ, **self.env))
-        self.assertEqual(expect, done.returncode, done.stderr + done.stdout)
-        return done
-
-    def attestation(self, **kw):
-        base = {'private': True, 'write': True, 'source': 'example-connector', 'repository': 'example-owner/interview-data',
-                'user_confirmed': True}
-        base.update(kw)
-        return base
-
-    def run_git(self, *args, cwd=None):
-        return subprocess.run(['git', *args], cwd=cwd or self.clone, capture_output=True, text=True, check=True).stdout.strip()
-
-    def remote_head(self):
-        done = subprocess.run(['git', '--git-dir', str(self.bare), 'rev-parse', '-q', '--verify', 'refs/heads/main'], capture_output=True, text=True)
-        return done.stdout.strip() or None
-
-    def second_clone(self):
-        self._clones = getattr(self, '_clones', 0) + 1
-        other = self.base / f'other{self._clones}'
-        subprocess.run(['git', 'clone', '-q', str(self.bare), str(other)], check=True)
-        return other

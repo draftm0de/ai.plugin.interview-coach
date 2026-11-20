@@ -6,14 +6,13 @@
 
 The authoritative description is [storage.md in the skills](../../skills/_shared/references/storage.md); this page explains it for users.
 
-## Three storage options
+## Two storage options
 
 On first use (or with `setup`) the coach asks for the storage type first and the concrete target second. The current project folder may be suggested but never becomes the target unasked.
 
 | Option | Meaning |
 |---|---|
 | **Local** (Lokal) | A durable directory you name. Read/write access is checked before setup. |
-| **Git** | An explicitly named **private** GitHub or GitLab repository. Saving means committing and pushing changes in that repository. |
 | **Do not save** (Nicht speichern) | Nothing is persisted: no files, pointers, locks, journals, exports, CV copies, jobs, runs or learning state. Several candidates and jobs stay distinguishable inside the chat only; a later chat does not know them. `stop` gives an in-chat summary. |
 
 "Manage files yourself" no longer exists, neither as a mode nor as a fallback. On save errors the coach shows the error and offers recovery or a new storage choice; it never exports unasked or switches the mode.
@@ -39,18 +38,13 @@ Every project folder has its own pointer to its storage target (`~/.config/zyris
 - **CV**: the original stays byte-identical (SHA-256 in `source.json`); `extracted.md` carries the content, not the layout. Status `complete` or `partial` (gaps such as images, unreadable pages, headers/footers, missing text layer). Partial imports are not reported as done.
 - **Profile**: `missing`, `draft` or `confirmed`; confirmed only after you confirmed the factual content. Statement origin (CV, user statement, model suggestion) stays visible.
 - **Jobs** belong to exactly one candidate. Posting, research (with sources and retrieval date), match and preparation are numbered snapshots; earlier versions and the original posting remain.
-- **Runs** are immutable; the header names `candidate_id` and optionally `job_id`. The **learning state** (`state.md`) is per candidate and spans jobs; job-specific fit gaps live in the job's `match` snapshot.
+- **Runs** are immutable (run format 4); the header names `candidate_id`, optionally `job_id` and, per main question `q-N`, the dialogue: original answer, follow-ups (`q-N-fM`: wording, kind, trigger, answer, hint flag, gaps) and retries. `answered_count` counts main questions only; `followup_count`, `followup_answered_count` and `retry_count` are kept separately. Run format 3 (without dialogue data) is rejected before writes and never migrated. The **learning state** (`state.md`) is per candidate and spans jobs; job-specific fit gaps live in the job's `match` snapshot.
 
-## Git in detail
+## Removed storage mode
 
-- Only `github.com` and `gitlab.com`. No tokens or passwords are requested or stored; access uses your existing `git`/`gh`/`glab` or an authorized connector.
-- Before setup, read access, **private** status and write permission for exactly this repository are confirmed (via `gh`/`glab`, or a connector attestation that names the repository and carries your confirmation). A connector attestation is a relayed statement, not independent proof; it is never stored as evidence and is required again for every setup/publish. A change of target, storage type or repository is decided before any change and needs `--switch`. No test commit is made to probe permissions.
-- Every saving command first requires a **clean** Git working tree (no staged, edited or foreign files, also not inside managed folders) and then commits exactly its own changes locally. Unexpected changes abort; nothing is stashed, reset or published — you resolve them yourself. All saving and publishing commands run under one shared cooperative Git-workspace lock (also across different candidates); only the paths the command wrote itself are committed, by explicit path (never `git add -A`); leftovers of a failed save are recorded with SHA-256 and resumed only while unchanged, unknown journal formats never. `git-pull`/`git-status` use the same lock. Staged changes of any kind (also under `.journal/`) are never hidden and abort saving and publishing with the affected paths (nothing is unstaged, deleted or reset automatically); unpublished commits containing `.journal` (or legacy `.zyris`) path segments are not pushed. Not protected: programs that ignore the cooperative lock. `git-publish` never stages: it re-checks privacy and write access and that `origin` (fetch and push URL) still names exactly the authorized repository and the URLs pinned at setup (several push targets, a different `pushurl`, any target without a provable identity of the authorized repository — for example redirected to a local path via `insteadOf` → abort before any write, no remote reconfiguration and no override switch), integrates foreign changes by rebase, pushes **without force** and verifies the remote head at the push target (a matching fetch target proves nothing). Only then does the coach report **remote saved**. A local-only change or a commit is not a remote success.
-- A conflict in the same file, a rejected or interrupted push, missing rights or an unconfirmed remote head end in an error; local commits are kept and foreign changes are not overwritten.
-- At session start `git-pull` fetches foreign changes (fast-forward only).
-- Limits: attributing changes to a save assumes nobody else writes to the working tree during it. The runtime coordinates when a save counts as remotely successful; transport and sign-in belong to external tools. There is no provider SDK. Live behavior against GitHub/GitLab is untested (see [acceptance](../acceptance.md)).
+Git storage is no longer supported. Existing Git configurations are rejected unchanged; there is no automatic migration to local storage.
 
-## Errors and recovery (local and Git working copy)
+## Errors and recovery (local)
 
 Each candidate has its own lock and journal. A run is reported saved only after content verification. Run and learning state are not one atomic multi-file transaction; `.journal/pending.json` records the intent.
 

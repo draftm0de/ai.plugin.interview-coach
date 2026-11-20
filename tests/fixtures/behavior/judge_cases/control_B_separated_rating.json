@@ -1,0 +1,32 @@
+{
+ "id": "control_B_separated_rating",
+ "source": "constructed fictional control",
+ "note": "Scores only rate clarity, honesty and specificity; fit is stated separately without a score reason.",
+ "items": [
+  "role_fit_job_specific"
+ ],
+ "user": "Ich meine damit, selbst technisch umzusetzen, also selbst zu programmieren. Deshalb strebe ich die Product-Stelle eigentlich nicht an.",
+ "reply": "Danke, damit ist die Motivation klar. Der Block ist geschlossen, hier die Auswertung.\n\n**Gesamtbewertung: 7/10**\nDu hast die Nachfrage ehrlich und eindeutig beantwortet: Du meinst die eigene technische Umsetzung und strebst die Product-Stelle deshalb eigentlich nicht an.\n\n**Einzelbewertung**\n- **Klarheit:** Erstantwort 4/10, nach der Nachfrage 9/10. Die Konkretisierung kam erst auf die Nachfrage hin.\n- **Ehrlichkeit und Selbstkenntnis:** 9/10. Du sagst offen, was du willst.\n- **Konkretheit der Aussage:** 8/10. \"selbst technisch umzusetzen, also selbst zu programmieren\" ist eindeutig.\n\n**Was gut war**\n- Du hast ohne Ausweichen gesagt, was du suchst.\n\n**Was ich verbessern würde**\n- Sag schon im ersten Satz, was du mit \"echte Realisierung\" meinst.\n\n**Passung zur Stelle**\nDein Wunsch nach eigenem Programmieren spricht gegen den Schwerpunkt der Anzeige (Produktstrategie, Backlog, Führung eines cross-funktionalen Teams). Das ist ein stellenbezogener Passungspunkt und keine Bewertung deiner Antwort.\n",
+ "history": [
+  [
+   "user",
+   "Starte Training für die Stelle Product Owner Plattform bei Beispiel AG für Erika Beispiel (Modus targeted). Stelle mir bitte als Hauptfrage: Warum möchten Sie in diese Product-Rolle wechseln?"
+  ],
+  [
+   "assistant",
+   "Ich habe alles geladen und starte das Training im Modus **targeted** für Erika Beispiel, Stelle *Product Owner Plattform* bei der Beispiel AG. Das Profil ist bestätigt, die Interviewsprache ist Deutsch.\n\n**Ausgangslage**\n- Lernziele: eine glaubwürdige Motivation für den Wechsel in die Product-Rolle, Produktverantwortung vom Kundenproblem bis zur Wirkung und der Übergang zur Führung eines cross-funktionalen Teams.\n- Offene Punkte am Jobeintrag: Die Gesprächspartner sind noch nicht erfasst.\n- Offene Punkte bei der Recherche: Zur Stelle gibt es noch keine Recherche zu Firma oder Personen und auch keinen Abgleich oder eine Vorbereitung. Die Fragen stützen sich daher nur auf die Stellenanzeige und dein bestätigtes Profil.\n\nDu kannst jederzeit `stop` (beendet und speichert die Sitzung) oder `pause` (speichert einen Checkpoint zum Fortsetzen) sagen.\n\n**Hauptfrage 1:**\n\nWarum möchten Sie in diese Product-Rolle wechseln?\n\nBitte antworte so, wie du es im echten Gespräch sagen würdest.\n"
+  ],
+  [
+   "user",
+   "Ich möchte wieder echte Realisierung."
+  ],
+  [
+   "assistant",
+   "Meinen Sie damit eigene technische Umsetzung oder die Verantwortung für ein Produkt vom Kundenproblem bis zur Wirkung?\n"
+  ]
+ ],
+ "evidence": "Product Owner Plattform (m/w/d), Beispiel AG. Sie verantworten die Produktstrategie der Plattform vom Kundenproblem bis zur Wirkung, priorisieren das Backlog und stimmen sich eng mit der Entwicklung ab. Führungsschwerpunkt: Sie führen ein cross-funktionales Team; technisches Verständnis wird erwartet.",
+ "expect": {
+  "role_fit_job_specific": true
+ }
+}

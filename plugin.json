@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "interview-coach",
-  "description": "Adaptive job interview coaching for Claude Code and Codex: several candidates per project, CV import, job preparation with public research, role-specific practice and evidence-based progress with private storage (local, private Git or none).",
+  "description": "Adaptive job interview coaching for Claude Code and Codex: several candidates per project, CV import, job preparation with public research, role-specific practice and evidence-based progress with private storage (local or none).",
   "author": {
     "name": "Peter Fux",
     "url": "https://draftmode.io"
@@ -23,7 +23,7 @@
       "interface": {
         "displayName": "Interview Coach",
         "shortDescription": "Prepare for job interviews",
-        "longDescription": "Practice role-specific interviews with constructive feedback. Manage several candidates per project, import CVs (PDF, DOCX, Markdown) or build a profile, prepare saved jobs with sourced public research and keep private evidence-based training progress locally, in a private Git repository, or not at all. Developed by Peter Fux at draftmode.",
+        "longDescription": "Practice role-specific interviews with constructive feedback. Manage several candidates per project, import CVs (PDF, DOCX, Markdown) or build a profile, prepare saved jobs with sourced public research and keep private evidence-based training progress locally or not at all. Developed by Peter Fux at draftmode.",
         "developerName": "draftmode",
         "category": "Productivity",
         "capabilities": [

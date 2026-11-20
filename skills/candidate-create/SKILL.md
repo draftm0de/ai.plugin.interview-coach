@@ -9,12 +9,15 @@ Creates a candidate inside the project's storage target. Read `../_shared/refere
 
 ## Flow
 
-1. Storage: no decision yet → setup (exactly **Lokal**, **Git**, **Nicht speichern**). 
+1. Storage: no decision yet → complete the shared setup flow (exactly **Lokal**, **Nicht speichern**, target confirmation, then interface-language confirmation) before candidate creation. For Lokal, offer the known project's `interview-data` subfolder with yes/other-folder choices per `setup.md`; do not demand a typed path first or repeat the question.
 2. Ask for the candidate's name. Equal names are allowed. Names are data, never file paths. Create with `candidate-create --name` — the runtime assigns the stable ID. Before creating, run `candidate-list`; if the same name exists, ask whether this is the same person (then select that candidate instead) or a different one.
-3. Ask: "Gibt es einen Lebenslauf?"
+3. Confirm this candidate's default interview language (one question, separate from the name and CV question).
+   Offer a sensible proposal and allow other languages, not just German/English. Save via
+   `set-interview-language --candidate ID --language TAG`; in Nicht speichern keep it only in this candidate's chat context.
+   Then ask: "Gibt es einen Lebenslauf?"
    - **Yes** → request upload or accessible file, `cv-import`, Markdown + profile per `cv-profile.md`. Report extraction status and every warning. Missing extraction capability → say exactly what is missing; nothing is installed or invented. A partial import is not "done".
    - **No** → build the profile with single questions (experience, education, skills, projects, goals); labeled CV draft + profile as `draft`; confirm facts with the user before they count as verified.
-4. Report: name and ID, CV/profile status, open points, the real storage location. Git: `git-publish`, then say whether it is **remote gespeichert**. Nicht speichern: say that nothing was stored and what stays only in this chat.
+4. Report: name and ID, CV/profile status, open points, the real storage location. Nicht speichern: say that nothing was stored and what stays only in this chat.
 5. Offer `candidate-training` or `job-create`.
 
 ## Guardrails

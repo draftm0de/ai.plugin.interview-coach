@@ -6,9 +6,9 @@
 
 ## Source of truth
 
-Five public skills live under `skills/` (`interview-coach`, `candidate-create`, `candidate-training`, `job-create`, `job-training`); `skills/_shared/` holds, without a `SKILL.md`, the shared runtime (`scripts/`: `interview_workspace.py`, `coach_core.py`, `coach_extract.py`, `coach_git.py`) and the shared references (`references/`). Root `scripts/` contains development tooling only. `plugin.json` defines `interview-coach` with display name **Interview Coach**. `make sync-plugin` derives `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`; `make check-plugin` detects drift. All manifests remain versionless. The shared marketplace lives in the separate `ai.plugins` repository; this plugin has no catalog of its own.
+Five public skills live under `skills/` (`interview-coach`, `candidate-create`, `candidate-training`, `job-create`, `job-training`); `skills/_shared/` holds, without a `SKILL.md`, the shared runtime (`scripts/`: `interview_workspace.py`, `coach_core.py`, `coach_extract.py`) and the shared references (`references/`). Root `scripts/` contains development tooling only. `plugin.json` defines `interview-coach` with display name **Interview Coach**. `make sync-plugin` derives `.claude-plugin/plugin.json` and `.codex-plugin/plugin.json`; `make check-plugin` detects drift. All manifests remain versionless. The shared marketplace lives in the separate `ai.plugins` repository; this plugin has no catalog of its own.
 
-Management tools require Git and Python 3.10+; Make is an optional convenience wrapper. No additional Python packages. The host CLI is needed only for automatic local installation/updates and explicitly selected model tests. The runtime needs Python 3.10+; Git only for Git storage. Missing tools are not installed automatically.
+Management tools require Git and Python 3.10+; Make is an optional convenience wrapper. No additional Python packages. The host CLI is needed only for automatic local installation/updates and explicitly selected model tests. The runtime needs Python 3.10+. Missing tools are not installed automatically.
 
 ## Checks
 
@@ -78,9 +78,6 @@ The scenarios check the domain contract rather than single words: (1) tool calls
 
 `tests/native/run_native.py` counts a runtime call as successful only if it is provably ONE call (`parse_runtime_call`: shlex with quoting, optionally one `sh|bash|zsh -c` wrapper; `;`, `&&`, `||`, pipes, redirects, variable prefixes → not proven) and its own tool result has exit code 0 (unknown ≠ 0). For training, project, candidate and job IDs of `job-show` must match. `training_question` is a bounded deterministic heuristic (posting vocabulary + a question/task that is not a selection/confirmation/preparation clarification); it does not understand meaning and proves no interview quality. A real run can therefore fail more strictly (compound shell commands are not evidence).
 
-### Git tests
-
-`tests/integration/git/` uses temporary local bare repositories behind a `github.com` URL (via `url.<bare>.insteadOf`), a fake `gh` and a logging `git` wrapper (asserting that force is never used). This exercises real git flows but is **not a live GitHub or GitLab acceptance**; private repositories, real authentication and connectors are untested. Write tests against personal repositories are not part of development.
 
 ### Scripted multi-step coaching regression
 

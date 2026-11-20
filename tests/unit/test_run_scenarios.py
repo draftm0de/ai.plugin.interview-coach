@@ -2,6 +2,8 @@
 import importlib.util
 import json
 from pathlib import Path
+import shutil
+import tempfile
 import unittest
 
 ROOT = next(p for p in Path(__file__).resolve().parents if (p / 'Makefile').is_file())
@@ -10,8 +12,12 @@ scenarios = importlib.util.module_from_spec(SPEC)
 import sys
 sys.path.insert(0, str(ROOT / 'tests/behavior'))
 SPEC.loader.exec_module(scenarios)
+sys.path.insert(0, str(ROOT))
+from tests.support import coach as support  # noqa: E402
 
-REQUIRED = {'setup_three_options', 'candidate_create_with_cv', 'candidate_create_without_cv', 'same_name_selection',
+REQUIRED = {'followup_adr_deadline', 'followup_motivation_role_fit', 'followup_complete_answer', 'followup_gap_stays_open',
+            'followup_optional_example', 'followup_stop_open', 'followup_mock', 'followup_pause_resume', 'followup_no_storage',
+            'setup_two_options', 'setup_local_accept', 'candidate_create_with_cv', 'candidate_create_without_cv', 'same_name_selection',
             'general_training_answer', 'job_create_missing_company', 'job_create_unknown_participants',
             'job_create_ambiguous_person', 'job_training_reuse_second_run', 'job_training_second_run',
             'stop_pause_resume', 'no_storage_no_writes', 'storage_failure_no_false_success',
@@ -46,14 +52,19 @@ class Harness(unittest.TestCase):
         return f'TOOL: python3 {scenarios.RUNTIME} {sub}'
 
     def test_scripted_good_model_passes_setup_scenario_and_creates_artifacts(self):
-        scenario = scenarios.load('setup_three_options')
-        replies = ['Wo möchtest du speichern? Lokal, Git (privates Repository) oder Nicht speichern.',
-                   'Welches Verzeichnis (Pfad) soll verwendet werden?']
+        scenario = scenarios.load('setup_two_options')
+        replies = ['Wo möchtest du speichern? Lokal oder Nicht speichern.',
+                   'PLACEHOLDER', 'Welches Verzeichnis (Pfad) soll verwendet werden?']
         holder = {}
 
         def model(prompt):
             if replies:
-                return replies.pop(0)
+                reply = replies.pop(0)
+                if reply == 'PLACEHOLDER':
+                    import re
+                    project = re.search(r'Current project folder: (\S+)\.', prompt).group(1)
+                    return f'Ordner {project}/interview-data: Ja, hier speichern / Nein, anderen Ordner wählen'
+                return reply
             if 'YOUR PREVIOUS REPLY' not in prompt:
                 import re
                 path = re.search(r'in (/\S+/ws) speichern', prompt).group(1)
@@ -141,24 +152,164 @@ class Rubric(unittest.TestCase):
         verdict = lambda prompt: '{"reason": true, "followup": true, "single_followup": false, "score_cautious": true}'
         self.assertEqual(['rubric failed: single_followup'], scenarios.run_judge(verdict, ['reason', 'followup', 'single_followup', 'score_cautious'], 'u', reply)[1])
 
-    def test_invention_verdicts_need_a_verifiable_quote_with_new_content(self):
+    def invented(self, *items):
+        return json.dumps({'no_invention': False, 'invented': list(items)})
+
+    def test_invention_needs_verified_quote_candidate_fact_and_new_content(self):
         user = 'Ich habe den Fehler in der Retry-Logik gefunden und den Support informiert.'
         reply = 'Gut. Formulierung: "Ich habe mich auf stabile Produktionssysteme konzentriert und den Support informiert."'
-        real = '{"no_invention": false, "invented": ["mich auf stabile Produktionssysteme konzentriert"]}'
-        self.assertEqual(['rubric failed: no_invention'], scenarios.run_judge(lambda p: real, ['no_invention'], user, reply)[1])
-        restated = '{"no_invention": false, "invented": ["den Support informiert"]}'              # only restates the candidate's words
-        self.assertEqual([], scenarios.run_judge(lambda p: restated, ['no_invention'], user, reply)[1])
-        fabricated = '{"no_invention": false, "invented": ["quote that is not in the reply"]}'      # judge hallucinated a quote
-        self.assertEqual([], scenarios.run_judge(lambda p: fabricated, ['no_invention'], user, reply)[1])
-        self.assertEqual([], scenarios.run_judge(lambda p: '{"no_invention": false}', ['no_invention'], user, reply)[1])  # unverifiable accusation
+        run = lambda raw, **kw: scenarios.run_judge(lambda p: raw, ['no_invention'], user, reply, **kw)
+        fact = {'quote': 'mich auf stabile Produktionssysteme konzentriert', 'source': 'candidate_fact', 'in_evidence': False}
+        self.assertTrue(run(self.invented(fact))[1][0].startswith('rubric failed: no_invention'))
+        # supported restatement: only with a verifiable evidence quote
+        restated = {'quote': 'den Support informiert', 'source': 'candidate_fact', 'in_evidence': True, 'evidence_quote': 'den Support informiert'}
+        self.assertEqual(([], True), (run(self.invented(restated))[1], run(self.invented(restated))[0]['no_invention']))
+        # NOT a pass: hallucinated quote, accusation without quote, unclassified statement, evidence claim without a verifiable quote
+        no_anchor = dict(restated, evidence_quote='steht nirgends')
+        for raw in (self.invented(dict(fact, quote='quote that is not in the reply')), '{"no_invention": false}', self.invented({'quote': fact['quote']}),
+                    self.invented(dict(restated, evidence_quote=None)), self.invented(no_anchor)):
+            verdicts, problems = run(raw)
+            self.assertIsNone(verdicts['no_invention'], raw)
+            self.assertTrue(problems[0].startswith('rubric unclear: no_invention'), problems)
 
-    def test_judge_verdicts_are_enforced_and_a_missing_judge_is_never_a_pass(self):
+    def test_same_vocabulary_does_not_overrule_a_negative_judge(self):
+        # every content word occurs in the candidate evidence, but the meaning differs: never PASS
+        user = 'Wir haben den Release nicht verschoben. Die Plattform-Gruppe hat entschieden, ich habe 2 Wochen Puffer eingeplant.'
+        cases = {
+            'added negation': ('Sie haben den Release nicht verschoben, nicht wahr?', 'Sie haben den Release nicht nicht verschoben'),
+            'swapped actors': ('Ich habe entschieden, die Plattform-Gruppe hat Puffer eingeplant.', 'die Plattform-Gruppe hat Puffer eingeplant'),
+        }
+        for name, (reply, quote) in cases.items():
+            claim = self.invented({'quote': quote if quote in reply else reply[:30], 'source': 'candidate_fact', 'in_evidence': False})
+            verdicts, problems = scenarios.run_judge(lambda p: claim, ['no_invention'], user, reply)
+            self.assertIsNone(verdicts['no_invention'], name)       # unsupported + same words: UNCLEAR, not the old automatic PASS
+            self.assertTrue(problems and problems[0].startswith('rubric unclear'), (name, problems))
+
+    def test_removed_or_added_negation_and_changed_numbers_are_found_against_the_evidence_quote(self):
+        evidence = 'Wir haben den Release nicht verschoben. Ich habe 2 Wochen Puffer eingeplant.'
+        def check(reply, quote, anchor):
+            claim = self.invented({'quote': quote, 'source': 'candidate_fact', 'in_evidence': True, 'evidence_quote': anchor})
+            return scenarios.run_judge(lambda p: claim, ['no_invention'], 'Weiter.', reply, [], evidence)
+        # removed negation
+        verdicts, problems = check('Sie haben den Release verschoben.', 'den Release verschoben', 'den Release nicht verschoben')
+        self.assertIs(False, verdicts['no_invention'])
+        self.assertIn('negation differs', problems[0])
+        # added negation
+        evidence_pos = 'Wir haben den Release verschoben.'
+        claim = self.invented({'quote': 'den Release nicht verschoben', 'source': 'candidate_fact', 'in_evidence': True, 'evidence_quote': 'den Release verschoben'})
+        verdicts, problems = scenarios.run_judge(lambda p: claim, ['no_invention'], 'Weiter.', 'Sie haben den Release nicht verschoben.', [], evidence_pos)
+        self.assertIs(False, verdicts['no_invention'])
+        self.assertIn('negation differs', problems[0])
+        # changed number (digit versus spelled-out number counts as equal)
+        verdicts, problems = check('Sie haben 4 Wochen Puffer eingeplant.', '4 Wochen Puffer eingeplant', '2 Wochen Puffer eingeplant')
+        self.assertIs(False, verdicts['no_invention'])
+        self.assertIn('numbers differ', problems[0])
+        self.assertEqual(([], True), (lambda r: (r[1], r[0]['no_invention']))(check('Sie haben zwei Wochen Puffer eingeplant.', 'zwei Wochen Puffer eingeplant', '2 Wochen Puffer eingeplant')))
+
+    def test_correct_paraphrase_of_an_earlier_candidate_statement_passes_with_a_verifiable_quote(self):
+        history = [('user', 'Ich habe die Entscheidung im ADR begründet und beide Teams vorher angehört.'), ('assistant', 'Danke.')]
+        reply = 'Sie sagten, dass Sie vor der Entscheidung beide Teams gehört und sie im ADR dokumentiert haben.'
+        claim = self.invented({'quote': 'vor der Entscheidung beide Teams gehört', 'source': 'candidate_fact', 'in_evidence': True,
+                               'evidence_quote': 'beide Teams vorher angehört'})
+        verdicts, problems = scenarios.run_judge(lambda p: claim, ['no_invention'], 'Weiter.', reply, history)
+        self.assertEqual(([], True), (problems, verdicts['no_invention']))
+        # the same claim without the earlier candidate line: not evidence
+        self.assertIsNone(scenarios.run_judge(lambda p: claim, ['no_invention'], 'Weiter.', reply, [])[0]['no_invention'])
+
+    def test_coach_suggestion_label_does_not_release_invented_first_person_answers(self):
+        user = 'Ich würde die Optionen im ADR festhalten.'
+        run = lambda reply, **item: scenarios.run_judge(lambda p: self.invented(dict(item, source='coach_suggestion')), ['no_invention'], user, reply)
+        recommendation = 'Sie könnten die Kriterien vorab mit beiden Teams abstimmen.'
+        self.assertEqual(([], True), (lambda r: (r[1], r[0]['no_invention']))(run(recommendation, quote=recommendation, suggestion_kind='recommendation')))
+        invented_answer = 'Sagen Sie: "Ich habe im letzten Projekt die Latenz um 40 % gesenkt."'
+        quote = 'Ich habe im letzten Projekt die Latenz um 40 % gesenkt'
+        verdicts, problems = run(invented_answer, quote=quote, suggestion_kind='first_person_answer', invents_experience=True)
+        self.assertIs(False, verdicts['no_invention'])
+        self.assertIn('invents experience', problems[0])
+        # judge says "does not invent" but the numbers are new: still found; mislabelled as recommendation: wording decides
+        for kind, flag in (('first_person_answer', False), ('recommendation', None)):
+            verdicts, problems = run(invented_answer, quote=quote, suggestion_kind=kind, invents_experience=flag)
+            self.assertIs(False, verdicts['no_invention'], kind)
+        # hypothetical wording without invented facts is fine; a missing kind or missing verdict stays unclear
+        hypothetical = 'Etwa: "Ich würde die Optionen im ADR festhalten und beide Teams anhören."'
+        hq = 'Ich würde die Optionen im ADR festhalten und beide Teams anhören'
+        self.assertEqual([], run(hypothetical, quote=hq, suggestion_kind='first_person_answer', invents_experience=False)[1])
+        self.assertIsNone(run(hypothetical, quote=hq)[0]['no_invention'])
+        claim_past = 'Sagen Sie: "Ich habe das Team neu aufgestellt."'
+        self.assertIsNone(run(claim_past, quote='Ich habe das Team neu aufgestellt', suggestion_kind='first_person_answer')[0]['no_invention'])
+        self.assertIsNone(run(claim_past, quote='Ich habe das Team neu aufgestellt', suggestion_kind='first_person_answer', invents_experience=False)[0]['no_invention'])
+
+    def test_earlier_candidate_statements_and_released_sources_count_as_evidence(self):
+        reply = 'Sie sagten, Sie hätten das Produktmanagement vorab über den Kompromiss informiert.'
+        quote = 'das Produktmanagement vorab über den Kompromiss informiert'
+        claim = self.invented({'quote': quote, 'source': 'candidate_fact', 'in_evidence': True, 'evidence_quote': quote})
+        history = [('user', 'Ich habe das Produktmanagement vorab über den Kompromiss informiert.'), ('assistant', 'Danke.')]
+        self.assertEqual([], scenarios.run_judge(lambda p: claim, ['no_invention'], 'Weiter.', reply, history)[1])
+        # earlier COACH lines are not evidence
+        coach_only = [('assistant', 'Denken Sie an das Produktmanagement vorab über den Kompromiss informieren.')]
+        self.assertIsNone(scenarios.run_judge(lambda p: claim, ['no_invention'], 'Weiter.', reply, coach_only)[0]['no_invention'])
+        # released fictional sources count
+        source_claim = self.invented({'quote': quote, 'source': 'candidate_fact', 'in_evidence': True, 'evidence_quote': 'Produktmanagement vorab über den Kompromiss informiert'})
+        self.assertEqual([], scenarios.run_judge(lambda p: source_claim, ['no_invention'], 'Weiter.', reply, [], 'Profil: Produktmanagement vorab über den Kompromiss informiert')[1])
+        # unsupported and nowhere in the evidence: a verified finding
+        denied = self.invented({'quote': quote, 'source': 'candidate_fact', 'in_evidence': False})
+        self.assertEqual(['rubric failed'], [x[:13] for x in scenarios.run_judge(lambda p: denied, ['no_invention'], 'Weiter.', reply, [])[1]])
+
+    def test_new_words_alone_are_no_proof(self):
+        reply = 'Sie haben also Entscheidungskompetenz bewiesen.'
+        claim = self.invented({'quote': 'Entscheidungskompetenz bewiesen', 'source': 'candidate_fact', 'in_evidence': True})
+        self.assertTrue(scenarios.run_judge(lambda p: claim, ['no_invention'], 'Ich entscheide.', reply)[1][0].startswith('rubric unclear'))
+
+    def test_judge_prompt_separates_candidate_and_coach_lines_and_carries_sources(self):
+        prompt = scenarios.judge_prompt(['no_invention'], 'jetzt', 'Antwort', [('user', 'U1'), ('assistant', 'C1')], 'CV-Text')
+        self.assertIn('CANDIDATE (scripted test user): U1', prompt)
+        self.assertIn('COACH: C1', prompt)
+        self.assertIn('RELEASED FICTIONAL SOURCES:\nCV-Text', prompt)
+        self.assertIn('coach_suggestion', prompt)
+        for key in ('evidence_quote', 'suggestion_kind', 'invents_experience'):
+            self.assertIn(key, prompt)
+
+    def test_judge_verdicts_are_enforced_and_unclear_or_missing_is_never_a_pass(self):
         verdicts, problems = scenarios.run_judge(lambda prompt: '{"strengths": true, "improvements": false}', ['strengths', 'improvements'], 'u', 'r')
         self.assertEqual({'strengths': True, 'improvements': False}, verdicts)
         self.assertEqual(['rubric failed: improvements'], problems)
-        self.assertTrue(scenarios.run_judge(lambda prompt: 'no json', ['strengths'], 'u', 'r')[1])
+        for raw in ('no json', '[1]', '{"strengths": "yes"}', '{}', '{"strengths": null}'):
+            verdicts, problems = scenarios.run_judge(lambda prompt, r=raw: r, ['strengths'], 'u', 'r')
+            self.assertIsNone(verdicts['strengths'], raw)
+            self.assertTrue(problems[0].startswith('rubric unclear'), (raw, problems))
         self.assertIn('not checked', scenarios.run_judge(None, ['strengths'], 'u', 'r')[1][0])
         self.assertEqual(({}, []), scenarios.run_judge(None, [], 'u', 'r'))
+
+    def test_scenario_status_distinguishes_fail_unclear_and_pass(self):
+        scenario = {'id': 'x', 'context': 'c', 'steps': [{'user': 'Hallo', 'judge': ['strengths']}]}
+        run = lambda raw: scenarios.run_scenario(scenario, lambda p: 'Antwort', context='CTX', judge=lambda p: raw)
+        self.assertEqual(('PASS', True), (run('{"strengths": true}')['status'], run('{"strengths": true}')['passed']))
+        self.assertEqual('FAIL', run('{"strengths": false}')['status'])
+        unclear = run('garbage')
+        self.assertEqual(('UNCLEAR', False), (unclear['status'], unclear['passed']))
+        self.assertTrue(unclear['unclear'])
+        self.assertEqual('UNCLEAR', scenarios.run_scenario(scenario, lambda p: 'Antwort', context='CTX', judge=None)['status'])
+
+    def test_block_evaluation_may_span_earlier_steps_but_must_exist_somewhere(self):
+        full = 'Gesamtbewertung: 7/10. ' + 'Einzelbewertung: Struktur 8/10, Verantwortung 7/10, Termin 6/10. ' * 5
+        scenario = {'id': 'x', 'context': 'c', 'steps': [{'user': 'Antwort'}, {'user': 'Bewerte den Block.', 'evaluable_over': [1]}]}
+        replies = iter([full, 'Gerne, es bleibt dabei.'])
+        ok = scenarios.run_scenario(scenario, lambda p: next(replies), context='CTX', judge=lambda p: '{}')
+        self.assertEqual('PASS', ok['status'])
+        replies = iter(['Danke.', 'Gerne, es bleibt dabei.'])
+        bad = scenarios.run_scenario(scenario, lambda p: next(replies), context='CTX', judge=lambda p: '{}')
+        self.assertEqual('FAIL', bad['status'])
+        self.assertTrue(any('no overall score' in e for e in bad['steps'][1]['errors']))
+
+    def test_scripted_answer_must_fit_the_coach_question(self):
+        scenario = {'id': 'x', 'context': 'c', 'steps': [{'user': 'Start'}, {'user': 'Kriterien sind Aufwand.', 'answers_previous_question': True}]}
+        model = lambda p: 'Welche Frist gilt?'
+        fits = scenarios.run_scenario(scenario, model, context='CTX', judge=lambda p: '{"script_fits_question": true}')
+        self.assertEqual('PASS', fits['status'])
+        misfit = scenarios.run_scenario(scenario, model, context='CTX', judge=lambda p: '{"script_fits_question": false}')
+        self.assertEqual('UNCLEAR', misfit['status'])           # a test-script problem, not a product verdict
+        self.assertTrue(any('scenario script' in e for e in misfit['unclear']))
+        self.assertEqual('UNCLEAR', scenarios.run_scenario(scenario, model, context='CTX', judge=lambda p: 'x')['status'])
 
     def test_failed_tool_calls_cannot_support_success_claims_or_required_calls(self):
         failed = [{'argv': ['finish'], 'subcommand': 'finish', 'rc': 1, 'line': 'python3 rt finish --x'}]
@@ -170,11 +321,190 @@ class Rubric(unittest.TestCase):
         self.assertEqual([], honest)
 
     def test_save_claim_detection(self):
-        for claim in ('Der Lauf wurde gespeichert.', 'Ich habe alles gespeichert und verifiziert.'):
+        for claim in ('Der Lauf wurde gespeichert.', 'Ich habe alles gespeichert und verifiziert.', 'Gespeichert.', '\u2705 Gespeichert unter runs/q.md',
+                      'Die Sitzung wurde gesichert.', 'Your run has been saved.', 'Ergebnis: **Gespeichert**'):
             self.assertTrue(scenarios.claims_saved(claim), claim)
         for no_claim in ('Es wurde nichts gespeichert.', 'Der Lauf wurde nicht gespeichert.', 'Speichern fehlgeschlagen, nicht gespeichert.',
-                         'Das Training ist beendet, gespeichert ist der Abbruch aber **nicht**.', 'Der Lauf ist nicht persistiert.'):
+                         'Das Training ist beendet, gespeichert ist der Abbruch aber **nicht**.', 'Der Lauf ist nicht persistiert.',
+                         'Nicht speichern: Es wurde nichts gespeichert oder abgelegt.', 'Nothing was saved.', 'Wenn Sie speichern möchten, wählen Sie Lokal.'):
             self.assertFalse(scenarios.claims_saved(no_claim), no_claim)
+
+    def test_resume_promise_after_stop_is_detected_and_pause_or_negation_is_not(self):
+        promise = 'Die Sitzung ist beendet. Beim Fortsetzen stelle ich die offene Nachfrage einmal erneut.'
+        for reply in (promise, 'Gespeichert. Wir können morgen weitermachen und ich greife die Nachfrage wieder auf.',
+                      'You can resume later and I will ask the open follow-up again.',
+                      'Beim Fortsetzen mit `resume` stelle ich die offene Nachfrage einmal erneut.',
+                      'Ich greife die offene Nachfrage später wieder auf.'):
+            self.assertTrue(scenarios.promises_resume(reply), reply)
+        for reply in ('Die Sitzung ist beendet; die Nachfrage bleibt unbeantwortet und kann nicht fortgesetzt werden.',
+                      'Ein beendeter Lauf ist final. Zum späteren Weitermachen hätten Sie pause genutzt.',
+                      'Nur ein pausierter Lauf kann fortgesetzt werden.', 'Die Sitzung ist beendet und gespeichert.',
+                      # observed false positives (final7): pointing to `pause` is the honest answer, not a promise
+                      'Wenn Sie ein andermal an einer offenen Frage weitermachen wollen, nutzen Sie dafür künftig `pause`.',
+                      'Mit `pause` statt `stop` hätte ich einen Fortsetzungspunkt gespeichert.',
+                      'Die offene Nachfrage ist beantwortet, es gibt also nichts zum Fortsetzen.',
+                      # observed false positives of the first detector (final6): starting something NEW is not resuming this session
+                      'Frage 2 stelle ich in einer neuen Session erneut.', 'Wenn Sie später weitermachen möchten, starten Sie eine neue Sitzung.',
+                      'Wenn Sie ein andermal weitermachen möchten, starte ich ein neues Training.',
+                      'Lauf `run-002` mit Status `stopped_early` und Fortsetzung von `run-001`.',
+                      'Der Verlauf liegt unter [run-continuation-01.md](/tmp/x/runs/run-continuation-01.md).',
+                      # observed false positives (final8): advice to the user, descriptions of `pause`, a new run
+                      '**Nächstes Training:** Beantworten Sie Frage 1 später unabhängig noch einmal, diesmal mit Kriterien und Wirkung.',
+                      'Wenn Sie ein andermal weitermachen möchten, starten Sie einen neuen Durchlauf.',
+                      'Wenn du ein andermal weitermachen willst, nenne mir die Frage und deine Antwort erneut.',
+                      'Das speichert einen Fortsetzungspunkt.', '- Den Termin schon in der Erstantwort aufgreifen.',
+                      # observed false positive (final12): a new training takes up the stored learning state
+                      'Wenn Sie ein anderes Mal weitermachen wollen, starten Sie ein neues Training. Dort greife ich den gespeicherten Lernstand auf.'):
+            self.assertFalse(scenarios.promises_resume(reply), reply)
+
+    def test_judge_if_rated_items_apply_only_to_replies_that_contain_a_rating(self):
+        scenario = {'id': 'x', 'context': 'c', 'steps': [{'user': 'a', 'judge_if_rated': ['strengths']}]}
+        asked = []
+        for reply in ('Welche Kriterien nutzen Sie?', 'Gesamtbewertung 7/10. Gut.'):
+            scenarios.run_scenario(scenario, lambda p, r=reply: r, context='CTX', judge=lambda p: (asked.append('strengths' in p.split('RULES:')[1]), '{"strengths": true}')[1])
+        self.assertEqual([True], asked)       # the judge is not asked at all for the unrated follow-up reply
+
+    def test_judge_sees_the_whole_block_evaluation_when_it_was_given_in_earlier_replies(self):
+        full = 'Gesamtbewertung: 7/10. ' + 'Einzelbewertung: Struktur 8/10, Verantwortung 7/10, Termin 6/10. ' * 5
+        scenario = {'id': 'x', 'context': 'c', 'steps': [{'user': 'Antwort'}, {'user': 'Bewerte den Block.', 'evaluable_over': [1], 'judge': ['strengths']}]}
+        seen = []
+        replies = iter([full, 'Zu Frage 2 liegt noch keine Antwort vor.'])
+        scenarios.run_scenario(scenario, lambda p: next(replies), context='CTX', judge=lambda p: (seen.append(p), '{"strengths": true}')[1])
+        self.assertIn('Gesamtbewertung: 7/10', seen[-1].split('FINAL COACH REPLY:')[1])
+
+    def test_step_flag_turns_a_resume_promise_into_a_scenario_failure_only_where_requested(self):
+        promise = 'Beendet. Beim Fortsetzen stelle ich die offene Nachfrage einmal erneut.'
+        flagged = {'id': 'x', 'context': 'c', 'steps': [{'user': 'stop', 'no_resume_promise': True}]}
+        result = scenarios.run_scenario(flagged, lambda p: promise, context='CTX', judge=lambda p: '{}')
+        self.assertEqual('FAIL', result['status'])
+        self.assertTrue(any('promises to resume' in e for e in result['steps'][0]['errors']))
+        pause = {'id': 'x', 'context': 'c', 'steps': [{'user': 'pause'}]}      # a pause may offer the resumption
+        self.assertEqual('PASS', scenarios.run_scenario(pause, lambda p: 'Zwischenstand gespeichert, zum Fortsetzen nutzen Sie resume.', context='CTX', judge=lambda p: '{}')['status'])
+        shipped = [json.loads(p.read_text()) for p in sorted((ROOT / 'tests/fixtures/behavior/scenarios').glob('followup_*.json'))]
+        for scenario in shipped:   # every shipped stop step of the follow-up scenarios carries the check
+            for step in scenario['steps']:
+                if step['user'].strip().lower() == 'stop':
+                    self.assertTrue(step.get('no_resume_promise'), scenario['id'])
+
+    def test_dialogue_matches_first_kind_and_minimum_without_fixing_the_count(self):
+        header = {'dialogue': [{'followups': [{'kind': 'clarification', 'answer': 'x', 'resolution': 'closed'},
+                                              {'kind': 'completion', 'answer': None, 'resolution': 'pending'}], 'retries': [], 'other_open_gaps': []}]}
+        self.assertTrue(scenarios.dialogue_matches(header, {'first_followup_kind': 'clarification', 'min_followups': 1}))
+        self.assertFalse(scenarios.dialogue_matches(header, {'first_followup_kind': 'completion'}))
+        self.assertFalse(scenarios.dialogue_matches(header, {'min_followups': 3}))
+        self.assertFalse(scenarios.dialogue_matches({'dialogue': [{'followups': [], 'retries': [], 'other_open_gaps': []}]}, {'min_followups': 1}))
+
+    def test_job_artifact_check_reads_the_stored_match_assignment_and_keeps_state_free_of_it(self):
+        iw = scenarios.iw
+        scenario = scenarios.load('followup_motivation_role_fit')
+        sandbox = scenarios.Sandbox(scenario)
+        self.addCleanup(sandbox.cleanup)
+        spec = next(a for a in scenario['artifacts'] if a['type'] == 'job_artifact')
+        self.assertEqual(['no stored match snapshot under any job'], scenarios.job_artifact_errors(sandbox, spec))
+        cid = sandbox.ids['CANDIDATE0']
+        job = iw.list_jobs(sandbox.workspace, cid)[0]['job_id']
+        with iw.candidate_lock(sandbox.workspace, cid) as cdir:
+            iw.add_artifact(cdir, iw.job_dir(cdir, job), 'match', 'Passung Product Owner: Wunsch nach eigener technischer Umsetzung, Produktverantwortung dagegen.')
+        # snapshot exists, but no saved run belongs to this candidate/job yet
+        self.assertTrue(any('without a saved run' in e for e in scenarios.job_artifact_errors(sandbox, spec)))
+        state = sandbox.workspace / 'candidates' / cid / 'state.md'
+        iw.finish(sandbox.workspace, cid, 'r1', '# Run\n', state.read_text(encoding='utf-8'), status='stopped_early', answered_count=1, planned_count=3,
+                  job_id=job, expected_state_sha256=iw.snapshot(sandbox.workspace, cid)['state_sha256'], dialogue=[support.block(1, followups=[support.followup(1, 1)])])
+        self.assertEqual([], scenarios.job_artifact_errors(sandbox, spec))
+        # the same point written into the cross-job state is a failure: it would be a general weakness
+        state.write_text(state.read_text(encoding='utf-8') + '\n- Schwäche: will selbst programmieren\n', encoding='utf-8')
+        self.assertTrue(any('state.md' in e for e in scenarios.job_artifact_errors(sandbox, spec)))
+        # a snapshot that lacks the preference fails
+        self.assertTrue(any('lacks' in e for e in scenarios.job_artifact_errors(sandbox, dict(spec, patterns=['Kubernetes-Betrieb']))))
+
+    def case(self, name):
+        return json.loads((ROOT / 'tests/fixtures/behavior/judge_cases' / f'{name}.json').read_text(encoding='utf-8'))
+
+    def test_final10_role_fit_dialogue_is_a_negative_case_for_score_reasons_built_on_the_declined_role(self):
+        bad, control = self.case('final10_B_role_fit_penalty'), self.case('control_B_separated_rating')
+        self.assertIs(False, bad['expect']['role_fit_job_specific'])
+        found = scenarios.preference_penalty_lines(bad['reply'])
+        self.assertTrue(any('reizt' in line for line in found), found)                       # overall 5/10 justified by missing appeal
+        self.assertTrue(any('anspricht' in line for line in found), found)                   # 'Substanz der Begründung: 4/10'
+        self.assertTrue(any('Absage' in line for line in found), found)
+        self.assertIn('ohne Punktzahl', bad['reply'])                                         # the heading did not rescue it
+        self.assertEqual([], scenarios.preference_penalty_lines(control['reply']))
+        # the step flag turns this into a scenario failure
+        scenario = {'id': 'x', 'context': 'c', 'steps': [{'user': 'u', 'no_preference_penalty': True}]}
+        failed = scenarios.run_scenario(scenario, lambda p: bad['reply'], context='CTX', judge=lambda p: '{}')
+        self.assertEqual('FAIL', failed['status'])
+        self.assertEqual('PASS', scenarios.run_scenario(scenario, lambda p: control['reply'], context='CTX', judge=lambda p: '{}')['status'])
+        # shipped scenario B carries the flag on the rating step
+        self.assertTrue(scenarios.load('followup_motivation_role_fit')['steps'][2]['no_preference_penalty'])
+
+    def test_judge_calibration_cases_are_wired_to_the_real_rubric_and_detect_a_wrong_judge(self):
+        cases = scenarios.calibration_cases()
+        self.assertGreaterEqual(len(cases), 4)
+        for case in cases:
+            for key in case['expect']:
+                self.assertIn(key, scenarios.RUBRIC, case['id'])
+        def right(p):
+            reply = p.split('FINAL COACH REPLY:')[1]
+            missing = 'Sie sagen nicht, wie Sie die Teams einbinden' in reply
+            return json.dumps({'role_fit_job_specific': 'Substanz der Begründung' not in reply, 'no_false_missing': not missing,
+                               'false_missing': [{'quote': 'Sie sagen nicht, wie Sie die Teams einbinden', 'candidate_quote': 'mit beiden Teams durchgehen'}] if missing else []})
+        self.assertTrue(all(row[4] for row in scenarios.run_calibration(right)))
+        lenient = lambda p: '{"role_fit_job_specific": true, "no_false_missing": true}'          # the judge that let final10 B pass
+        failing = [(row[0], row[1]) for row in scenarios.run_calibration(lenient) if not row[4]]
+        self.assertEqual({('final10_B_role_fit_penalty', 'role_fit_job_specific'), ('final10_host_claude_false_missing', 'no_false_missing')}, set(failing))
+        self.assertFalse(all(row[4] for row in scenarios.run_calibration(lambda p: 'no json')))   # UNCLEAR is never an accepted verdict
+
+    def test_false_missing_needs_verifiable_quotes_on_both_sides_and_stays_unclear_otherwise(self):
+        case = self.case('final10_host_claude_false_missing')
+        history = [tuple(x) for x in case['history']]
+        quote = {'quote': 'Sie sagen nicht, wie Sie die Teams einbinden', 'candidate_quote': 'mit beiden Teams durchgehen'}
+        run = lambda raw: scenarios.run_judge(lambda p: raw, ['no_false_missing'], case['user'], case['reply'], history)
+        verdicts, problems = run(json.dumps({'no_false_missing': False, 'false_missing': [quote]}))
+        self.assertIs(False, verdicts['no_false_missing'])
+        self.assertTrue(problems[0].startswith('rubric failed: no_false_missing'))
+        # a bare 'false', a hallucinated claim quote, a candidate quote that no candidate line contains, unrelated quotes: UNCLEAR, never PASS and never FAIL
+        for raw in ({'no_false_missing': False}, {'no_false_missing': False, 'false_missing': [dict(quote, quote='steht nirgends in der Antwort')]},
+                    {'no_false_missing': False, 'false_missing': [dict(quote, candidate_quote='das hat niemand gesagt')]},
+                    {'no_false_missing': False, 'false_missing': [{'quote': 'Sie sagen nicht, wie Sie die Teams einbinden', 'candidate_quote': 'Release-Termin in drei Wochen'}]},
+                    {'no_false_missing': False, 'false_missing': [{'quote': quote['quote']}]}):
+            verdicts, problems = run(json.dumps(raw))
+            self.assertIsNone(verdicts['no_false_missing'], raw)
+            self.assertTrue(problems[0].startswith('rubric unclear: no_false_missing'), problems)
+        self.assertIn('false_missing', scenarios.judge_prompt(['no_false_missing'], 'u', 'r'))
+
+    def test_rubric_names_the_overlooked_reason_patterns_and_the_false_missing_rule(self):
+        self.assertIn('Substanz der Begründung', scenarios.RUBRIC['role_fit_job_specific'])
+        self.assertIn('Passung ohne Punktzahl', scenarios.RUBRIC['role_fit_job_specific'])
+        self.assertIn('mit beiden Teams durchgehen', scenarios.RUBRIC['no_false_missing'])
+
+    def test_one_question_mark_per_turn_flag_and_no_gaps_for_unasked_aspects(self):
+        two = 'Der Release ist fest. Wie gehen Sie mit dem Termin um? Was tun Sie, wenn die Teams uneinig sind?'
+        scenario = {'id': 'x', 'context': 'c', 'steps': [{'user': 'u', 'max_question_marks': 1}]}
+        self.assertEqual('FAIL', scenarios.run_scenario(scenario, lambda p: two, context='CTX', judge=lambda p: '{}')['status'])
+        self.assertEqual('PASS', scenarios.run_scenario(scenario, lambda p: 'Wie gehen Sie mit dem Termin um?', context='CTX', judge=lambda p: '{}')['status'])
+        deepening = {'kind': 'deepening', 'answer': None, 'resolution': 'pending', 'gap': None}
+        clean = {'dialogue': [{'followups': [deepening], 'retries': [], 'other_open_gaps': []}]}
+        self.assertTrue(scenarios.dialogue_matches(clean, {'allowed_kinds': ['deepening'], 'no_gaps': True}))
+        gap = {'dialogue': [{'followups': [deepening], 'retries': [], 'other_open_gaps': ['Entscheidungskriterien']}]}
+        self.assertFalse(scenarios.dialogue_matches(gap, {'no_gaps': True}))
+        completion = {'dialogue': [{'followups': [dict(deepening, kind='completion', gap='Kriterien')], 'retries': [], 'other_open_gaps': []}]}
+        self.assertFalse(scenarios.dialogue_matches(completion, {'allowed_kinds': ['deepening'], 'no_gaps': True}))
+        shipped = scenarios.load('followup_optional_example')
+        self.assertIn({'type': 'run_dialogue', 'allowed_kinds': ['deepening'], 'no_gaps': True}, shipped['artifacts'])
+
+    def test_model_run_artifacts_are_preserved_for_independent_review(self):
+        scenario = scenarios.load('followup_motivation_role_fit')
+        sandbox = scenarios.Sandbox(scenario)
+        self.addCleanup(sandbox.cleanup)
+        (sandbox.files / 'dialogue-001.json').write_text('[]', encoding='utf-8')
+        out = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: shutil.rmtree(out, ignore_errors=True))
+        scenarios.preserve_artifacts(sandbox, out / 'artifacts' / 'x')
+        cid = sandbox.ids['CANDIDATE0']
+        self.assertTrue((out / 'artifacts/x/ws/candidates' / cid / 'state.md').is_file())
+        self.assertTrue(list((out / 'artifacts/x/ws/candidates' / cid / 'jobs').glob('*/postings/*.md')))
+        self.assertTrue((out / 'artifacts/x/files/dialogue-001.json').is_file())
+        self.assertFalse((out / 'artifacts/x/ws/.journal').exists())
 
     def test_missing_confirmation_is_detected_in_the_profile_scenario(self):
         scenario = scenarios.load('candidate_create_without_cv')
@@ -200,6 +530,24 @@ class Rubric(unittest.TestCase):
         self.assertTrue(any('no overall score' in e for step in result['steps'] for e in step['errors']))
 
 
+class DialogueArtifact(unittest.TestCase):
+    def header(self, **kw):
+        return {'dialogue': [{'followups': kw.get('followups', []), 'retries': kw.get('retries', []), 'other_open_gaps': kw.get('gaps', [])}]}
+
+    def test_dialogue_matching_is_structural(self):
+        match = scenarios.dialogue_matches
+        completion = {'kind': 'completion', 'answer': None, 'resolution': 'pending'}
+        self.assertTrue(match(self.header(followups=[completion]), {'followup_kinds': ['completion'], 'open_followup': True}))
+        self.assertFalse(match(self.header(followups=[completion]), {'open_followup': False}))
+        self.assertFalse(match(self.header(), {'followup_kinds': ['completion']}))
+        deep = {'kind': 'deepening', 'answer': 'x', 'resolution': 'closed'}
+        self.assertTrue(match(self.header(followups=[deep]), {'allowed_kinds': ['deepening']}))   # a deepening follow-up on a good answer is fine
+        self.assertTrue(match(self.header(), {'allowed_kinds': ['deepening']}))                  # none needed is fine as well
+        self.assertFalse(match(self.header(followups=[completion]), {'allowed_kinds': ['deepening']}))   # an artificial completion question is not
+        self.assertTrue(match(self.header(retries=[{'after_coaching': True}], gaps=['x']), {'retry_after_coaching': True, 'open_gap': True}))
+        self.assertFalse(match(self.header(retries=[{'after_coaching': False}]), {'retry_after_coaching': True}))
+
+
 class ArtifactChecks(unittest.TestCase):
     def sandbox_with_runs(self, second_answered=3, second_job=None):
         sandbox = scenarios.Sandbox({'id': 'x', 'steps': [], 'preset': {'storage': 'local', 'candidates': [{'name': 'Erika Beispiel'}]}})
@@ -207,10 +555,12 @@ class ArtifactChecks(unittest.TestCase):
         cid = sandbox.ids['CANDIDATE0']
         iw = scenarios.iw
         state = iw.snapshot(sandbox.workspace, cid)['state_sha256']
-        iw.finish(sandbox.workspace, cid, 'p1', '# p\n', '# s1\n', expected_state_sha256=state, status='paused', answered_count=1, planned_count=4)
+        iw.finish(sandbox.workspace, cid, 'p1', '# p\n', '# s1\n', expected_state_sha256=state, status='paused', answered_count=1, planned_count=4,
+                  dialogue=[support.block(1)])
         state = iw.snapshot(sandbox.workspace, cid)['state_sha256']
         iw.finish(sandbox.workspace, cid, 'p2', '# q\n', '# s2\n', expected_state_sha256=state, status='stopped_early',
-                  answered_count=second_answered, planned_count=4, resume_from='p1')
+                  answered_count=second_answered, planned_count=4, resume_from='p1',
+                  dialogue=support.dialogue(second_answered))
         return sandbox
 
     def test_valid_continuation_and_immutability(self):

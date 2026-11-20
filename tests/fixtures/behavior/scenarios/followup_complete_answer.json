@@ -1,0 +1,81 @@
+{
+ "id": "followup_complete_answer",
+ "title": "D: vollständige Antwort – keine künstliche Nachfrage",
+ "skills": [
+  "candidate-training"
+ ],
+ "context": "Host: Claude Code or Codex (simulated). Current project folder: {PROJECT}. Files live under {FILES}. This project already has local storage configured at {WS} (verified by project-show). Use --project {PROJECT} for runtime calls.",
+ "preset": {
+  "storage": "local",
+  "candidates": [
+   {
+    "name": "Erika Beispiel",
+    "cv": "# Erika Beispiel\n\n## Berufserfahrung\n- Backend-Entwicklerin, Muster GmbH, 2019-2024: Python-Services, PostgreSQL, Kubernetes-Betrieb\n\n## Ausbildung\n- BSc Informatik, Beispiel-Universität, 2018\n\n## Skills\nPython, Go, SQL\n",
+    "profile": "# Profil Erika Beispiel\n- Backend-Entwicklerin, 5 Jahre Python (Quelle: CV)\n- Kubernetes-Betrieb (Quelle: CV)\n",
+    "interview_language": "de"
+   }
+  ]
+ },
+ "steps": [
+  {
+   "user": "Starte allgemeines Training für Erika Beispiel, geplant sind 3 Fragen. Stelle mir bitte genau diese Frage als erste Hauptfrage: Zwei Teams streiten über die Architektur eines neuen Moduls, und der Release-Termin in drei Wochen steht fest. Wie lösen Sie diesen Architekturkonflikt?",
+   "judge": [
+    "one_question"
+   ],
+   "tools_exclude": [
+    "finish"
+   ]
+  },
+  {
+   "user": "Ich würde beide Teams anhören, die Optionen im ADR mit Pro und Contra festhalten und als Verantwortliche entscheiden; das Ergebnis erkläre ich beiden Teams persönlich und binde sie in die Umsetzung ein. Wegen des festen Termins in drei Wochen würde ich den Release-Umfang reduzieren, die aufwendigere Option nachziehen, die technische Schuld im ADR vermerken und das Produktmanagement vorab informieren.",
+   "judge": [
+    "no_invention",
+    "no_artificial_completion",
+    "deepening_or_close"
+   ],
+   "tools_exclude": [
+    "finish"
+   ]
+  },
+  {
+   "user": "Das war meine ganze Antwort zu dieser Frage. Bitte bewerte jetzt den Frageblock.",
+   "judge": [
+    "strengths",
+    "improvements",
+    "no_invention",
+    "no_artificial_completion",
+    "no_false_missing"
+   ],
+   "tools_exclude": [
+    "finish"
+   ],
+   "evaluable_over": [
+    2,
+    3
+   ]
+  },
+  {
+   "user": "stop",
+   "tools_include": [
+    "finish",
+    "stopped_early",
+    "--dialogue-file"
+   ],
+   "no_resume_promise": true
+  }
+ ],
+ "artifacts": [
+  {
+   "type": "run_field",
+   "equals": {
+    "answered_count": 1
+   }
+  },
+  {
+   "type": "run_dialogue",
+   "allowed_kinds": [
+    "deepening"
+   ]
+  }
+ ]
+}

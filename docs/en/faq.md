@@ -18,7 +18,7 @@ The project is licensed under [MIT](../../LICENSE), as declared in [plugin.json]
 
 ### Do I need Git or Python to practise?
 
-Add `https://github.com/draftm0de/ai.plugins` as a marketplace and select Interview Coach. No ZIP or local checkout is needed. The runtime requires Python 3.10+; Git only for Git storage. Host-side execution and persistence capabilities still need verification.
+Add `https://github.com/draftm0de/ai.plugins` as a marketplace and select Interview Coach. No ZIP or local checkout is needed. The runtime requires Python 3.10+. Host-side execution and persistence capabilities still need verification.
 
 ## Privacy and persistence
 
@@ -32,7 +32,7 @@ Nothing is persisted: no files, pointers, locks, journals, exports, CV copies, j
 
 ### Which storage options exist?
 
-Exactly three: **Local**, **Git** (private GitHub/GitLab repository only) and **Do not save**. "Manage files yourself" no longer exists; on save errors the coach offers recovery or a new storage choice.
+Exactly two: **Local**, **Do not save**. "Manage files yourself" no longer exists; on save errors the coach offers recovery or a new storage choice.
 
 ### When is something "remote saved"?
 
@@ -92,4 +92,4 @@ The current gallery contains a rendered preview and selected text from fictional
 
 ### What has been verified?
 
-Deterministic tests cover manifests, the installable payload, candidate/job/run logic, CV extraction, recovery and the Git flow against local bare repositories – **not** GitHub/GitLab live. Model scenarios are heuristic. Isolated Claude Code/Codex runs and live Git remain open; see the [acceptance matrix](../acceptance.md) and [development](development.md).
+Deterministic tests cover manifests, the installable payload, candidate/job/run logic, CV extraction, recovery. Model scenarios are heuristic. Isolated Claude Code/Codex runs remain open; see the [acceptance matrix](../acceptance.md) and [development](development.md).

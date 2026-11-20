@@ -23,7 +23,7 @@ The coach adapts questions and criteria to your role and seniority. It distingui
 
 *English translation of rendered excerpts from a fictional Codex CLI test, not a screenshot of Claude or ChatGPT. Scores illustrate one response, not a guaranteed result. [Read the example and its provenance](docs/en/screens.md).*
 
-1. Set up: choose a storage type – exactly three options: **Local**, **Git** (private GitHub/GitLab) or **Do not save** – then the path or repository.
+1. Set up: choose a storage type – exactly two options: **Local**, **Do not save** – then the local path.
 2. Create a candidate (`candidate-create`): import a CV (PDF, DOCX, Markdown) or build a profile without one.
 3. Train generally (`candidate-training`), or prepare a job (`job-create`) and train for it (`job-training`).
 4. In coached modes answer one question at a time; receive an overall score, criteria, strengths and improvements.
@@ -63,13 +63,13 @@ The invocation spellings follow host documentation; a native `:job-create` comma
 
 ## Storage and privacy
 
-Exactly three options: **Local** (a directory you name), **Git** (only a *private* GitHub/GitLab repository; "remote saved" is reported only after a confirmed push, never via force-push) and **Do not save**. "Manage files yourself" no longer exists. Private data lives outside the installed plugin. No tokens are requested. See [storage, formats and recovery](docs/en/storage.md).
+Exactly two options: **Local** (a directory you name), **Do not save**. "Manage files yourself" no longer exists. Private data lives outside the installed plugin. No tokens are requested. See [storage, formats and recovery](docs/en/storage.md).
 
 ## Project status
 
 This MVP uses versionless plugin manifests and repository import through Draftmode AI Plugins. There is no customer portal, payment system, license server or claimed listing in an additional official plugin directory.
 
-Local persistence, the Git flow (against local bare repositories, **not** a live GitHub/GitLab acceptance), extraction and packaging have deterministic tests. Model scenarios use fictional data and heuristic checks. Host acceptance for Claude Code and Codex with isolated profiles is open; results and gaps are in the [acceptance matrix](docs/acceptance.md).
+Local persistence, extraction and packaging have deterministic tests. Model scenarios use fictional data and heuristic checks. Host acceptance for Claude Code and Codex with isolated profiles is open; results and gaps are in the [acceptance matrix](docs/acceptance.md).
 
 License: [MIT](LICENSE). The earlier [release evidence](docs/en/release-evidence.md) is history.
 
@@ -83,7 +83,7 @@ make test          # deterministic unit, integration and contract tests; no mode
 make check-plugin  # validate versionless host manifests
 ```
 
-Tests require no additional Python packages such as pytest. Management tools require Git and Python 3.10+; the runtime requires Python 3.10+; Git is needed only for Git storage, optionally `gh`/`glab` for the visibility check. PDF import needs `pdftotext`, `mutool` or `pypdf` (never installed automatically). Make is optional. See [development and testing](docs/en/development.md) for model tests and repository boundaries.
+Tests require no additional Python packages such as pytest. Management tools require Git and Python 3.10+; the runtime requires Python 3.10+. PDF import needs `pdftotext`, `mutool` or `pypdf` (never installed automatically). Make is optional. See [development and testing](docs/en/development.md) for model tests and repository boundaries.
 
 The five skills under [skills/](skills/) and the shared runtime under [skills/_shared/](skills/_shared/) define the behavior; [SCOPE.md](SCOPE.md) is authoritative. User documentation lives in [docs/](docs/en/README.md).
 

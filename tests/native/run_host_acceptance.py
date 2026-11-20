@@ -524,8 +524,9 @@ def prepare(res, claude):
 
     try:
         step("project-init", "--project", proj, "--storage", "local", "--path", state["ws"])
-        step("set-language", "--project", proj, "--interface", "de", "--interview", "de")
+        step("set-language", "--project", proj, "--interface", "de")
         state["candidate"] = step("candidate-create", "--project", proj, "--name", "Erika Beispiel")["candidate_id"]
+        step("set-interview-language", "--project", proj, "--candidate", state["candidate"], "--language", "de")
         step("cv-import", "--project", proj, "--candidate", state["candidate"], "--file", str(project / "files/cv.md"))
         step("profile-save", "--project", proj, "--candidate", state["candidate"], "--file", str(project / "files/profile.md"), "--status", "confirmed",
              "--origin", "cv", "--cv-source", "cv-001", "--user-confirmed", "--acknowledge-gaps")

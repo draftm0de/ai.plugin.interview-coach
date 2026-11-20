@@ -18,30 +18,6 @@ def load(path, name):
 
 
 native = load('tests/native/run_native.py', 'run_native')
-live = ROOT / 'tests/live/run_live_git.py'
-
-
-class LiveGitRunner(unittest.TestCase):
-    def run_live(self, *args):
-        return subprocess.run([sys.executable, '-B', str(live), *args], capture_output=True, text=True)
-
-    def test_dry_run_prints_plan_and_phrase_without_any_action(self):
-        done = self.run_live('--provider', 'github', '--repo', 'example-owner/test', '--branch', 'coach-live-test', '--dry-run')
-        self.assertEqual(0, done.returncode)
-        self.assertIn("'WRITE fictional data to github:example-owner/test@coach-live-test'", done.stdout)
-        self.assertIn('DRY RUN: nothing was executed', done.stdout)
-
-    def test_without_the_exact_approval_phrase_nothing_runs(self):
-        for extra in ([], ['--approve', 'yes'], ['--approve', 'WRITE fictional data to github:other/repo@coach-live-test']):
-            done = self.run_live('--provider', 'github', '--repo', 'example-owner/test', '--branch', 'coach-live-test', *extra)
-            self.assertEqual(2, done.returncode)
-            self.assertIn('NOT RUN', done.stdout)
-
-    def test_primary_branches_are_refused(self):
-        for branch in ('main', 'master', 'develop'):
-            self.assertNotEqual(0, self.run_live('--provider', 'gitlab', '--repo', 'g/p', '--branch', branch, '--dry-run').returncode)
-
-
 class NativeRunner(unittest.TestCase):
     def test_event_parsing_for_both_hosts(self):
         claude = native.Host.__new__(native.Host)
@@ -72,7 +48,7 @@ class NativeRunner(unittest.TestCase):
         run.project = Path('/x/p')
         run.files = Path('/x/f')
         names = [p[0] for p in native.phases(run)]
-        for needed in ('discovery', 'three_options', 'setup_local', 'candidate_with_cv', 'candidate_without_cv_unconfirmed',
+        for needed in ('discovery', 'two_options', 'setup_local', 'candidate_with_cv', 'candidate_without_cv_unconfirmed',
                        'candidate_confirm_new_chat', 'same_name_selection', 'job_create', 'job_training', 'training_saved', 'reload_new_chat'):
             self.assertIn(needed, names)
 

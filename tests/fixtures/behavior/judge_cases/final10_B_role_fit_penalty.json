@@ -1,0 +1,32 @@
+{
+ "id": "final10_B_role_fit_penalty",
+ "source": "final10 scenario B step 3 (automatic PASS at the time, overlooked professional error)",
+ "note": "Overall 5/10 and 'Substanz der Begründung: 4/10' are justified by missing enthusiasm for the declined role; improvement item says the answer reads like a rejection. The heading 'Passung zur Stelle (ohne Punktzahl)' does not make up for it.",
+ "items": [
+  "role_fit_job_specific"
+ ],
+ "user": "Ich meine damit, selbst technisch umzusetzen, also selbst zu programmieren. Deshalb strebe ich die Product-Stelle eigentlich nicht an.",
+ "reply": "Danke, damit ist die Motivation klar. Der Block ist geschlossen, hier die Auswertung.\n\n**Gesamtbewertung: 5/10**\nDu warst ehrlich und hast die Nachfrage direkt beantwortet. Die Antwort belegt aber noch nicht, was dich an der Aufgabe reizt oder wie du mit dem Unterschied zur Stelle umgehst.\n\n**Einzelbewertung**\n- **Klarheit:** Erstantwort 4/10, nach der Nachfrage 8/10. Die Konkretisierung kam erst auf die Nachfrage hin.\n- **Ehrlichkeit und Selbstkenntnis:** 9/10. Du sagst offen, was du willst.\n- **Substanz der Begründung:** 4/10. Du nennst, was du *nicht* willst, aber nicht, was dich an dieser Rolle oder an Beispiel AG anspricht.\n\n**Was gut war**\n- \"Ich meine damit, selbst technisch umzusetzen, also selbst zu programmieren\" ist eine klare, eindeutige Aussage.\n- Du hast ohne Ausweichen gesagt, dass die Stelle dafür eigentlich nicht deine Wahl ist.\n\n**Was ich verbessern würde**\n- Sag schon im ersten Satz, was du suchst, statt nur \"echte Realisierung\".\n- Ergänze, was du aus der Rolle mitnehmen würdest oder wo sie zu deinen Zielen passt. Sonst wirkt die Antwort wie eine Absage.\n\n**Passung zur Stelle (ohne Punktzahl)**\nDein Wunsch nach eigenem Programmieren spricht gegen den Schwerpunkt der Anzeige. Sie nennt Produktstrategie, Backlog, Abstimmung mit der Entwicklung und die Führung eines cross-funktionalen Teams, erwartet technisches Verständnis und sagt nichts zu eigener Programmierung. Das ist ein stellenbezogener Passungspunkt und kein Kommunikationsmangel. Ich halte ihn nach dieser Sitzung im Jobeintrag fest. Gespeichert ist er noch nicht.\n\n**Vorschlag für eine gesprochene Antwort** (nur aus deinen Angaben, ergänze die Klammern selbst):\n„Mich motiviert vor allem, selbst technisch umzusetzen und zu programmieren. Deshalb prüfe ich ehrlich, ob die Product-Rolle zu mir passt. [ergänzen: Was dich an der Rolle trotzdem reizt] [ergänzen: Wie du technische Nähe in der Rolle sicherstellen würdest]\"\n\n**Hauptfrage 2:**\n\nDie Anzeige erwartet technisches Verständnis und die Führung eines cross-funktionalen Teams. Wie würden Sie Ihre technische Erfahrung in dieser Rolle einsetzen?\n",
+ "history": [
+  [
+   "user",
+   "Starte Training für die Stelle Product Owner Plattform bei Beispiel AG für Erika Beispiel (Modus targeted). Stelle mir bitte als Hauptfrage: Warum möchten Sie in diese Product-Rolle wechseln?"
+  ],
+  [
+   "assistant",
+   "Ich habe alles geladen und starte das Training im Modus **targeted** für Erika Beispiel, Stelle *Product Owner Plattform* bei der Beispiel AG. Das Profil ist bestätigt, die Interviewsprache ist Deutsch.\n\n**Ausgangslage**\n- Lernziele: eine glaubwürdige Motivation für den Wechsel in die Product-Rolle, Produktverantwortung vom Kundenproblem bis zur Wirkung und der Übergang zur Führung eines cross-funktionalen Teams.\n- Offene Punkte am Jobeintrag: Die Gesprächspartner sind noch nicht erfasst.\n- Offene Punkte bei der Recherche: Zur Stelle gibt es noch keine Recherche zu Firma oder Personen und auch keinen Abgleich oder eine Vorbereitung. Die Fragen stützen sich daher nur auf die Stellenanzeige und dein bestätigtes Profil.\n\nDu kannst jederzeit `stop` (beendet und speichert die Sitzung) oder `pause` (speichert einen Checkpoint zum Fortsetzen) sagen.\n\n**Hauptfrage 1:**\n\nWarum möchten Sie in diese Product-Rolle wechseln?\n\nBitte antworte so, wie du es im echten Gespräch sagen würdest.\n"
+  ],
+  [
+   "user",
+   "Ich möchte wieder echte Realisierung."
+  ],
+  [
+   "assistant",
+   "Meinen Sie damit eigene technische Umsetzung oder die Verantwortung für ein Produkt vom Kundenproblem bis zur Wirkung?\n"
+  ]
+ ],
+ "evidence": "Product Owner Plattform (m/w/d), Beispiel AG. Sie verantworten die Produktstrategie der Plattform vom Kundenproblem bis zur Wirkung, priorisieren das Backlog und stimmen sich eng mit der Entwicklung ab. Führungsschwerpunkt: Sie führen ein cross-funktionales Team; technisches Verständnis wird erwartet.",
+ "expect": {
+  "role_fit_job_specific": false
+ }
+}

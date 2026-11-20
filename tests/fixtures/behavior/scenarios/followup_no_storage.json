@@ -1,0 +1,67 @@
+{
+ "id": "followup_no_storage",
+ "title": "J: Nicht speichern – gleicher Dialog ohne Schreibvorgänge",
+ "skills": [
+  "interview-coach",
+  "candidate-training"
+ ],
+ "context": "Host: Claude Code or Codex (simulated). Current project folder: {PROJECT}. Uploaded/accessible files live under {FILES}. The user has explicitly chosen 'Nicht speichern' for this project.",
+ "steps": [
+  {
+   "user": "Nicht speichern. Interviewsprache Deutsch. Starte allgemeines Training, geplant sind 3 Fragen. Stelle mir als erste Hauptfrage: Zwei Teams streiten über die Architektur eines neuen Moduls, und der Release-Termin in drei Wochen steht fest. Wie lösen Sie diesen Architekturkonflikt?",
+   "no_tool_calls": true,
+   "judge": [
+    "one_question"
+   ]
+  },
+  {
+   "user": "Ich würde die beiden Optionen in einem ADR festhalten, jeweils Pro und Contra mit Kriterien wie Wartbarkeit und Betriebsaufwand aufschreiben, mit beiden Teams durchgehen und am Ende als Verantwortliche die Entscheidung treffen und im ADR begründen.",
+   "no_tool_calls": true,
+   "must_not_contain": [
+    "/10"
+   ],
+   "judge": [
+    "followup_deadline_pressure",
+    "no_leak_before_followup"
+   ],
+   "max_question_marks": 1
+  },
+  {
+   "user": "Bei dem Termin würde ich den Umfang für den Release auf das Nötigste reduzieren, die schwierigere Option erst nach dem Release nachziehen und das als bewusste technische Schuld im ADR vermerken. Dem Produktmanagement würde ich diesen Kompromiss vorab erklären.",
+   "no_tool_calls": true,
+   "judge": [
+    "strengths",
+    "no_invention",
+    "no_false_missing"
+   ],
+   "answers_previous_question": true
+  },
+  {
+   "user": "stop",
+   "no_tool_calls": true,
+   "must_contain_any": [
+    "Zusammenfassung",
+    "beendet"
+   ],
+   "must_not_contain": [
+    "gespeichert unter",
+    "Nächste Frage"
+   ],
+   "no_resume_promise": true
+  }
+ ],
+ "artifacts": [
+  {
+   "type": "absent",
+   "path": "ws"
+  },
+  {
+   "type": "absent",
+   "path": "cfg"
+  },
+  {
+   "type": "no_files",
+   "path": "project"
+  }
+ ]
+}

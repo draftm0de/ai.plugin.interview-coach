@@ -50,14 +50,14 @@ class BehaviorHarnessTests(unittest.TestCase):
                   "Nicht gespeichert. state.md aktualisiert.")
         self.assertTrue(module.check(case, answer))
 
-    def test_setup_case_requires_exactly_the_three_choices(self):
+    def test_setup_case_requires_exactly_the_two_choices(self):
         cases = json.loads((ROOT / 'tests/fixtures/behavior/quality-cases.json').read_text())
-        case = next(c for c in cases if c['id'] == 'setup_three_storage_choices')
-        valid = 'Wo soll gespeichert werden? Lokal, Git (privates Repository) oder Nicht speichern.'
+        case = next(c for c in cases if c['id'] == 'setup_two_storage_choices')
+        valid = 'Wo soll gespeichert werden? Lokal oder Nicht speichern.'
         self.assertEqual(module.check(case, valid), [])
-        self.assertTrue(module.check(case, valid.replace(', Git (privates Repository)', '')))
+        self.assertTrue(module.check(case, valid + ' Git'))
         self.assertTrue(module.check(case, valid + ' Oder Dateien selbst verwalten.'))
-        self.assertIn('exactly three options', module.skill_context())
+        self.assertIn('exactly two options', module.skill_context())
 
     def test_skill_context_includes_evaluation_and_research(self):
         context = module.skill_context()

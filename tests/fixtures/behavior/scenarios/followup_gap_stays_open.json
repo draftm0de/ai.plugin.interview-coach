@@ -1,0 +1,89 @@
+{
+ "id": "followup_gap_stays_open",
+ "title": "E: Lücke bleibt offen, Coaching, unterstützte Wiederholung",
+ "skills": [
+  "candidate-training"
+ ],
+ "context": "Host: Claude Code or Codex (simulated). Current project folder: {PROJECT}. Files live under {FILES}. This project already has local storage configured at {WS} (verified by project-show). Use --project {PROJECT} for runtime calls.",
+ "preset": {
+  "storage": "local",
+  "candidates": [
+   {
+    "name": "Erika Beispiel",
+    "cv": "# Erika Beispiel\n\n## Berufserfahrung\n- Backend-Entwicklerin, Muster GmbH, 2019-2024: Python-Services, PostgreSQL, Kubernetes-Betrieb\n\n## Ausbildung\n- BSc Informatik, Beispiel-Universität, 2018\n\n## Skills\nPython, Go, SQL\n",
+    "profile": "# Profil Erika Beispiel\n- Backend-Entwicklerin, 5 Jahre Python (Quelle: CV)\n- Kubernetes-Betrieb (Quelle: CV)\n",
+    "interview_language": "de"
+   }
+  ]
+ },
+ "steps": [
+  {
+   "user": "Starte allgemeines Training für Erika Beispiel, geplant sind 3 Fragen. Stelle mir bitte genau diese Frage als erste Hauptfrage: Zwei Teams streiten über die Architektur eines neuen Moduls, und der Release-Termin in drei Wochen steht fest. Wie lösen Sie diesen Architekturkonflikt?",
+   "judge": [
+    "one_question"
+   ],
+   "tools_exclude": [
+    "finish"
+   ]
+  },
+  {
+   "user": "Ich würde die beiden Optionen in einem ADR festhalten, jeweils Pro und Contra mit Kriterien wie Wartbarkeit und Betriebsaufwand aufschreiben, mit beiden Teams durchgehen und am Ende als Verantwortliche die Entscheidung treffen und im ADR begründen.",
+   "must_not_contain": [
+    "/10"
+   ],
+   "judge": [
+    "followup_deadline_pressure",
+    "no_leak_before_followup"
+   ],
+   "tools_exclude": [
+    "finish"
+   ],
+   "max_question_marks": 1
+  },
+  {
+   "user": "Dazu kann ich nichts sagen, das weiß ich nicht.",
+   "judge": [
+    "gap_honest_no_loop"
+   ],
+   "tools_exclude": [
+    "finish"
+   ]
+  },
+  {
+   "user": "Ja, bitte gib mir dazu Coaching.",
+   "tools_exclude": [
+    "finish"
+   ]
+  },
+  {
+   "user": "Dann nochmal meine Antwort: Wegen des Termins würde ich den Umfang reduzieren und die zweite Option nach dem Release nachziehen.",
+   "tools_exclude": [
+    "finish"
+   ]
+  },
+  {
+   "user": "stop",
+   "tools_include": [
+    "finish",
+    "stopped_early",
+    "--dialogue-file"
+   ],
+   "no_resume_promise": true
+  }
+ ],
+ "artifacts": [
+  {
+   "type": "run_field",
+   "equals": {
+    "status": "stopped_early",
+    "answered_count": 1,
+    "followup_count": 1
+   }
+  },
+  {
+   "type": "run_dialogue",
+   "open_gap": true,
+   "retry_after_coaching": true
+  }
+ ]
+}

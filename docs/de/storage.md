@@ -6,14 +6,13 @@
 
 Die maßgebliche Beschreibung steht in [storage.md der Skills](../../skills/_shared/references/storage.md); diese Seite erklärt sie für Nutzer.
 
-## Drei Speicheroptionen
+## Zwei Speicheroptionen
 
 Beim ersten Gebrauch (oder mit `setup`) fragt der Coach zuerst nach der Speicherart und danach nach dem konkreten Ziel. Der aktuelle Projektordner darf vorgeschlagen werden, wird aber nie ungefragt Speicherziel.
 
 | Option | Bedeutung |
 |---|---|
 | **Lokal** | Ein von dir benanntes, dauerhaft zugängliches Verzeichnis. Lese-/Schreibrechte werden vor der Einrichtung geprüft. |
-| **Git** | Ein ausdrücklich genanntes **privates** GitHub- oder GitLab-Repository. Speichern heißt: Änderungen werden im gewählten Repository committed und gepusht. |
 | **Nicht speichern** | Nichts wird persistiert: keine Dateien, Zeiger, Sperren, Journale, Exporte, CV-Kopien, Stellen, Runs oder Lernstände. Mehrere Bewerber und Stellen bleiben nur im Chat unterscheidbar; ein späterer Chat kennt sie nicht. `stop` liefert eine Zusammenfassung im Chat. |
 
 „Dateien selbst verwalten“ gibt es nicht mehr, weder als Modus noch als Fallback. Bei Speicherfehlern zeigt der Coach den Fehler und bietet Wiederherstellung oder eine neue Speicherwahl an; er exportiert nichts ungefragt und wechselt den Modus nicht.
@@ -39,18 +38,13 @@ Jeder Projektordner hat einen eigenen Zeiger auf sein Speicherziel (`~/.config/z
 - **CV**: Das Original bleibt bytegleich (SHA-256 in `source.json`); `extracted.md` bildet den Inhalt ab, nicht das Layout. Status `complete` oder `partial` (Lücken wie Bilder, nicht lesbare Seiten, Kopf-/Fußzeilen, fehlende Textebene). Teilimporte gelten nicht als fertig.
 - **Profil**: `missing`, `draft` oder `confirmed`. Bestätigt gilt es erst, nachdem du die fachlichen Angaben bestätigt hast. Quelle der Aussagen (CV, Nutzerangabe, Modellvorschlag) bleibt erkennbar.
 - **Stellen** gehören genau einem Bewerber. Ausschreibung, Recherche (mit Quellen und Abrufdatum), Abgleich und Vorbereitung sind fortlaufend nummerierte Snapshots; frühere Stände und die Original-Ausschreibung bleiben erhalten.
-- **Runs** sind unveränderlich; der Kopf nennt `candidate_id` und optional `job_id`. Der **Lernstand** (`state.md`) gilt pro Bewerber und bewerberübergreifend über Stellen; stellenspezifische Passungslücken stehen im `match`-Snapshot der Stelle.
+- **Runs** sind unveränderlich (Run-Format 4); der Kopf nennt `candidate_id`, optional `job_id` und je Hauptfrage `q-N` den Dialog: Originalantwort, Nachfragen (`q-N-fM`, Wortlaut, Art, Anlass, Antwort, Hinweis-Flag, Lücken) und Wiederholungsversuche. `answered_count` zählt nur Hauptfragen; `followup_count`, `followup_answered_count` und `retry_count` werden getrennt geführt. Runs im Format 3 (ohne Dialogdaten) werden vor Schreibzugriffen abgelehnt und nicht migriert. Der **Lernstand** (`state.md`) gilt pro Bewerber und bewerberübergreifend über Stellen; stellenspezifische Passungslücken stehen im `match`-Snapshot der Stelle.
 
-## Git im Detail
+## Entfernte Speicherart
 
-- Nur `github.com` und `gitlab.com`. Es werden keine Tokens oder Passwörter erfragt oder gespeichert; Zugriff nutzt dein vorhandenes `git`/`gh`/`glab` oder einen autorisierten Connector.
-- Vor der Einrichtung werden Lesezugriff, **privater** Status und Schreibrecht für genau dieses Repository bestätigt (über `gh`/`glab` oder eine Connector-Bestätigung, die das Repository nennt und deine Bestätigung trägt). Eine Connector-Bestätigung ist ein weitergereichter Hinweis, kein unabhängiger Beweis; sie wird nie als Nachweis gespeichert und bei jedem Setup/Publish neu verlangt. Ein Wechsel von Ziel, Speicherart oder Repository wird vor jeder Änderung geprüft und braucht `--switch`. Es gibt keinen Test-Commit zur Rechteprüfung.
-- Jeder Speichervorgang verlangt zuerst einen **sauberen** Git-Arbeitsbaum (keine gestagten, geänderten oder fremden Dateien, auch nicht in verwalteten Ordnern) und committet danach genau seine eigenen Änderungen lokal. Unerwartete Änderungen brechen ab; nichts wird gestasht, zurückgesetzt oder veröffentlicht – du klärst sie selbst. Alle Speicher- und Veröffentlichungsvorgänge laufen unter einer gemeinsamen kooperativen Git-Workspace-Sperre (auch bei verschiedenen Bewerbern); committet werden nur die Pfade, die der Vorgang selbst geschrieben hat, per ausdrücklichem Pfad (nie `git add -A`); Reste eines fehlgeschlagenen Vorgangs werden mit SHA-256 festgehalten und nur bei unverändertem Inhalt fortgesetzt, unbekannte Journalformate nie. `git-pull`/`git-status` nutzen dieselbe Sperre. Gestagte Änderungen jeder Art (auch unter `.journal/`) werden nie ausgeblendet und brechen Speichern und Veröffentlichen mit den betroffenen Pfaden ab (nichts wird automatisch entstagt, gelöscht oder zurückgesetzt); unveröffentlichte Commits mit `.journal`- (oder alten `.zyris`-)Pfadsegmenten werden nicht gepusht. Nicht geschützt: Programme, die die kooperative Sperre ignorieren. `git-publish` stagt nie selbst: Es prüft erneut Privatheit und Schreibrecht und dass `origin` (Fetch- und Push-URL) weiterhin genau das autorisierte Repository bzw. die beim Setup festgehaltenen URLs bezeichnet (mehrere Push-Ziele, abweichende `pushurl`, jedes Ziel ohne beweisbare Identität des autorisierten Repositorys – etwa per `insteadOf` auf einen lokalen Pfad umgeleitet → Abbruch vor jedem Schreiben, ohne Remote-Umkonfiguration und ohne Ausnahme-Schalter), arbeitet Fremdänderungen per Rebase ein, pusht **ohne Force** und prüft den Remote-Stand am Push-Ziel (ein passender Stand am Fetch-Ziel beweist nichts). Erst dann meldet der Coach **remote gespeichert**. Eine nur lokale Änderung oder ein Commit ist kein Remote-Erfolg.
-- Konflikt in derselben Datei, abgelehnter oder unterbrochener Push, fehlende Rechte oder nicht bestätigter Remote-Stand enden in einem Fehler; lokale Commits bleiben, fremde Änderungen werden nicht überschrieben.
-- Zu Sitzungsbeginn holt `git-pull` Fremdänderungen (nur Fast-Forward).
-- Grenzen: Die Zuordnung eigener Änderungen setzt voraus, dass während eines Speichervorgangs niemand anderes im Arbeitsbaum schreibt. Die Runtime koordiniert, wann ein Speichern als remote erfolgreich gilt; Transport und Anmeldung liegen bei externen Werkzeugen. Ein Provider-SDK gibt es nicht. Live-Verhalten gegen GitHub/GitLab ist nicht getestet (siehe [Abnahme](../acceptance.md)).
+Git-Speicherung wird nicht mehr angeboten. Bestehende Git-Konfigurationen werden ohne Änderungen abgelehnt; es gibt keine automatische Migration in lokalen Speicher.
 
-## Fehler und Wiederherstellung (lokal und Git-Arbeitskopie)
+## Fehler und Wiederherstellung (lokal)
 
 Jeder Bewerber hat eigene Sperre und eigenes Journal. Ein Lauf wird erst nach Inhaltsprüfung als gespeichert gemeldet. Bericht und Lernstand sind keine gemeinsam atomare Mehrdatei-Transaktion; `.journal/pending.json` hält die Absicht fest.
 
@@ -66,6 +60,6 @@ Jeder Bewerber hat eigene Sperre und eigenes Journal. Ein Lauf wird erst nach In
 
 ## Formatgrenzen
 
-Es wird nur das aktuelle Format 2 unterstützt. Verzeichnisse mit dem früheren Layout (`state.md`, `candidate/profile.md`, `runs/` im Stamm), fremde Dateien, falsche Schema-Versionen, doppelte JSON-Schlüssel, Run-Dateien ohne aktuelle Metadaten oder mit fremder Bewerber-/Stellenzuordnung werden **vor jedem Schreibzugriff** mit konkretem Grund abgelehnt. Vorhandene Daten werden weder migriert noch gelöscht noch überschrieben; wähle für neue Daten ein leeres Ziel oder gleiche manuell ab.
+Es wird nur das aktuelle Format 3 unterstützt. Verzeichnisse mit dem früheren Layout (`state.md`, `candidate/profile.md`, `runs/` im Stamm), fremde Dateien, falsche Schema-Versionen, doppelte JSON-Schlüssel, Run-Dateien ohne aktuelle Metadaten oder mit fremder Bewerber-/Stellenzuordnung werden **vor jedem Schreibzugriff** mit konkretem Grund abgelehnt. Vorhandene Daten werden weder migriert noch gelöscht noch überschrieben; wähle für neue Daten ein leeres Ziel oder gleiche manuell ab.
 
 Garantien gelten für kooperierende Prozesse auf lokalen Dateisystemen; Netzwerk- oder Cloud-Sync-Verzeichnisse sind kein unterstütztes Transaktionsbackend.

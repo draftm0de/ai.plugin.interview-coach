@@ -3,10 +3,10 @@
 Status: confirmed
 
 Am 19.11.2026 wurden SKILL.md und references/ vom Nutzer als Zielbild bestätigt. Die Erweiterung (zwei Hosts,
-genau drei Speicheroptionen, mehrere Bewerber, CV-Import, Stellen-Skills, funktionaler Git-Ablauf) wurde danach
+genau zwei Speicheroptionen, mehrere Bewerber, CV-Import, Stellen-Skills, lokaler Speicherablauf) wurde danach
 ausdrücklich freigegeben und hat Vorrang vor früheren Fassungen. Die folgenden Kriterien sind Anforderungen,
-keine Behauptung von Umsetzung oder Abnahme. / The extension (two hosts, exactly three storage options, several
-candidates, CV import, job skills, functional Git flow) was explicitly confirmed afterwards and supersedes earlier
+keine Behauptung von Umsetzung oder Abnahme. / The extension (two hosts, exactly two storage options, several
+candidates, CV import, job skills, local storage flow) was explicitly confirmed afterwards and supersedes earlier
 versions. The criteria below are requirements, not claims of implementation or acceptance.
 
 ## Zweck / Purpose
@@ -24,9 +24,8 @@ automatische Aktivierung beim Öffnen eines Projekts wird nicht behauptet.
 ## Nicht-Ziele / Non-goals
 
 Keine Einstellungsprognose, erfundenen Erfahrungen, automatischen Hintergrundspeicherungen, privaten Daten im Plugin
-oder Marketplace-Kataloge im Plugin-Repository. Kein Provider-SDK-Adapter und keine eigene Verwaltung von
-Git-Zugangsdaten (Tokens/Passwörter werden weder erfragt noch gespeichert); Remote-Speicherung koordiniert die
-Runtime über externes `git` (Sichtbarkeitsprüfung über `gh`/`glab` oder ausdrückliche Connector-Bestätigung).
+oder Marketplace-Kataloge im Plugin-Repository. Kein Git-Speicher, kein Provider-SDK-Adapter und keine
+Verwaltung von Git-Zugangsdaten; keine Clone-, Commit-, Push- oder Pull-Funktion für Nutzerdaten.
 Keine Legacy-Unterstützung, Aliase, Ersatzpfadsuche oder automatische Migration. „Dateien selbst verwalten“ ist kein
 Speichermodus. / No hiring prediction, fabricated experience, background persistence, private plugin data,
 plugin-owned marketplace catalog, provider SDK adapter, git credential management, legacy support or migration.
@@ -39,13 +38,21 @@ actual dialogue behavior.
 ## R1: Speicherwahl und Zustimmung
 
 Status: confirmed
-Acceptance: Beim Erststart genau drei Speicheroptionen (Lokal, Git, Nicht speichern) vor einer Pfad- bzw. Repository-Frage anbieten; der Projektordner ist höchstens Vorschlag, nie ungefragtes Ziel. Bestehendes Ziel nur bestätigt weiterverwenden oder explizit wechseln (auch Wechsel der Speicherart oder des Repositorys am selben Pfad); diese Entscheidung und ungültige vorhandene Konfiguration werden vor jeder Mutation (Verzeichnisse, Klone, Workspace-Dateien, Zeiger, Remote-Schreibaktionen) geprüft und serialisiert. Setup erhält vorhandene Inhalte und prüft Lese-/Schreibzugriff. „Dateien selbst verwalten“ ist weder Modus noch Fallback.
+Acceptance: Beim Erststart genau zwei Speicheroptionen (Lokal, Nicht speichern) vor einer Pfadfrage anbieten; der Projektordner ist höchstens Vorschlag, nie ungefragtes Ziel. Bestehendes Ziel nur bestätigt weiterverwenden oder explizit wechseln (auch Wechsel des Ziels); diese Entscheidung und ungültige vorhandene Konfiguration werden vor jeder Mutation (Verzeichnisse, Workspace-Dateien, Zeiger) geprüft und serialisiert. Setup erhält vorhandene Inhalte und prüft Lese-/Schreibzugriff. „Dateien selbst verwalten“ ist weder Modus noch Fallback.
 Source: skills/_shared/references/setup.md
 Source: skills/_shared/scripts/interview_workspace.py
 Test: tests/integration/workspace/test_projects_candidates.py
 Test: tests/behavior/run.py
 Fixture: tests/fixtures/behavior/quality-cases.json
-Fixture: tests/fixtures/behavior/scenarios/setup_three_options.json
+Fixture: tests/fixtures/behavior/scenarios/setup_two_options.json
+
+Ergänzung bestätigt am 20.11.2026: Nach „Lokal“ bei bekanntem Projektpfad dessen Unterordner `interview-data`
+mit absolutem Pfad und „Ja, hier speichern“ / „Nein, anderen Ordner wählen“ anbieten. „Ja“ bestätigt das Ziel
+und die angekündigte Einrichtung ohne erneute Pfadabfrage; „Nein“ führt zur Frage nach einem anderen Pfad,
+ohne den Vorschlag anzulegen. Fragen nicht doppelt ausgeben. Ohne bekannten Projektpfad direkt nach dem Ziel
+fragen; niemals private Daten im installierten Plugin vorschlagen. Bestehende Format- und Zugriffskontrollen bleiben verbindlich.
+Fixture: tests/fixtures/behavior/scenarios/setup_local_accept.json
+Fixture: tests/fixtures/behavior/scenarios/setup_two_options.json
 
 ## R2: Nicht speichern
 
@@ -81,7 +88,7 @@ Fixture: tests/fixtures/behavior/scenarios/stop_pause_resume.json
 ## R5: Sprache und Coaching
 
 Status: confirmed
-Acceptance: Bestätigte Bedien- und Interviewsprache getrennt behandeln. Im Coaching eine Frage pro Turn, Feedback zur tatsächlichen Antwort mit rollenbezogener Gesamtbewertung und Kriterien; im Mock Feedback am Ende. Modi general, targeted, drill, mock, briefing bleiben erhalten. Keine beruflichen Erfahrungen erfinden.
+Acceptance: Bestätigte Bedien- und Interviewsprache getrennt behandeln. Bestätigt am 20.11.2026: Nur die Bediensprache ist projektbezogen und wird im Setup abgefragt. Die Standard-Interviewsprache wird pro Bewerber bestätigt; eine einzelne Stelle kann sie überschreiben, auch unabhängig von anderen Stellen desselben Unternehmens. Ohne Stellenabweichung gilt der Bewerberstandard. Fehlende Bestätigung wird vor Interviewfragen eingeholt. Sprachwahl ist nicht auf Deutsch/Englisch beschränkt. Nicht speichern hält dieselbe Zuordnung nur im Chat. Im Coaching eine Frage pro Turn, Feedback zur tatsächlichen Antwort mit rollenbezogener Gesamtbewertung und Kriterien; im Mock Feedback am Ende. Modi general, targeted, drill, mock, briefing bleiben erhalten. Keine beruflichen Erfahrungen erfinden.
 Source: skills/interview-coach/SKILL.md
 Source: skills/_shared/references/training.md
 Source: skills/_shared/references/evaluation.md
@@ -91,6 +98,8 @@ Fixture: tests/fixtures/behavior/quality-cases.json
 Test: tests/behavior/run_journey.py
 Fixture: tests/fixtures/behavior/journeys/teamlead_coaching.json
 Test: tests/contracts/test_skill_contract.py
+
+Test: tests/integration/workspace/test_languages.py
 
 ## R6: Evidenzbasierter Fortschritt
 
@@ -216,18 +225,47 @@ Fixture: tests/fixtures/behavior/scenarios/job_training_reuse_second_run.json
 ## R18: Kanonische Datenhierarchie
 
 Status: confirmed
-Acceptance: Genau ein aktueller Aufbau (Projekt/Speicherziel → Bewerber → Identität/Profil, CV, Lernstand, Stellen mit Ausschreibung/Recherche/Vorbereitung, Runs mit optionaler Stellenzuordnung) mit versionierten Schemas. Alle privaten Daten liegen außerhalb des installierten Plugins; Pfade sind gegen Traversal und unsichere Symlinks geschützt. Der interne Kontrollordner heißt `.journal` (Format 3) und enthält geschützte Verwaltungs- und Wiederherstellungsdaten, die nicht manuell gelöscht werden sollen. Das frühere Layout mit `.zyris` (Format 2), auch gemischt oder als Datei/Symlink sowie auf Bewerberebene, wird vor jeder Mutation mit konkreter Diagnose abgelehnt und nie migriert, gelesen, verschoben oder gelöscht; der Schutz vor Veröffentlichung von Kontrolldateien erfasst `.journal` und `.zyris` als vollständige Pfadsegmente.
+Acceptance: Genau ein aktueller Aufbau (Projekt/Speicherziel → Bewerber → Identität/Profil, CV, Lernstand, Stellen mit Ausschreibung/Recherche/Vorbereitung, Runs mit optionaler Stellenzuordnung) mit versionierten Schemas. Alle privaten Daten liegen außerhalb des installierten Plugins; Pfade sind gegen Traversal und unsichere Symlinks geschützt. Der interne Kontrollordner heißt `.journal` (Format 3) und enthält geschützte Verwaltungs- und Wiederherstellungsdaten, die nicht manuell gelöscht werden sollen. Das frühere Layout mit `.zyris` (Format 2), auch gemischt oder als Datei/Symlink sowie auf Bewerberebene, wird vor jeder Mutation mit konkreter Diagnose abgelehnt und nie migriert, gelesen, verschoben oder gelöscht.
 Source: skills/_shared/references/storage.md
 Source: skills/_shared/scripts/interview_workspace.py
 Source: skills/_shared/scripts/coach_core.py
 Test: tests/integration/workspace/test_projects_candidates.py
 Test: tests/contracts/test_skill_contract.py
 
-## R19: Git-Speicherablauf
+## R19: Git-Speicher entfernt
 
 Status: confirmed
-Acceptance: Ausschließlich private GitHub-/GitLab-Repositories mit explizitem Ziel; vor Einrichtung werden authentifizierter Zugriff, privater Status und Schreibrecht bestätigt (Provider-CLI oder ausdrücklich aufgezeichnete Connector-Bestätigung), ohne Testcommit und ohne Tokenabfrage. Remote-gespeichert wird erst nach bestätigtem Remote-Head gemeldet; lokale Änderung ist kein Remote-Erfolg. Konflikte, abgelehnte oder unterbrochene Pushes, fehlende Rechte und unbestätigter Remote-Erfolg enden in Fehlern ohne Force-Push und ohne Verlust fremder Änderungen. Vor jeder Veröffentlichung wird das tatsächliche Fetch- und Push-Ziel (origin, pushurl, mehrere Ziele, URL-Rewriting) gegen das autorisierte private Repository geprüft; Privatheits- und Rechtenachweis gelten für genau dieses Ziel und werden aktuell erhoben (eine gespeicherte Connector-Bestätigung ist kein Dauerbeweis), die abschließende Verifikation liest das beschriebene Ziel. Veröffentlicht werden nur Änderungen des autorisierten Speichervorgangs: gestagte, geänderte oder fremde Dateien (auch in verwalteten Verzeichnissen) brechen ab und bleiben unangetastet; es gibt keine automatischen Resets, Stashes oder Bereinigungen.
-Source: skills/_shared/scripts/coach_git.py
+Acceptance: Am 20.11.2026 wurde Git-Speicherung ausdrücklich aus dem Produktumfang entfernt. Angeboten werden nur Lokal und Nicht speichern. Runtime und Skills bieten keine Git-Speicherbefehle, Remote-Parameter, Provider-Anmeldung oder Connector-Speicherung mehr. Bestehende Git-Konfigurationen werden vor Schreibzugriffen konkret abgelehnt und unverändert erhalten; keine automatische Umwandlung in lokalen Speicher, keine Migration und kein Löschen. Git für Repository-Entwicklung und Plugin-Installation ist davon unabhängig.
+Source: skills/_shared/scripts/interview_workspace.py
+Source: skills/_shared/references/setup.md
+Test: tests/integration/workspace/test_storage_modes.py
+
+## R20: Realistischer Nachfrage-Dialog
+
+Status: confirmed
+Acceptance: Bestätigt am 20.11.2026. Nach einer Antwort prüft der Interviewer zuerst, ob eine wesentliche, tatsächlich gestellte Anforderung der Hauptfrage offen, mehrdeutig oder widersprüchlich ist. Wenn ja: genau eine konkrete Nachfrage pro Turn, bei der aktuellen Hauptfrage; davor keine Musterantwort, kein Lösungshinweis, keine ausführliche Bewertung, keine Verbesserungsliste; Abwarten der eigenständigen Antwort; kein Wechsel zur nächsten Hauptfrage allein wegen einer eingegangenen Antwort. Eine Nachfrage ist kein vollständiger Wiederholungsversuch. Bei genügend Evidenz, fehlender sinnvoller Klärung oder Nichtwissen wird der Frageblock beendet: in Coaching-Modi erst jetzt (nie nach jeder Einzelantwort) Erstantwort und Ergänzungen getrennt bewerten, dann Coaching anbieten oder zur nächsten Hauptfrage; keine endlose Schleife, keine starre Quote, keine künstliche Nachfrage bei guter vollständiger Antwort. Mock erlaubt natürliche Nachfragen, Bewertung/Hinweise/Musterantworten erst am Ende; Briefing bleibt ohne Antwortbewertung. STOP hat immer Vorrang (keine weitere Frage, keine zweite Bestätigung).
+Arten: clarification (neutral), completion (wesentliche Anforderung fehlt), deepening (zusätzliche Dimension, kein Fehler der Erstantwort). Die Anzahl der Nachfragen erzeugt keinen pauschalen Abzug; bewertet wird, was spontan beantwortet, was nach einer Nachfrage selbstständig konkretisiert wurde, was offen blieb und wo Hinweise/Coaching nötig waren. Eine Antwort nach neutraler Nachfrage ist eigene Evidenz, aber keine spontan vollständige Erstantwort; nach inhaltlichen Hilfen ist sie unterstützt; Musterantworten sind keine Bewerberevidenz; improving/stable bleiben unverändert und Nachfragen täuschen keine zusätzlichen Szenarien vor. Nur ausdrücklich verlangte oder wesentliche Aspekte werden bewertet; ein „wenn möglich“ erbetenes reales Beispiel ist keine Voraussetzung für eine gute Antwort auf ein hypothetisches Szenario und wird später im Block nicht verpflichtend.
+Rollenpassung: mehrdeutige Motivationsaussagen werden vor jeder Schwächenableitung geklärt; eine bestätigte Präferenz für technische Umsetzung kann gegen eine Product-Rolle sprechen, ist aber eine stellenspezifische Passungsfrage (match/preparation), keine allgemeine Kommunikationsschwäche und nicht Teil des Bewerber-Lernstands; Ausschreibungen werden nicht überzeichnet (Ausschreibungsfakten und Interpretation getrennt).
+Persistenz (Run-Format 4, nur aktuelles Format): je Hauptfrage stabile Zuordnung `q-N`, Hauptfrage und ursprüngliche Antwort, Nachfragen (`q-N-fM`) mit Originalwortlaut, Art, konkretem Anlass, Antwort, Hinweis-Flag, geschlossene/offene Lücken und getrennter Einordnung von Erstantwort und Frageblock. Hauptfragen, Nachfragen und Wiederholungsversuche werden getrennt gezählt; eine Nachfrage erhöht `answered_count` nicht; eine unbeantwortete Nachfrage bei STOP ist weder Antwort noch fehlgeschlagene Antwort. Immutable Runs, stopped_early, Pause/Fortsetzung (neue Run-ID, gleiche Zuordnung, unveränderte Planzahl, beantwortete Inhalte unverändert und nicht wiederholt; ein dokumentierter Hinweis `hints_before` wird nie entfernt; dokumentierte offene Lücken verschwinden nur mit neuer Evidenz) bleiben erhalten. Runs im Format 3 (ohne Dialogdaten) werden vor Schreibzugriffen konkret abgelehnt und unverändert gelassen; keine Aliase, Fallbacks oder Migration. Nicht speichern: dieselbe Gesprächslogik nur im Chat ohne Runtime-Aufrufe oder Dateien.
+Source: skills/_shared/references/followup.md
+Source: skills/_shared/references/evaluation.md
+Source: skills/_shared/references/session-control.md
+Source: skills/_shared/references/runtime.md
 Source: skills/_shared/references/storage.md
-Test: tests/integration/git/test_git_storage.py
-Fixture: tests/fixtures/behavior/scenarios/storage_failure_no_false_success.json
+Source: skills/_shared/scripts/interview_workspace.py
+Test: tests/integration/workspace/test_followups.py
+Test: tests/behavior/run_scenarios.py
+Test: tests/unit/test_run_scenarios.py
+Test: tests/native/run_host_dialogue.py
+Test: tests/unit/test_host_dialogue.py
+Fixture: tests/fixtures/behavior/judge_cases/final10_B_role_fit_penalty.json
+Fixture: tests/fixtures/behavior/judge_cases/final10_host_claude_false_missing.json
+Fixture: tests/fixtures/behavior/scenarios/followup_adr_deadline.json
+Fixture: tests/fixtures/behavior/scenarios/followup_motivation_role_fit.json
+Fixture: tests/fixtures/behavior/scenarios/followup_complete_answer.json
+Fixture: tests/fixtures/behavior/scenarios/followup_gap_stays_open.json
+Fixture: tests/fixtures/behavior/scenarios/followup_optional_example.json
+Fixture: tests/fixtures/behavior/scenarios/followup_stop_open.json
+Fixture: tests/fixtures/behavior/scenarios/followup_mock.json
+Fixture: tests/fixtures/behavior/scenarios/followup_pause_resume.json
+Fixture: tests/fixtures/behavior/scenarios/followup_no_storage.json

@@ -33,7 +33,8 @@ Owner: `job-create`; reused by `job-training`. Research rules: `research.md`.
    candidate facts that profile or the candidate did not state. Save as `job-add --kind match`, then topics, likely questions
    and open questions as `job-add --kind preparation`.
 8. Updates add a new snapshot; earlier snapshots and the original posting stay.
-9. Report: candidate, job ID, what was saved, open points, storage location, remote status in Git mode. Open points have two
+   Ambiguous motivation or preference statements are clarified (`followup.md`) before they become fit points; a confirmed preference against the role (e.g. hands-on implementation vs. Product) is recorded as a job-specific fit point in a new `match` (and, where preparation covers it, `preparation`) snapshot via `job-add`, never only in a run and never as a general weakness or in `state.md`. Keep posting facts and interpretation apart ("Führungsschwerpunkt" is not "keinerlei technische Mitarbeit").
+9. Report: candidate, job ID, what was saved, open points, storage location. Open points have two
    separate sources: **record gaps** (`job-show` → `open_points`: missing company, participants not yet asked, unverified people —
    required fields only) and **research gaps** (what the latest `research`/`preparation` snapshot lists as unknown, not yet
    researched or skipped, e.g. no web research, unknown interviewers). An empty `open_points` list means the job record is

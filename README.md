@@ -23,7 +23,7 @@ Fragen und Kriterien richten sich nach Rolle und Erfahrungsniveau. Der Coach tre
 
 *Gerenderte Auszüge eines fiktiven Codex-CLI-Tests, kein Host-Screenshot. Noten bewerten einzelne Antworten und versprechen kein Ergebnis. [Herkunft und vollständiger Ablauf](docs/de/screens.md).*
 
-1. Einrichten: Speicherart wählen – genau drei Optionen: **Lokal**, **Git** (privates GitHub/GitLab) oder **Nicht speichern** – danach Pfad bzw. Repository.
+1. Einrichten: Speicherart wählen – genau zwei Optionen: **Lokal**, **Nicht speichern** – bei Lokal danach den Speicherordner bestätigen.
 2. Bewerber anlegen (`candidate-create`): mit CV-Import (PDF, DOCX, Markdown) oder Profilaufbau ohne CV.
 3. Allgemein trainieren (`candidate-training`) oder eine Stelle vorbereiten (`job-create`) und dafür trainieren (`job-training`).
 4. Im begleiteten Modus eine Frage pro Turn beantworten; Gesamtbewertung, Kriterien, Stärken und Verbesserungen erhalten.
@@ -63,13 +63,13 @@ Die Aufrufschreibweisen folgen der Host-Dokumentation; ein nativer Befehl `:job-
 
 ## Speicherung und Datenschutz
 
-Genau drei Optionen: **Lokal** (von dir benanntes Verzeichnis), **Git** (ausschließlich *privates* GitHub-/GitLab-Repository; „remote gespeichert“ wird erst nach bestätigtem Push gemeldet, nie per Force-Push) und **Nicht speichern**. „Dateien selbst verwalten“ entfällt. Private Daten liegen außerhalb des installierten Plugins. Es werden keine Tokens erfragt. [Speicherung, Formate und Wiederherstellung](docs/de/storage.md).
+Genau zwei Optionen: **Lokal** (von dir benanntes Verzeichnis), **Nicht speichern**. „Dateien selbst verwalten“ entfällt. Private Daten liegen außerhalb des installierten Plugins. Es werden keine Tokens erfragt. [Speicherung, Formate und Wiederherstellung](docs/de/storage.md).
 
 ## Projektstatus
 
 MVP mit versionslosen Plugin-Manifesten und Repository-Import über Draftmode AI Plugins. Lizenz: [MIT](LICENSE). Kein Kundenportal, Zahlungssystem oder Lizenzserver; eine Aufnahme in ein zusätzliches offizielles Plugin-Verzeichnis wird nicht behauptet.
 
-Lokale Speicherung, Git-Ablauf (gegen lokale Bare-Repositories, **keine** Live-Abnahme von GitHub/GitLab), Extraktion und Paketierung besitzen deterministische Tests. Modellszenarien verwenden fiktive Daten und heuristische Prüfungen. Host-Abnahme für Claude Code und Codex mit isolierten Profilen ist offen; Ergebnisse und Lücken stehen in der [Abnahmematrix](docs/acceptance.md). Der frühere [Release-Nachweis](docs/de/release-evidence.md) ist Historie.
+Lokale Speicherung, Extraktion und Paketierung besitzen deterministische Tests. Modellszenarien verwenden fiktive Daten und heuristische Prüfungen. Host-Abnahme für Claude Code und Codex mit isolierten Profilen ist offen; Ergebnisse und Lücken stehen in der [Abnahmematrix](docs/acceptance.md). Der frühere [Release-Nachweis](docs/de/release-evidence.md) ist Historie.
 
 ## Entwicklung
 
@@ -81,7 +81,7 @@ make test          # Deterministische Unit-, Integrations- und Vertragstests ohn
 make check-plugin  # Versionslose Host-Manifeste prüfen
 ```
 
-Die Tests benötigen keine zusätzlichen Python-Pakete wie pytest. Git und Python 3.10+ werden für die Verwaltungswerkzeuge benötigt; die Laufzeit benötigt Python 3.10+; Git wird nur für den Git-Speicher benötigt, optional `gh`/`glab` für die Sichtbarkeitsprüfung. PDF-Import braucht `pdftotext`, `mutool` oder `pypdf` (wird nicht installiert). Make ist optional. [Entwicklung und Tests](docs/de/development.md).
+Die Tests benötigen keine zusätzlichen Python-Pakete wie pytest. Git und Python 3.10+ werden für die Verwaltungswerkzeuge benötigt; die Laufzeit benötigt Python 3.10+. PDF-Import braucht `pdftotext`, `mutool` oder `pypdf` (wird nicht installiert). Make ist optional. [Entwicklung und Tests](docs/de/development.md).
 
 Die fünf Skills unter [skills/](skills/) und die gemeinsame Runtime unter [skills/_shared/](skills/_shared/) definieren das Verhalten; maßgeblich ist [SCOPE.md](SCOPE.md). Nutzerdokumentation liegt unter [docs/de/](docs/de/README.md) und wird direkt auf GitHub dargestellt.
 

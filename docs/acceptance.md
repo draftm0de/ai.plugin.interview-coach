@@ -6,6 +6,246 @@ Ein Source-Verweis oder ein bestandener Text-Vertragstest beweist keinen fachlic
 **Keine vollständige Abnahme.** Unten stehen getrennt: deterministisch geprüft · modellbasiert geprüft · nativ im Host beobachtet ·
 live beim Provider geprüft (nicht erfolgt) · nicht implementiert · noch nicht geprüft.
 
+## Nachtrag 2026-11-21 — Rollenpassung ohne indirekte Bestrafung, nicht erfragte Zusatzaspekte, eine Frage pro Turn, Evidenztreue, aufbewahrte Artefakte
+
+**Maßgeblicher Lauf: `final13`, Quellstand `88ddf32f6f3140a3696ee09b4d20db70f57ab050cadef63d7280d6a49f758844` (96 Dateien; identisch in `fingerprint-start.txt`/`fingerprint-end.txt`, nach der Doku erneut geprüft).** Belege: `.tmp/tests/final13/` (lokal, git-ignoriert), darin `scenarios/artifacts/<szenario>/{ws,files}` (gespeicherte fiktive Run-/State-/Match-Artefakte, ohne `.journal`) und `host-*-artifacts/`. **Gesamtergebnis: nicht vollständig bestanden** (2 von 9 Szenarien FAIL). Frühere Läufe `final11` und `final12` (eigene Stände) sind unten erhalten und nicht mit `final13` vermischt.
+
+### Änderungen, Tests, Ergebnisse, Grenzen
+**1. Rollenpassung / Judge (B, final10)**
+- Änderung: `followup.md`/`evaluation.md`: Noten *und deren Begründungen* dürfen nicht auf fehlender Begeisterung, fehlendem Interesse oder fehlenden Gründen für die abgelehnte Rolle beruhen (auch nicht in „Substanz der Begründung“ oder „wirkt wie eine Absage“); bewertet werden Klarheit, Ehrlichkeit, Konkretheit; die Überschrift „Passung (ohne Punktzahl)“ genügt nicht. Rubrik `role_fit_job_specific` nennt genau diese Muster. Neu: deterministischer Wächter `preference_penalty_lines` (Schritt-Flag `no_preference_penalty` in Szenario B).
+- Tests: negativer Regressionstest mit dem konkreten final10-Dialog (`tests/fixtures/behavior/judge_cases/final10_B_role_fit_penalty.json`): findet die Zeilen „reizt“, „anspricht“, „Absage“; Kontrollfall mit sauber getrennter Bewertung (`control_B_separated_rating.json`) wird nicht beanstandet; ein „lenienter“ Judge, der final10 durchließ, wird von der Kalibrierung erkannt. Der echte Judge wurde mit `run_scenarios.py --cli claude --judge-calibration` 3× in `final13` und 1× vorab befragt: alle 4 Fälle in allen 3 Läufen mit dem erwarteten Urteil.
+- Ergebnis `final13`: Das Stellen-Szenario B schlug an einer anderen Prüfung fehl (siehe Fehlschläge), nicht an der Notenbegründung. In `final11` bestand die Notenbegründungsprüfung; im damaligen Transkript lautete eine Begründung „Substanz der Begründung 5/10: Es fehlt ein Anlass oder Beispiel, was Sie zu diesem Wunsch geführt hat“ — vom Wächter und vom Judge nicht beanstandet, **manuell grenzwertig** (fordert eine Rechtfertigung der Präferenz); nicht automatisch entschieden.
+- Grenze: Judge heuristisch, Einzelstichproben (3 Kalibrierungsläufe belegen kein Dauerverhalten); der Wächter erkennt nur die beobachteten Formulierungen.
+
+**2. Szenario F: nicht erfragte Zusatzaspekte**
+- Änderung: `followup.md`: nicht erfragte Aspekte sind nie `completion`, nur optionale `deepening` (Formulierung als optional, `gap: null`, nie in `other_open_gaps`, nie „fehlt/offen“ in der Bewertung, bei Ablehnung Abschluss ohne Abzug); eine vom Coach selbst angehängte Zweitfrage kann nie als unbeantwortet bewertet werden. Szenario F prüft jetzt `allowed_kinds: [deepening]` **und** `no_gaps` (keine Lücke, kein offenes Resolution, keine `other_open_gaps`); Rubrik `no_false_missing` (nur bei bewerteter Antwort, `judge_if_rated`).
+- Tests: Unit-Test `dialogue_matches` (`no_gaps`), Fixture-Test.
+- Ergebnis: F PASS in `final12` und `final13`; in `final11` FAIL (Judge `no_false_missing`: „wer sie am Ende trifft bleibt offen“, obwohl „ich … entscheide“ gesagt war — dritter Befund dieser Art; danach Beispiel in `evaluation.md` ergänzt).
+- Grenze: Der deepening-Zweig mit gespeicherter Vertiefungs-Nachfrage wurde in `final13` nicht beobachtet (Coach bewertete direkt).
+
+**3. Eine Nachfrage pro Turn, Evidenztreue (Claude-nostorage)**
+- Änderung: `followup.md`: zusätzliche Fehlbeispiele (zwei Fragen nach „Und wie …“, „oder“-Alternativen, das final10-Beispiel); `evaluation.md` „Evidence fidelity“ (jede „fehlt/offen“-Behauptung gegen alle Bewerberaussagen prüfen; „mit beiden Teams durchgehen“ = Teameinbindung genannt; mehr Tiefe nur als Empfehlung). Szenarien: Flag `max_question_marks: 1` an allen Nachfrage-Schritten; Rubrik `no_false_missing` an Bewertungsschritten; Hostrunner: `false_missing_claims` gegen die skriptierten Antworten in jeder Bewertungs- und STOP-Antwort.
+- Judge-Zuverlässigkeit: `no_false_missing=false` gilt nur mit wörtlichem Zitat der Behauptung **und** des widersprechenden Bewerberzitats (geprüft, inhaltlich überlappend); sonst UNCLEAR (`false_missing_verdict`, Tests inkl. erfundener Zitate).
+- Regressionen aus dem final10-Transkript: `final10_host_claude_false_missing.json` (Judge-Kalibrierung), `test_final10_host_rating_calls_the_stated_team_involvement_missing` (Hostrunner-Wächter findet „Sie sagen nicht, wie Sie die Teams einbinden“ und lässt die treue Kontrollbewertung durch).
+- Ergebnis `final13`: Host Claude Code stop/pause/nostorage PASS, Codex stop/pause/nostorage PASS (Checks laut `host-*.json`: claude stop 20/20; claude pause 15/15; claude nostorage 13/13; codex stop 20/20; codex pause 15/15; codex nostorage 13/13). In `final12` trat die Zweifragen-Nachfrage im Claude-nostorage erneut auf (Hostlauf FAIL), in `final10` ebenfalls; in `final11` und `final13` nicht → **intermittierend (2 von 4 Claude-nostorage-Läufen), nicht behoben**, nur nicht in `final13` beobachtet.
+- Grenze: Nachfrage-Wortlaut ist modellabhängig; die Hostprüfung erkennt nur die Zahl der Fragezeichen.
+
+**4. Aufbewahrung der Artefakte**
+- Änderung: `run_scenarios.py` kopiert nach jedem Szenario `ws/` (ohne `.journal`) und `files/` nach `<output>/artifacts/<id>/`; der Hostrunner kopiert den Speicher nach `<output>-artifacts/<szenario>/`. Test: `test_model_run_artifacts_are_preserved_for_independent_review`.
+- Ergebnis: Für `final13` vorhanden, u. a. gespeicherter `match`-Snapshot, Run und `state.md` von Szenario B (`scenarios/artifacts/followup_motivation_role_fit/ws/candidates/.../{jobs/.../match/001.md,runs/run-001.md,state.md}`); in `final11` gelesen: der Match-Snapshot enthält die Präferenz in den Worten der Bewerberin, die Anzeigenfakten, als Interpretation markiert, und „kein Teil des übergreifenden Lernstands“; `state.md` enthält die Präferenz nicht.
+- Grenze: Für Nicht speichern entsteht per Definition nichts; Hostläufe bewahren nur den Speicher der Szenarien stop/pause.
+
+### Befehle, Exitcodes, Ergebnisse (`final13`, ein Quellstand)
+| Prüfung | Exit | Ergebnis |
+|---|---|---|
+| `python3 -B scripts/run_tests.py --kind deterministic` | 0 | 309 Tests OK |
+| `python3 scripts/plugin.py check` | 0 | valid |
+| Szenarien A, C, E, G, H, I, J, F (je `scenario-*.log`) | 0 | 8 PASS |
+| Szenario D `followup_complete_answer` | 1 | **FAIL** |
+| Szenario B `followup_motivation_role_fit` | 1 | **FAIL** |
+| Host Claude Code und Codex: stop, pause, nostorage | 0 / 0 | 6 von 6 PASS |
+| Judge-Kalibrierung ×3 (`judge-calibration-{1,2,3}.log`) | 0 ×3 | 4 von 4 Fällen je Lauf wie erwartet |
+
+**Fehlschläge in `final13` (nicht abgeschwächt):**
+- **D (Produktfehler, gering):** Die Bewertung schrieb der Bewerberin zu: „Du denkst den Termindruck von Anfang an mit und lässt ihn nicht erst am Ende nachträglich einfließen.“ Die Antwort sagte nur, dass wegen des festen Termins der Umfang reduziert wird; „von Anfang an“ ist eine nicht belegte Zuschreibung. Judge (mit Zitat, neue Wörter) und manuelle Durchsicht stimmen überein.
+- **B (offen, Rubrik- oder Produktfrage):** Die Klärung lautete „Was verstehen Sie konkret unter ‚echter Realisierung‘ in Ihrer täglichen Arbeit?“ — eine neutrale Frage, nennt aber keine möglichen Bedeutungen. Die Rubrik `clarify_motivation_neutral` verlangt das Nennen möglicher Bedeutungen („eigene technische Umsetzung oder Produktverantwortung“); dieselbe Prüfung schlug in `final11` an derselben Stelle fehl, bestand in `final12` und `final10`. Ob eine offene neutrale Klärungsfrage reicht, ist **eine Entscheidung über das Soll** (bestätigt ist nur „vor der Schwächenableitung klären“, das Beispiel ist „e.g.“); ich habe die Rubrik nicht abgeschwächt. Der Rest von B (Match-Snapshot, Zuordnung, keine Notenbegründung durch die Präferenz) wurde in `final13` nicht erreicht/gewertet, weil Schritt 2 bereits fehlschlug; die Artefakte des Laufs sind in `scenarios/artifacts/followup_motivation_role_fit/` zu prüfen.
+
+### Läufe auf anderen Ständen (erhalten, nicht für den Endstand gültig)
+| Lauf | Quellstand (Anfang) | Ergebnis |
+|---|---|---|
+| `final10` | `fff306d1…` | siehe Korrektur oben; F und Claude-nostorage FAIL |
+| `final11` | `2c5f8073…` | 7 von 9 Szenarien PASS; B FAIL (`clarify_motivation_neutral`), F FAIL (`no_false_missing`, „wer sie am Ende trifft“ trotz „ich … entscheide“); Hosts 6/6 PASS; Kalibrierung 3×4/4 |
+| `final12` | `9aee4a79…` | 8 von 9 PASS; J FAIL (`no_false_missing`, Judge ohne Zitate: UNCLEAR-würdig, dadurch `false_missing_verdict` ergänzt); Host Claude pause FAIL (Fehlalarm des Resume-Detektors auf „Dort greife ich den gespeicherten Lernstand auf.“ in neuem Training → Detektor eingeengt) und nostorage FAIL (Nachfrage mit zwei Fragen, echter Produktfehler); Codex 3/3 PASS; Kalibrierung 3×4/4 |
+
+### Verbleibende Lücken
+- Nicht vollständig bestanden: D (gering) und B (Soll-Entscheidung offen); Claude-nostorage-Zweifragen-Nachfrage intermittierend.
+- Einzelstichproben, Judge heuristisch und nur mit Claude; der Judge streut zwischen Läufen (z. B. `no_false_missing`).
+- Nicht auf den Hosts geprüft: Rollenpassung/Match-Speicherung (nur Modellszenario), deepening-Zweig, Coaching-Fall E, Mock, Stellen-Training mit Pause.
+- Payload-Kopie, keine Marketplace-Installation; Host-Sitzungsverläufe außerhalb des Projekts werden nicht erfasst.
+
+## Nachtrag 2026-11-20 (Nachbesserung 2) — Blockabschluss, Rollenpräferenz im Match-Artefakt, STOP ohne Fortsetzungsversprechen
+
+> **KORREKTUR (2026-11-21): Szenario B bestand in `final10` automatisch, enthielt aber einen übersehenen fachlichen Fehler.** Gesamtnote 5/10 und „Substanz der Begründung: 4/10“ wurden damit begründet, dass die Bewerberin nicht sagt, „was dich an dieser Rolle oder an Beispiel AG anspricht“, und die Antwort „wirkt wie eine Absage“. Das bestraft die ausdrücklich abgelehnte Rollenpräferenz indirekt; die Überschrift „Passung zur Stelle (ohne Punktzahl)“ ändert daran nichts. Der Judge meldete `role_fit_job_specific: true`, die Rubrik war zu schwach formuliert, und ein deterministischer Test für Notenbegründungen fehlte. Die ursprüngliche Aussage unten (B PASS, manuell gelesen) bleibt unverändert stehen und gilt als widerlegt. Ebenfalls in `final10` übersehen: Das Bewertungstranskript des Claude-nostorage-Hostlaufs nannte die Teameinbindung fehlend, obwohl die Bewerberin „mit beiden Teams durchgehen“ gesagt hatte, und wertete eine selbst hinzugefügte Zweitfrage als „nur halb beantwortet“. Beide Texte sind als Kalibrierungsfälle gespeichert (`tests/fixtures/behavior/judge_cases/`). Für `final10` wurden die gespeicherten Run-/State-/Match-Artefakte nicht aufbewahrt, nur die Transkripte.
+
+**Maßgeblicher Lauf: `final10`, Quellstand `fff306d1d5d963335edada3a29422d6485bbf60c30f2d070579cf27aa93a4bb9` (92 Dateien; identisch in `fingerprint-start.txt` und `fingerprint-end.txt`).** Belege: `.tmp/tests/final10/` (lokal, git-ignoriert; nicht mit `final5` vermischt). **Gesamtergebnis: nicht vollständig bestanden** (siehe Fehlschläge). Die Doku-Änderung nach dem Lauf berührt keine fingerprint-relevante Datei.
+
+### Pro Punkt: Änderung, Test, Ergebnis, Grenze
+**1. Blockabschluss (evaluation.md:15)**
+- Änderung: Die Pflicht „vollständige Antwort schließt den Block sofort“ ist entfernt. Einheitliche Regel in `evaluation.md` (Zeile 15 und „Follow-up blocks“), `followup.md` Schritt 5 und `SKILL.md` 2a: vollständige Antwort ⇒ keine completion-/clarification-Nachfrage; optional genau eine sinnvolle deepening-Nachfrage ohne Bewertung/Hinweis/Lösung, sonst Block schließen und bewerten; keine Pflicht, keine Quote.
+- Test: `test_block_close_deepening_stop_and_role_fit_rules_agree_across_files_structural_only` (Regression: „closes its block immediately“/„evaluated at once“ dürfen nicht mehr vorkommen; beide Dateien nennen die gleiche Regel). Modellszenario D (`deepening_or_close`, Judge sieht bei `evaluable_over` den ganzen Block).
+- Ergebnis: Contract-Test OK; Szenario D PASS in `final10` (einzelner Lauf).
+- Grenze: Der Zweig „genau eine deepening-Nachfrage“ wurde nicht beobachtet; strukturelle Prüfung beweist kein Dialogverhalten. In `final6` schlug D an einer unklaren Rubrik fehl (`deepening_or_close` false bei Abschluss mit Bewertung; Rubrikformulierung war widersprüchlich und wurde präzisiert).
+
+**2. Rollenpräferenz im stellenspezifischen Match-Artefakt**
+- Änderung: `followup.md`, `job-preparation.md`, `job-training/SKILL.md`: bestätigte Präferenz wird spätestens am Sitzungsende als neuer vollständiger `match`-Snapshot (`job-add --kind match`) gespeichert, nie nur im Run, nicht in `state.md`; ohne Job bleibt sie im Run/Chat; bei Fehlschlag wird ausdrücklich „nicht gespeichert“ gesagt. Zusätzlich (aus Beobachtung in `final7`/`final8`): keine Zahl und keine Kriterienzeile für die Präferenz (z. B. „Bezug zur Rolle: 2/10“).
+- Tests: Runtime `test_confirmed_role_preference_is_stored_in_the_job_match_not_only_in_the_run_and_not_in_state` (unbestätigtes Profil verweigert, append-only Snapshot, Header mit candidate_id/job_id, Run mit gleicher Zuordnung, `state.md` ohne Präferenz); Harness `job_artifact_errors` mit Unit-Test; Szenario B prüft das tatsächlich gespeicherte Artefakt (Art `match`, Zuordnung zu Bewerber/Stelle des gespeicherten Runs, Inhaltsmuster, `state.md` ohne Präferenz) und die Judge-Rubrik `role_fit_job_specific` (jetzt auch: keine Note wegen der Präferenz).
+- Ergebnis: Szenario B PASS in `final10` (`job-add` Exit 0, `match`-Snapshot 1, Run und Match derselben Stelle zugeordnet, Fit-Punkt „ohne Punktzahl“); manuell gelesen. In `final7`/`final8` zeigte das Szenario echte Fehler: Präferenz bestrafte die Note („Bezug zur Rolle 2/10“, `final7`: Gesamtnote 4/10) bzw. wurde vom verschärften Judge erkannt (`final8`).
+- Grenze: Einzelstichprobe; der Fit-Punkt wird nur im Szenario mit Job geprüft; ob der Inhalt des Snapshots fachlich vollständig ist, ist manuell nur einmal gelesen. Einen Snapshot-Inhalt „ohne frühere Inhalte“ erkennt kein automatischer Test im Modelllauf.
+
+**3. STOP ⇒ `stopped_early`, kein Fortsetzungsversprechen**
+- Änderung: `session-control.md`, `job-training`/`candidate-training` `SKILL.md`: STOP endet immer mit `stopped_early`; die Abschlussantwort verspricht keine Wiederaufnahme der offenen Nachfrage, verweist ggf. auf `pause`. `followup.md` Schritt 8: Bei Wiederaufnahme eines `paused`-Checkpoints Kontext als Aussage, nicht als zweite Frage.
+- Tests: negativer Detektortest `promises_resume` mit dem genauen Satz aus `final5` plus englischen/umschriebenen Varianten; Fehlalarm-Tests aus beobachteten Antworten (Hinweis auf `pause`, neuer Lauf, Dateinamen, Ratschläge); Step-Flag `no_resume_promise` an jedem STOP-Schritt aller `followup_*`-Szenarien (Unit-Test prüft die Fixtures) und `stop_checks` in jedem STOP-Turn des Hostrunners; Runtime `test_a_stopped_run_is_final_and_cannot_be_resumed_while_a_paused_one_can` (Resume eines `stopped_early`-Runs wird abgelehnt, `completed` mit offener Nachfrage abgelehnt, positiver Pause→Resume→Antwort→STOP mit `resume_from`, Zählern und unveränderter Zuordnung); Hostszenario `pause` (Neue Sitzung, Resume, Antwort, STOP).
+- Ergebnis: Unit/Integration OK; Hostszenario `pause` PASS auf Claude Code und Codex in `final10`.
+- Grenze: Der Detektor ist regelbasiert (Assistenten-Versprechen mit „ich/wir“, „beim Fortsetzen“, „kann fortgesetzt werden“, „stelle ich … erneut“); neue Formulierungen können durchrutschen oder, wie in `final6`–`final8` beobachtet, zu Fehlalarmen führen. Er musste dreimal an beobachteten Fehlalarmen nachgeschärft werden (siehe Läufe); die echten Versprechen aus `final5` werden weiterhin erkannt.
+
+### Befehle, Exitcodes, Ergebnisse (`final10`, ein Quellstand)
+| Prüfung | Exit | Ergebnis |
+|---|---|---|
+| `python3 -B scripts/run_tests.py --kind deterministic` (`deterministic.log`) | 0 | 301 Tests OK |
+| `python3 scripts/plugin.py check` (`plugin-check.log`) | 0 | valid |
+| Szenarien A, B, C, D, G, H, I, J (Claude, `scenario-*.log`) | 0 | 8 PASS |
+| Szenario F `followup_optional_example` | 1 | **FAIL** |
+| Host Claude Code (`host-claude.json`): stop, pause / nostorage | 0 / 1 | stop PASS, pause PASS / nostorage **FAIL** |
+| Host Codex (`host-codex.json`): stop, pause, nostorage | 0 | alle PASS |
+
+**Fehlschläge in `final10` (nicht abgeschwächt, nicht behoben):**
+- **F (Produktfehler, zweimal in Folge beobachtet: `final8`, `final10`):** Auf eine vollständig beantwortete Frage, deren Kriterien nicht erfragt waren, fragte der Coach „Nach welchen Kriterien entscheiden Sie, ob das Feature in den Sprint passt oder verschoben wird?“ statt zu bewerten; im Run kein deepening. Die Frage verlangt nur Vorgehen und ein optionales Beispiel; Kriterien waren nicht gefragt, die Nachfrage ist damit eine künstliche completion-Nachfrage nach `followup.md`. Der Judge meldete `no_artificial_completion: false` (in `final8` in einem anderen Durchlauf `true`: Judge streut).
+- **Host Claude nostorage (Produktfehler):** Nachfrage mit zwei Fragezeichen und zwei Fragen („Wie gehen Sie konkret mit dem Termin um? Was tun Sie, wenn die Teams … uneinig sind …?“) verletzt „genau eine Nachfrage / ein Fragezeichen“. Auf Codex und im Stop-/Pause-Lauf von Claude nicht aufgetreten.
+
+### Läufe auf früheren Ständen (erhalten, nicht für den Endstand gültig)
+| Lauf | Quellstand (Anfang) | Ergebnis | Ursache |
+|---|---|---|---|
+| `final5` | `3256005a…` | B FAIL (+ 3 PASS-Wiederholungen) | siehe Korrektur oben |
+| `final6` | `072dca47…` | 5 Szenarien FAIL (A, D, F, I, J), Host Claude und Codex: pause FAIL | Detektor `promises_resume` überbreit (Neustart in neuer Sitzung als „Versprechen“ gewertet); D `deepening_or_close` Rubrikwiderspruch; Host Resume-Antwort mit Rückfrage-Wiederholung (zwei Fragezeichen). Szenario B bestand erstmals mit gespeichertem Match. |
+| `final7` | `0fbbc231…` | 8 von 9 Szenarien FAIL (nur J PASS), Host Claude stop und pause FAIL, Codex PASS | Detektor verwarf `pause` in Backticks (eigener Fehler beim Entfernen von Codespans); D: Judge sah nur die letzte Antwort; B: Präferenz in `state.md` gefunden. |
+| `final8` | `38904f81…` | 5 Szenarien FAIL (B, D, F, H, J), Host Claude stop und pause FAIL, Codex PASS | Detektor weiterhin überbreit (Ratschläge, „neuer Durchlauf“); B: Rubrik erkannte Notenabzug (`Bezug zur Rolle: 2/10`) = echter Produktfehler; F: Rückfrage statt Bewertung. |
+| `final9-aborted` | `a1821bbf…` | abgebrochen | Start trotz rotem Unit-Test (Testfehler im eigenen Test); manuell gestoppt, nicht gewertet. |
+
+### Verbleibende Lücken
+- Nicht vollständig bestanden: F und Host-Claude-nostorage (siehe oben). Keine Abnahme des Gesamtstands.
+- Alles Einzelstichproben; Judge heuristisch, nur Claude; der Judge streut (F `no_artificial_completion` false/true auf verschiedenen Läufen).
+- Nicht auf den Hosts: Rollenpassung/Match-Speicherung (nur Modellszenario B), deepening-Zweig, Coaching-/Hinweisfall E, Mock, Stellen-Training-Pause.
+- Payload-Kopie, keine Marketplace-Installation; Host-Sitzungsverläufe außerhalb des Projekts werden nicht erfasst.
+
+## Nachtrag 2026-11-20 (Nachbesserung) — Judge-Semantik, Nicht-speichern-Hosttest, Vertiefung/Blockabschluss
+
+**Quellstand: `3256005a2ded17a7999ee242edbb0a04324b2035af9244afa72f57714b1a34d2` (92 Dateien, `.tmp/tests/fingerprint.py`; am Anfang und Ende des Laufs `final5` und nach der Doku identisch).** Alle Ergebnisse dieses Abschnitts gelten nur für diesen Stand. Die Ergebnisse des Abschluss-Nachtrags darunter (`f9df5367…`) gelten ausdrücklich nicht für ihn; Stop- und Pause-Hostläufe wurden hier auf dem neuen Stand erneut gefahren, nicht übernommen.
+
+### Änderungen
+1. **Judge (`tests/behavior/run_scenarios.py`, `invention_verdict`)**: Die automatische Überstimmung „keine neuen Inhaltswörter ⇒ PASS“ ist entfernt. Ein als unbelegt gemeldeter Kandidatenfakt ist nur FAIL, wenn neue Inhaltswörter oder neue Zahlen belegbar sind; sonst UNCLEAR (Bedeutung, Akteur, Negation oder Beziehung nicht geklärt). „Belegt“ gilt nur mit einem `evidence_quote`, der wörtlich in Quellen/Bewerberzeilen steht, Inhalt mit der Aussage teilt und Zahlen (Ziffern und Zahlwörter) sowie Negation gleich hat (`semantic_divergence`); Abweichung ⇒ FAIL, fehlender Beleg ⇒ UNCLEAR. Vertauschte Akteure erkennt nur der Judge; ohne Beleg bleibt der Befund UNCLEAR (bekannte Grenze: behauptet der Judge fälschlich „belegt“ mit einem thematisch passenden Zitat, wird ein reiner Akteurtausch nicht deterministisch gefunden). `coach_suggestion` verlangt `suggestion_kind`: `recommendation` ist zulässig; `first_person_answer` ist FAIL bei `invents_experience=true` oder neuen Zahlen, UNCLEAR ohne Urteil oder bei Ich-Behauptung mit fremdem Inhalt; Ich-Perfektformulierungen gelten unabhängig vom Label als Ich-Antwort.
+2. **Nicht-speichern-Hosttest (`tests/native/run_host_dialogue.py`)**: keine Ausnahmen für `.cfg`/`.agents` mehr. Der Konfigurationsordner liegt außerhalb des Projekts; vor dem Dialog (nach Vorbereitung des Host-Skillordners) werden Projekt und Konfigurationsordner mit Inhaltshashes erfasst (`snapshot`), danach neue/geänderte/gelöschte Einträge geprüft (`diff_snapshots`). Ausnahmen nur als exakter Pfad mit Begründung (`NOSTORAGE_ALLOWED`, leer; Präfixe/Muster werden abgelehnt). Zusätzlich: kein Eintrag im Konfigurationsordner (= kein Zeiger), kein Runtime-Aufruf, und `claims_saved` prüft die STOP-Antwort sowie jede Turn-Antwort auf Speicherbehauptungen (erweitert um „gesichert/archiviert/Gespeichert unter/saved/stored“, Verneinungen ausgenommen).
+3. **Vertiefung/Blockabschluss**: `followup.md` (Schritt 5), `evaluation.md` („Follow-up blocks“, Entscheidung am Antwortende) und `interview-coach/SKILL.md` (2a) sind angeglichen: Vollständige Antwort ⇒ keine completion-/clarification-Nachfrage; höchstens eine sinnvolle deepening-Nachfrage (kein Abzug, keine vorweggenommene Bewertung/Lösung, keine Pflicht, keine Quote), sonst Block schließen und bewerten; nach einer Vertiefung schließt der Block. Szenario D prüft das über die neue Rubrik `deepening_or_close` (entweder genau eine Vertiefungsfrage ohne Bewertung/Hinweis oder Abschluss mit Bewertung, nie beides, keine completion-Frage).
+
+### Neue deterministische Tests
+`tests/unit/test_run_scenarios.py`: gleicher Wortschatz überstimmt den Judge nicht (hinzugefügte Negation, vertauschte Akteure), entfernte/hinzugefügte Negation und geänderte Zahl gegen `evidence_quote`, Zahlwort = Ziffer, korrekte Paraphrase früherer Bewerberaussage (PASS nur mit prüfbarem Zitat, ohne die frühere Zeile UNCLEAR), `coach_suggestion` gibt erfundene Ich-Antworten nicht frei (auch bei falschem Label), Speicherbehauptungen. `tests/unit/test_host_dialogue.py`: neue/geänderte/gelöschte Dateien über Hashes, Zeiger im Konfigurationsordner, Ausnahmen nur exakt und begründet.
+
+### Befehle, Exitcodes, Ergebnisse (Lauf `final5`, Belege `.tmp/tests/final5/`, lokal und git-ignoriert)
+| Prüfung | Exit | Ergebnis |
+|---|---|---|
+| `python3 -B scripts/run_tests.py --kind deterministic` (`deterministic.log`; nach der Doku erneut) | 0 / 0 | 290 Tests OK |
+| `python3 scripts/plugin.py check` (`plugin-check.log`) | 0 | valid |
+| Szenarien A, C–J (`run_scenarios.py --cli claude --scenario …`, je `scenario-*.log`) | 0 | 8 von 9 Szenarien PASS |
+| Szenario B `followup_motivation_role_fit` im selben Lauf | 1 | **FAIL** (Details unten) |
+| `run_host_dialogue.py --host claude` (`host-claude.json`) | 0 | stop 17/17, pause 13/13, nostorage 10/10 |
+| `run_host_dialogue.py --host codex` (`host-codex.json`) | 0 | stop 17/17, pause 13/13, nostorage 10/10 |
+
+> **KORREKTUR (2026-11-20, nach Transkript-Durchsicht von final5): Die folgende Einordnung von Szenario B ist teilweise falsch und bleibt zur Nachvollziehbarkeit erhalten.** Die Rollenpassung wurde laut Transkript des Hauptlaufs *nur im Run* festgehalten (die STOP-Antwort sagt selbst: „Ein `match`- oder `preparation`-Snapshot für den Job wurde nicht angelegt. Der Passungspunkt steht bisher nur im Lauf.“), nicht im stellenspezifischen Match-Artefakt; und nach STOP wurde fälschlich eine Fortsetzung angeboten („Beim Fortsetzen stelle ich die offene Nachfrage einmal erneut.“), obwohl ein gestoppter Lauf final ist und die Runtime nur `paused` fortsetzt. Das waren zwei Produktfehler, nicht (nur) eine zu enge Erwartung „genau eine Nachfrage“. Die Aussage unten „die Rollenpassung wurde korrekt als stellenbezogener Passungspunkt gespeichert“ und die Wertung „kein Verstoß“ gelten nicht. Die 3 bestandenen Wiederholungen von B prüften diese beiden Punkte nicht (das Artefakt prüfte nur Run-Felder).
+
+**Szenario B (FAIL, manuell eingeordnet).** Im Lauf stellte der Coach nach der beantworteten Klärung („Meinen Sie damit eigene technische Umsetzung oder die Verantwortung für ein Produkt …?“ → eigenes Programmieren) eine zweite Nachfrage („Was hat Sie trotzdem dazu bewogen, sich auf die Stelle … zu bewerben?“), die beim STOP offen blieb. Das Skript erwartet `followup_count=1` und keine offene Nachfrage; die Run-Artefaktprüfung schlug deshalb fehl. Einordnung: kein Verstoß gegen die bestätigten Regeln (keine feste Quote; die Nachfrage ist einzeln, neutral, ohne Bewertung; die Rollenpassung wurde korrekt als stellenbezogener Passungspunkt gespeichert, nicht als Schwäche), aber die Erwartung des Szenarios an die genaue Anzahl ist eng. Sie wurde **nicht** abgeschwächt, weil eine Änderung den Quellstand verändern und alle Ergebnisse entwerten würde. Drei Wiederholungen auf demselben Quellstand (`rerunB1–3.log`, Exit 0) bestanden alle; das ist keine Kompensation des FAIL im Hauptlauf, sondern die Streuung: B bestand 3 von 4 Läufen auf `3256005a…`. Offen: Soll das Szenario eine zweite, nicht beantwortete Nachfrage tolerieren? Das ist eine Entscheidung über das Soll, nicht von mir getroffen.
+
+**Fachliche Durchsicht (manuell, Transkripte aus `scenarios/*.json` und `host-*.json`).**
+- Nicht-speichern, Claude und Codex: STOP-Antworten sagen „nichts gespeichert“ bzw. fassen nur im Chat zusammen; keine Datei im Projekt (Claude 0 Dateien vorher, Codex 30 gehashte Skill-Dateien vorher, keine Änderung), kein Eintrag im Konfigurationsordner, kein Runtime-Aufruf. Die Erkennung falscher Erfolgsmeldungen und unerlaubter Dateien ist durch die Unit-Tests belegt, nicht durch einen absichtlich fehlerhaften Hostlauf.
+- Szenario D: Der Coach schloss und bewertete den Block sofort (7/10) ohne Nachfrage (Judge-Rohurteil `deepening_or_close: true`). Der Zweig „genau eine deepening-Frage“ wurde in diesem Lauf nicht durchlaufen. Kleine Ungenauigkeit: „zeitlicher Rahmen fehlt“, obwohl der Termin in drei Wochen genannt war (als Verbesserungsvorschlag vertretbar, nicht als Fehlbehauptung gewertet).
+
+### Verbleibende Lücken
+- Szenario B im Hauptlauf FAIL (siehe oben); alle Szenarien sind Einzelstichproben, Judge heuristisch und nur mit Claude.
+- Deepening-Zweig von Szenario D und der Coaching-/Hinweisfall E sind nicht auf den Hosts geprüft; Mock, Rollenpassung (B/C) und Stellen-Training mit Pause laufen nicht als Hostlauf (Stellen-Training-Pause nur deterministisch).
+- Nicht-speichern-Host: Zwei Läufe (je einer pro Host), `NOSTORAGE_ALLOWED` blieb leer, weil keine unvermeidbaren Artefakte im Projekt auftraten; Host-eigene Sitzungsverläufe außerhalb von Projekt und Konfigurationsordner (z. B. unter `~/.claude`, `~/.codex`) werden nicht erfasst.
+- Payload-Kopie, keine Marketplace-Installation; Akteurtausch bei fälschlich „belegt“ gemeldeten Aussagen bleibt eine Judge-Grenze.
+
+## Nachtrag 2026-11-20 (Abschluss) — Nachfrage-Dialog R20: Source-Review-Punkte behoben, finaler Lauf auf einem Quellstand
+
+Dieser Abschnitt ersetzt die Ergebnisse des darunter stehenden früheren Nachtrags „Nachfrage-Dialog (R20)“ (anderer, älterer Stand; dort „Codex NOT RUN“ und offene `no_invention`-Befunde sind überholt). Ergebnisse verschiedener Stände werden **nicht** zusammengerechnet: das Gesamtergebnis unten gilt nur für den Lauf `final4`.
+
+**Quellstand.** Fingerprint (SHA-256 über sortierte Dateihashes von `skills/`, `tests/`, `scripts/`, beiden Plugin-Manifestordnern, `SCOPE.md`, `plugin.json`; 92 Dateien; Skript `.tmp/tests/fingerprint.py`): `f9df5367bc49f3233992b87ffb5bcab0277045ab66bf8acfdf07da5de222fc57` am Anfang **und** am Ende des Laufs (keine Änderung während des Laufs). Uncommitteter Arbeitsbaum auf `868c3db`. Evidenz (lokal, git-ignoriert): `.tmp/tests/final4/` (`deterministic.log`, `plugin-check.log`, `scenario-*.log`, `scenarios/*.json` mit vollständigen Dialogen und Judge-Rohurteilen, `host-claude.json`, `host-codex.json` mit allen Turns, Checks und Details, `fingerprint-*.txt`). Orchestrierung: `.tmp/tests/run_final.sh`.
+
+**Behobene Review-Punkte (Source, getrennt von Tests).**
+1. `evaluation.md`: pauschale Bewertung nach jeder Einzelantwort entfernt; Bewertung erst bei Blockabschluss (vollständige Antwort schließt sofort), Mock erst am Interviewende; optionale Beispiele werden nie nachträglich Pflicht; Bewertung bleibt bei Bewerberaussagen (keine unterstellten Motive/Zwecke, nichts als „offen“ bezeichnen, was gesagt wurde).
+2. Judge-Kontext (`tests/behavior/run_scenarios.py`): Judge erhält freigegebene fiktive Quellen (CV/Profil/Posting/Dateien) und den bisherigen Dialog mit getrennten Zeilen `CANDIDATE`/`COACH`; Coach-Zeilen sind keine Evidenz.
+3. Judge-Zuverlässigkeit: Status `PASS|FAIL|UNCLEAR`. Ungültiges JSON, fehlende/nicht-boolesche Urteile, Anschuldigung ohne verifizierbares Zitat, nicht klassifizierte oder widersprüchliche Evidenzangaben → `UNCLEAR`, nie PASS. `no_invention` scheitert nur bei verifiziertem Zitat, `candidate_fact`, fehlender Evidenz und neuem Inhalt; neue Wörter allein beweisen nichts; frühere Bewerberaussagen zählen; `coach_suggestion` ist keine Bewerberbehauptung. Skript-Antworten werden gegen die letzte Coach-Frage geprüft (`script_fits_question`); ein Mismatch ist `UNCLEAR` (Testskript-, kein Produktbefund).
+4. Fortsetzung (`continuation_problem`, Runtime): erlaubt sind Beantworten einer offenen Nachfrage, `hints_before` einer offenen Nachfrage nur false→true, Anhängen von Nachfragen/Wiederholungen/Hauptfragen, Füllen einer leeren `initial_assessment`, Ersetzen von `block_assessment` bzw. Entfernen von `other_open_gaps` im letzten Checkpoint-Block **nur mit neuer Evidenz**. Abgelehnt (vor dem Schreiben): Entfernen eines dokumentierten Hinweises, Ändern von Antwort/Art/Anlass/Wortlaut/Lücke/Auflösung beantworteter Nachfragen, Ändern früherer Blöcke, Verschwinden dokumentierter Lücken ohne Evidenz.
+5. Szenarien: D/F erlauben `deepening` (`allowed_kinds`) statt `followup_count=0`; D wertet den Block über Schritte (`evaluable_over`); F ohne unterstellte Nachfrage.
+6. Nachfrage-Regel geschärft (eine Fragezeichen, keine mit „und“ verbundene zweite Frage).
+
+**Offene Modellbefunde A/F/J (aus gespeicherten fiktiven Dialogen der Läufe `claude-r2/r3`; Zitate sinngemäß aus den Transkripten).**
+- A (`followup_adr_deadline`, Schritt 3): Der Satz „Offen bleibt, ob Sie vorher beide Teams anhören“ widerspricht der Erstantwort („mit beiden Teams durchgehen“) → **Produktfehler (gering)**: ungenaue Wiedergabe, keine erfundene Bewerberbehauptung; durch die Regel „nichts als offen bezeichnen, was gesagt wurde“ adressiert. Zusätzlich im Lauf `final` (älterer Stand) in D: „damit sich keine Seite als Verlierer fühlt“ → **Produktfehler**: unterstellter Zweck; Regel „keine Motive/Zwecke unterstellen“ ergänzt.
+- F (Schritt 3): Beanstandet war vermutlich die Beispielformulierung „Ich bereite die Entscheidung vor …, der Product Owner entscheidet“; sie ist als „etwa:“-Vorschlag markiert → **Judge-Fehler** (Coach-Vorschlag), im neuen Judge als `coach_suggestion` behandelt. Das Judge-Rohurteil mit Zitaten lag damals nicht gespeichert vor → dieser Punkt bleibt **unklarer Befund** (nur aus dem Transkript rekonstruiert).
+- J (Schritt 3, Lauf `r2`): „Kommunikation / Prägnanz: 7/10 – Antworten sind knapp und sachlich“ bewertet einen nicht erfragten Stilaspekt; „Beziehen Sie beide Teams … ein“ ignoriert, dass die Erstantwort das nannte → **Produktfehler (gering)** bzw. unklar, welches Zitat der Judge meinte; durch die neuen Regeln adressiert.
+- Wiederkehrender **Produktfehler** (Läufe `final3`, 2 von 9 Szenarien, ältere Regelfassung): zweiteilige Nachfrage („…, und bis wann würden Sie entscheiden?“), vom Judge zu Recht beanstandet; Regel verschärft, Lauf `final4` ohne diesen Befund (Einzelstichprobe, kein Beweis der Dauerhaftigkeit).
+
+**Befehle, Exitcodes, Ergebnisse (alle auf Quellstand `f9df5367…`, Lauf `final4`).**
+
+| Prüfart | Befehl | Exit | Ergebnis |
+|---|---|---|---|
+| Deterministische Gesamtsuite (Unit/Integration/Contracts; Runtime-Tests) | `python3 -B scripts/run_tests.py --kind deterministic` | 0 | 283 Tests OK (u. a. `test_followups.py` 20 Tests inkl. Regression Hinweis→Pause→Fortsetzung→Antwort bleibt `supported`, erlaubte/verbotene Änderungen; `test_run_scenarios.py` Judge-Fälle: ungültiges JSON, fehlende Urteile, fehlende Zitate, Rückbezüge auf frühere Bewerberaussagen; `test_host_dialogue.py`) |
+| Manifestprüfung (aktuelle Architektur) | `python3 scripts/plugin.py check` | 0 | valid |
+| Modellszenarien A–J (heuristisch, Claude CLI 2.1.319, Tools aus, Judge = zweiter Modellaufruf) | `python3 -B tests/behavior/run_scenarios.py --cli claude --scenario <id> --timeout 300 --output-dir …/scenarios` je Szenario | 0 (9×) | 9/9 PASS: adr_deadline (A), motivation_role_fit (B/C), complete_answer (D), gap_stays_open (E), optional_example (F), stop_open (G), mock (H), pause_resume (I), no_storage (J) |
+| Mehrturn-Host Claude Code 2.1.319 | `python3 -B tests/native/run_host_dialogue.py --host claude --output …/host-claude.json` | 0 | stop 17/17, pause 13/13, nostorage 7/7 Checks |
+| Mehrturn-Host Codex 0.165.0 | `python3 -B tests/native/run_host_dialogue.py --host codex --output …/host-codex.json` | 0 | stop 17/17, pause 13/13, nostorage 7/7 Checks |
+
+**Host-Szenarien (beobachtet; je ein Lauf pro Host, fiktive Daten, isolierte temporäre Projekte, Payload-Kopie, keine Installation).** `stop`: Hauptfrage → unvollständige Antwort → genau eine Nachfrage zum Termin (ohne Bewertung/Lösungshinweis) → Ergänzung → Blockbewertung (Erstantwort und Ergänzung getrennt) → STOP → ein gespeicherter Run. Aus dem Run mit der echten Runtime geprüft: Bewerber-ID, `job_id` null, `stopped_early`, Zähler 1/1/1/0 (Haupt/Nachfrage/beantwortete Nachfrage/Wiederholung), Hauptfrage und Originalantwort wörtlich, Nachfragewortlaut/Art/Anlass/Lücke, Ergänzung wörtlich, `hints_before=false` → eigene Evidenz nach Nachfrage (nicht unterstützt), getrennte Erst-/Blockbewertung, Planzahl 3. `pause`: Pause bei offener Nachfrage (Checkpoint `paused`, 1/1/0, Nachfrage `pending`, Planzahl 3) → **neue Sitzung** → `resume` → nur die offene Nachfrage wird einmal erneut gestellt → Antwort → STOP → zweiter Run mit `resume_from`, gleicher Bewerber/Stelle, Planzahl erhalten, Zähler 1/1/1/0 (keine Doppelzählung), Checkpoint-Datei byte-identisch. `nostorage`: derselbe Dialog, kein Runtime-Aufruf, keine Datei, Chat-Zusammenfassung. Zwei Hosts nutzen die Session-Fortsetzung der CLI (Claude `--session-id/--resume`, Codex `exec resume`); die Hosts legen dabei ihre üblichen Sitzungsverläufe ab (kein Eingriff in Plugin-Installation/Einstellungen).
+
+**Verbleibende Lücken / Grenzen (ausdrücklich).**
+- Stichproben: jedes Szenario genau ein Lauf pro Stand; Modellverhalten ist nichtdeterministisch (frühere Läufe `final`–`final3` zeigten Abweichungen, siehe oben). Kein Wiederholbarkeitsnachweis.
+- Judge heuristisch (zweiter Modellaufruf, nur Claude); Host-Dialogchecks sind strukturell (Fragezeichen, Schlüsselwörter, Leak-Muster, Runtime-Zustand), die inhaltliche Qualität der Transkripte wurde stichprobenartig, nicht vollständig manuell geprüft.
+- Nicht auf den Hosts geprüft: Coaching-/Hinweisfälle (Szenario E: Lücke bleibt offen, Antworten nach Coaching als `supported`; Hinweis→Pause→Fortsetzung) — nur deterministisch (Runtime) und im Modellszenario E (Claude, ohne Host); Mock (H) und Rollenpassung (B/C) nur als Modellszenario; Pause bei Stellen-Training (`job-training`, mit `job_id`) nur deterministisch.
+- Keine Prüfung gegen echte veröffentlichte Installation (Marketplace), nur Payload-Kopie; keine Live-/Provider-Abnahme (nicht Teil dieses Auftrags).
+- Während der Arbeit mussten Testskripte nachgebessert werden (Judge, Szenarien, Host-Runner); frühere Zwischenläufe (`final`, `final2`, `final3`/`final3-superseded`) sind keine Abnahme des finalen Stands. `final3` scheiterte an zwei Szenarien (Mock, Pause/Fortsetzung: zweiteilige Nachfrage) → Regel verschärft → `final4`.
+- Run-Format 4 lehnt Altruns (Format 3) ab; keine Migration; keine privaten Daten gelesen oder verändert.
+
+## Nachtrag 2026-11-20 (überholt durch den Abschluss-Nachtrag oben) — Nachfrage-Dialog (R20), Run-Format 4
+
+Getrennt nach Prüfart. Alle Daten fiktiv, isolierte temporäre Projekte; keine persönliche Plugin-Installation, keine privaten Daten, kein Commit.
+
+**1. Strukturelle Vertragsprüfung (beweist kein Dialogverhalten).** `tests/contracts/test_skill_contract.py::test_followup_dialogue_rules_are_present_and_linked_structural_only`, `test_scope.py` (R1–R20), `python3 scripts/plugin.py check` → valid. Ergebnis: bestanden.
+
+**2. Tatsächliche Runtime-Tests (deterministisch).** `python3 -B scripts/run_tests.py --kind deterministic`: 267 Tests, OK. Neu `tests/integration/workspace/test_followups.py` (14 Tests): getrennte Zähler (Nachfrage erhöht `answered_count` nicht, Abweichung wird vor dem Schreiben abgelehnt), Art/Evidenzklassen, deepening ohne Lücke, offene Lücke, unterstützte Wiederholung nach Coaching (E), STOP/Pause mit unbeantworteter Nachfrage (G), Fortsetzung ohne Wiederholung/Änderung beantworteter Inhalte und mit unveränderter Planzahl (I), Run-Format 3 wird vor Schreibzugriffen abgelehnt und bleibt unverändert, `-->` in Antworten, CLI `--dialogue-file`. Gesamtsuite zuvor bereits rot-grün geprüft (Anpassung bestehender Tests an Format 4).
+
+**3. Heuristische Modellprüfung** (`tests/behavior/run_scenarios.py`, Claude CLI 2.1.319, Tools aus, Rubrik-Judge = zweiter Modellaufruf; Szenarien A–J als `followup_*.json`). Drei Läufe mit Korrekturen dazwischen (Interviewsprache im Preset bestätigt; Szenario D vollständigere Antwort; F ohne Pflicht „keine Nachfrage“; Harness: Fortsetzung darf nur Nachfragen schließen, wiederholter erfolgreicher Save ist kein Fehlschlag). Letzter Stand je Szenario: PASS: complete_answer (D), gap_stays_open (E), stop_open (G), mock (H), motivation_role_fit (B/C), pause_resume (I) – jeweils im letzten Lauf, in dem das Szenario lief. FAIL (nur Rubrik `no_invention`, Judge-Beanstandung von Verbesserungsvorschlägen im Bewertungstext, nicht manuell als echte Erfindung bestätigt): adr_deadline (A) Schritt 3, optional_example (F) Schritt 3, no_storage (J) Schritt 3 (Lauf 2; nicht wiederholt). Beobachtete reale Befunde, behoben: vor der Nachfrage lobte das Modell die Erstantwort („klare Struktur …“) → Regel „nur neutrale Bestätigung ohne Wertung“; Passungspräferenz wurde als niedrige Antwortnote gewertet → Regel „Klärung ist kein Abzug, Passung getrennt“; Dialogdatei ohne `gap` bei clarification wurde von der Runtime korrekt abgelehnt → Hinweis in runtime.md. Eine mehrteilige statt einer einzelnen Nachfrage in A wurde in einem Lauf vom Judge beanstandet (nicht erneut geprüft). Nicht durchgängig grün: kein Gesamt-PASS.
+
+**4. Beobachtetes Hostverhalten (ein Turn, `tests/native/run_native.py`, Phase `followup_adr_deadline`).** Claude Code (Payload-Kopie, temporäres Projekt): 4/4 Phasen bestanden; Nachfrage genau eine, zum Release-Termin, ohne Bewertung/Musterantwort, kein `finish`. Einzelner Lauf, keine Mehrturn-Hostabnahme. Dabei wurden zwei ältere Phasen-Prompts um die Interviewsprache ergänzt (vorher scheiterte `candidate_with_cv` an der korrekten Sprachrückfrage). **Codex: NOT RUN** für den Dialog – der Lauf `setup_local,candidate_with_cv,candidate_confirm_erika` lief in das 150-s-Timeout (zuvor bestand `setup_local` allein); kein Ersatz durch Texttest.
+
+**Nicht ausgeführt / offen.** Mehrturn-Hostlauf (Claude Code und Codex) der Szenarien A–J (nur Einzelturn A auf Claude Code); `make test-behavior|journey` nicht neu gelaufen; `no_invention`-Beanstandungen in A/F/J nicht manuell verifiziert; Szenario-Judge ist heuristisch; Modellverhalten kann pro Lauf abweichen.
+
+**Datenformat.** Run-Format 4 (Header `schema_version: 4`, neue Felder `followup_count`, `followup_answered_count`, `retry_count`, `dialogue`). Vorhandene Runs im Format 3 werden vor Schreibzugriffen abgelehnt (Bewerber blockiert), nicht migriert, nicht verändert. `finish` verlangt `--dialogue-file`. Workspace-, Kandidaten-, Job- und Journal-Format unverändert (3).
+
+## Nachtrag 2026-11-20 — Deterministische Tests nach Git-Entfernung und Sprachänderung
+
+Nach ausdrücklicher Testfreigabe ausgeführt:
+
+- `make test`: **251 Tests, OK**, 14,063 Sekunden, Exitcode 0 (Unit, Integration, Verträge).
+- `make check-plugin`: **valid: true**, Exitcode 0; keine Manifeständerungen nötig.
+- `git diff --check`: Exitcode 0.
+
+Der erste Testlauf hatte zwei fehlgeschlagene Assertions (neues Szenario fehlte in der erwarteten Liste;
+Symlink-Test erwartete nur „symlink“, Diagnose verwendet „symbolic link“) und drei PDF-Fehler wegen des
+nicht beschreibbaren Swift-Compiler-Caches. Die Testdefinitionen wurden korrigiert. Beim erfolgreichen
+Gesamtlauf zeigten `CLANG_MODULE_CACHE_PATH` und `SWIFT_MODULECACHE_PATH` auf separate Unterordner eines
+neuen temporären Verzeichnisses. Keine Änderung an der PDF-Runtime oder Installation von Werkzeugen.
+Rohprotokoll dieser lokalen Sitzung: `/tmp/interview-coach-tests.vGpDgT/results.log` (temporär).
+
+Diese Ergebnisse ersetzen die NOT-RUN-Angaben der folgenden beiden Nachträge nur für die deterministischen
+Tests. Modelltests und echte Claude-Code-/Codex-Dialogabnahme wurden nicht ausgeführt. FAIL/BLOCKED-Ausgaben
+im Rohprotokoll stammen aus absichtlich simulierten Negativfällen der bestandenen Runner-Unit-Tests.
+
+## Nachtrag 2026-11-20 — Git-Speicherung entfernt
+
+Aktueller Umfang: ausschließlich Lokal und Nicht speichern. Git-Runtime, CLI-Befehle,
+Provider-Parameter und Git-Speichertests entfernt; frühere Git-Ergebnisse unten sind historische Nachweise
+für den damaligen Umfang, keine aktuellen Produktzusagen. Neue Ablehnungstests:
+`tests/integration/workspace/test_storage_modes.py`. Dialogszenarien prüfen zwei Speicheroptionen.
+**NOT RUN**: Tests und Host-Abnahme dieser Änderung wurden nicht ausgeführt. Bestehende Git-Zeiger und
+Daten werden abgelehnt und unverändert erhalten; keine automatische Migration.
+
+## Nachtrag 2026-11-20 — Interviewsprache pro Bewerber und Stelle
+
+R5 erweitert: Bediensprache bleibt projektbezogen; Interviewsprache als Bewerberstandard mit optionaler
+Stellenabweichung. Runtime, Dialogregeln und Nutzungshinweise angepasst. Neue Akzeptanztests:
+`tests/integration/workspace/test_languages.py` (Trennung, Vererbung, CLI, Ablehnung bisheriger Sprachdaten).
+**NOT RUN**: keine Testausführung für diesen Nachtrag; frühere Ergebnisse belegen diese Änderungen nicht.
+Native Claude-Code-/Codex-Dialogabnahme und Git-Verhalten des neuen Sprachbefehls sind noch ungeprüft.
+Bestehende globale Interviewpräferenzen und Datensätze ohne Sprachfeld werden ohne Migration abgelehnt.
+
 ## Nachtrag 2026-11-19 17:25 — Unit- und Vertragstests auf aktuellem Stand (nur deterministisch)
 
 Gilt nur für den unten fingerprinteten, uncommitteten Arbeitsbaum auf `47f45f2`; **darunter alles historisch**. Keine Code- oder Testkorrektur war nötig.

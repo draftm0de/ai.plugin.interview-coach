@@ -1,0 +1,87 @@
+{
+ "id": "setup_local_accept",
+ "title": "Direkter Bewerbereinstieg: lokalen Vorschlag mit Ja bestätigen",
+ "skills": [
+  "candidate-create"
+ ],
+ "context": "Host: Claude Code or Codex (simulated). Current project folder: {PROJECT}. Uploaded/accessible files live under {FILES}. No storage decision has been made for this project yet.",
+ "steps": [
+  {
+   "user": "Ich möchte einen Bewerber anlegen.",
+   "must_contain_any": [
+    "Lokal"
+   ],
+   "required_groups": [
+    [
+     "Lokal"
+    ],
+    [
+     "Nicht speichern"
+    ]
+   ],
+   "must_not_contain": [
+    "Dateien selbst verwalten",
+    "Wie lautet der Pfad",
+    "Wie lautet die Repository-URL",
+    "Git"
+   ],
+   "tools_exclude": [
+    "project-init",
+    "candidate-create"
+   ]
+  },
+  {
+   "user": "Lokal.",
+   "must_contain_any": [
+    "Pfad",
+    "Verzeichnis",
+    "Ordner"
+   ],
+   "tools_exclude": [
+    "project-init"
+   ],
+   "required_groups": [
+    [
+     "{PROJECT}/interview-data"
+    ],
+    [
+     "Ja, hier speichern"
+    ],
+    [
+     "Nein, anderen Ordner wählen"
+    ]
+   ],
+   "must_not_contain": [
+    "Gib bitte einen absoluten Pfad an"
+   ]
+  },
+  {
+   "user": "Ja, hier speichern.",
+   "tools_include": [
+    "project-init"
+   ],
+   "tools_exclude": [
+    "candidate-create"
+   ],
+   "must_contain_any": [
+    "Deutsch",
+    "Bediensprache",
+    "Sprache"
+   ]
+  }
+ ],
+ "artifacts": [
+  {
+   "type": "exists",
+   "glob": "project/interview-data/workspace.json"
+  },
+  {
+   "type": "exists",
+   "glob": "cfg/*.json"
+  },
+  {
+   "type": "absent",
+   "path": "ws"
+  }
+ ]
+}

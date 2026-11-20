@@ -111,7 +111,7 @@
   "required_groups": []
  },
  {
-  "id": "setup_three_storage_choices",
+  "id": "setup_two_storage_choices",
   "mode": "setup",
   "prompt": "Fiktiver Erststart: Es gibt keinen konfigurierten Speicherort und keine Speicherentscheidung. Nutzer: Ich möchte ein Interview üben. Antworte nur mit dem ersten Einrichtungsschritt; frage noch keinen konkreten Pfad oder Repository-Link ab.",
   "must_contain_any": [
@@ -121,14 +121,12 @@
   "must_not_contain": [
    "Wie lautet der Pfad",
    "Wie lautet die Repository-URL",
-   "Dateien selbst verwalten"
+   "Dateien selbst verwalten",
+   "Git"
   ],
   "required_groups": [
    [
     "Lokal"
-   ],
-   [
-    "Git"
    ],
    [
     "Nicht speichern"

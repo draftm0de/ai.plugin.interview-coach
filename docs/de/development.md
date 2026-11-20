@@ -6,9 +6,9 @@
 
 ## Kanonische Quelle
 
-Fünf öffentliche Skills liegen unter `skills/` (`interview-coach`, `candidate-create`, `candidate-training`, `job-create`, `job-training`); `skills/_shared/` enthält ohne eigene `SKILL.md` die gemeinsame Runtime (`scripts/`: `interview_workspace.py`, `coach_core.py`, `coach_extract.py`, `coach_git.py`) und die gemeinsamen Referenzen (`references/`). Root-`scripts/` enthält nur Entwicklungswerkzeuge. `plugin.json` definiert das Plugin `interview-coach` mit Anzeigename **Interview Coach**. `make sync-plugin` leitet `.claude-plugin/plugin.json` und `.codex-plugin/plugin.json` ab; `make check-plugin` prüft Drift. Alle Manifeste bleiben versionslos. Der gemeinsame Marketplace liegt im separaten Repository `ai.plugins`; hier gibt es keinen eigenen Katalog.
+Fünf öffentliche Skills liegen unter `skills/` (`interview-coach`, `candidate-create`, `candidate-training`, `job-create`, `job-training`); `skills/_shared/` enthält ohne eigene `SKILL.md` die gemeinsame Runtime (`scripts/`: `interview_workspace.py`, `coach_core.py`, `coach_extract.py`) und die gemeinsamen Referenzen (`references/`). Root-`scripts/` enthält nur Entwicklungswerkzeuge. `plugin.json` definiert das Plugin `interview-coach` mit Anzeigename **Interview Coach**. `make sync-plugin` leitet `.claude-plugin/plugin.json` und `.codex-plugin/plugin.json` ab; `make check-plugin` prüft Drift. Alle Manifeste bleiben versionslos. Der gemeinsame Marketplace liegt im separaten Repository `ai.plugins`; hier gibt es keinen eigenen Katalog.
 
-Git und Python 3.10+ sind für Verwaltungswerkzeuge erforderlich; Make ist ein optionaler Komfortzugang. Keine zusätzlichen Python-Pakete. Die Host-CLI wird nur für automatische lokale Installation/Updates sowie ausdrücklich gewählte Modelltests benötigt. Die Runtime benötigt Python 3.10+; Git nur für den Git-Speicher. Fehlende Werkzeuge werden nicht automatisch installiert.
+Git und Python 3.10+ sind für Verwaltungswerkzeuge erforderlich; Make ist ein optionaler Komfortzugang. Keine zusätzlichen Python-Pakete. Die Host-CLI wird nur für automatische lokale Installation/Updates sowie ausdrücklich gewählte Modelltests benötigt. Die Runtime benötigt Python 3.10+. Fehlende Werkzeuge werden nicht automatisch installiert.
 
 ## Prüfungen
 
@@ -65,9 +65,6 @@ Die Szenarien prüfen den fachlichen Vertrag statt einzelner Wörter: (1) Tool-A
 
 `tests/native/run_native.py` wertet einen Runtime-Aufruf nur als erfolgreich, wenn er als **ein einzelner** Aufruf nachweisbar ist (`parse_runtime_call`: shlex mit Anführungszeichen, optional ein `sh|bash|zsh -c`-Wrapper; `;`, `&&`, `||`, Pipes, Umleitungen, Variablen-Präfixe → nicht nachgewiesen) und sein eigenes Tool-Ergebnis Exitcode 0 hat (unbekannt ≠ 0). Beim Training müssen Projekt, Bewerber- und Job-ID des `job-show` stimmen. `training_question` ist eine begrenzte deterministische Heuristik (Stellenvokabular + Frage/Aufgabe, die keine Auswahl-/Bestätigungs-/Vorbereitungsklärung ist); sie versteht keine Bedeutung und beweist keine Interviewqualität. Dadurch kann der echte Lauf strenger scheitern (zusammengesetzte Shell-Kommandos gelten nicht als Beleg).
 
-### Git-Tests
-
-`tests/integration/git/` nutzt temporäre lokale Bare-Repositories hinter einer `github.com`-URL (per `url.<bare>.insteadOf`), einen Fake-`gh` und einen protokollierenden `git`-Wrapper (Prüfung: nie Force). Das prüft echte Git-Abläufe, ist aber **keine Live-Abnahme von GitHub oder GitLab**; private Repositories, echte Authentifizierung und Connectoren sind nicht getestet. Schreibtests gegen persönliche Repositories gehören nicht zur Entwicklung.
 
 ### Lokal über den gemeinsamen Marketplace
 

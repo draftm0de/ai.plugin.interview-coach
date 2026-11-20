@@ -12,7 +12,7 @@ ROOT = next(p for p in Path(__file__).resolve().parents if (p / 'Makefile').is_f
 SKILLS = ROOT / 'skills'
 SHARED = SKILLS / '_shared'
 PUBLIC = ('interview-coach', 'candidate-create', 'candidate-training', 'job-create', 'job-training')
-REFERENCES = ('research', 'training', 'evaluation', 'storage', 'technical-interview', 'setup', 'session-control',
+REFERENCES = ('followup', 'research', 'training', 'evaluation', 'storage', 'technical-interview', 'setup', 'session-control',
               'runtime', 'candidate-selection', 'cv-profile', 'job-preparation')
 
 
@@ -84,11 +84,11 @@ class StorageOptions(unittest.TestCase):
                     texts[q] = read(q)
         return texts
 
-    def test_exactly_three_options_and_no_self_managed_mode_in_active_instructions(self):
+    def test_exactly_two_options_and_no_self_managed_mode_in_active_instructions(self):
         setup = read(SHARED / 'references/setup.md')
-        for option in ('**Lokal**', '**Git**', '**Nicht speichern**'):
+        for option in ('**Lokal**', '**Nicht speichern**'):
             self.assertIn(option, setup)
-        self.assertIn('exactly three', setup)
+        self.assertIn('exactly two', setup)
         for path, text in self.active_texts().items():
             for line in text.splitlines():
                 low = line.lower()
@@ -101,7 +101,7 @@ class StorageOptions(unittest.TestCase):
         setup = read(SHARED / 'references/setup.md')
         self.assertIn('Storage type first, details second', setup)
         self.assertIn('never becomes the storage target without the user', setup)
-        self.assertIn('Never ask for tokens or passwords', setup)
+        self.assertIn('Never offer repository setup', setup)
 
     def test_no_storage_mode_forbids_runtime_calls_in_every_skill(self):
         for name in PUBLIC:
@@ -112,11 +112,12 @@ class StorageOptions(unittest.TestCase):
         self.assertIn('never run the runtime', read(SKILLS / 'interview-coach/SKILL.md'))
         self.assertIn('No workspace, pointer, lock, journal', read(SHARED / 'references/storage.md'))
 
-    def test_git_contract_states_private_only_and_remote_success_rule(self):
-        storage = read(SHARED / 'references/storage.md')
-        for phrase in ('private GitHub or GitLab only', 'remote gespeichert', 'without force', 'No test commit',
-                       'No provider SDK adapter, no credential handling'):
-            self.assertIn(phrase, storage)
+    def test_git_storage_is_removed_from_payload_and_cli(self):
+        self.assertFalse((SHARED / 'scripts/coach_git.py').exists())
+        runtime = read(SHARED / 'scripts/interview_workspace.py')
+        for command in ('git-status', 'git-pull', 'git-publish', '--remote', '--attest-private'):
+            self.assertNotIn(command, runtime)
+        self.assertIn('Git storage is no longer supported', runtime)
 
 
 class HostEntryPoints(unittest.TestCase):
@@ -144,6 +145,44 @@ class HostEntryPoints(unittest.TestCase):
         control = read(SHARED / 'references/session-control.md')
         for term in ('preferences.json', 'interface_language', 'interview_language', 'stopped_early', 'pause'):
             self.assertIn(term, control)
+
+    def test_followup_dialogue_rules_are_present_and_linked_structural_only(self):
+        # Structural text contract: proves wording exists, NOT dialogue behavior (see model scenarios and docs/acceptance.md).
+        rules = read(SHARED / 'references/followup.md')
+        for term in ('exactly one concrete follow-up', 'clarification', 'completion', 'deepening', 'STOP always wins', 'wenn möglich',
+                     'not a retry', 'Nicht speichern', 'job-specific', 'never candidate evidence', 'hints_before'):
+            self.assertIn(term, rules, term)
+        for skill in ('interview-coach', 'candidate-training', 'job-training'):
+            self.assertIn('followup.md', read(SKILLS / skill / 'SKILL.md'), skill)
+        self.assertIn('--dialogue-file', read(SHARED / 'references/runtime.md'))
+        self.assertIn('follow-up', read(SHARED / 'references/session-control.md'))
+
+    def test_block_close_deepening_stop_and_role_fit_rules_agree_across_files_structural_only(self):
+        # Structural: the same rule must be stated consistently; behavior is covered by the model scenarios.
+        evaluation, rules = read(SHARED / 'references/evaluation.md'), read(SHARED / 'references/followup.md')
+        for text in (evaluation, rules):
+            self.assertIn('deepening', text)
+            self.assertIn('no quota', text)
+        # regression: a complete answer must not be forced to close its block at once
+        self.assertNotIn('closes its block immediately', evaluation)
+        self.assertNotIn('evaluated at once', evaluation)
+        self.assertIn('close the block and evaluate it', evaluation)
+        self.assertIn('close the block at once and rate it', rules)
+        session = read(SHARED / 'references/session-control.md')
+        for term in ('`stopped_early`', 'cannot be resumed', 'NOT promise', '`pause`'):
+            self.assertIn(term, session, term)
+        for skill in ('job-training', 'candidate-training'):
+            self.assertIn('never promises to resume', read(SKILLS / skill / 'SKILL.md'), skill)
+        self.assertIn('job-add --kind match', read(SKILLS / 'job-training/SKILL.md'))
+        self.assertIn('saved as a new `match` snapshot', rules)
+        self.assertIn('Recall the main question', rules)
+        for term in ('never a `completion`', 'never list its topic in `other_open_gaps`', 'oder', 'Substanz der Begründung', 'ohne Punktzahl'):
+            self.assertIn(term, rules, term)
+        evaluation_text = read(SHARED / 'references/evaluation.md')
+        for term in ('Evidence fidelity', 'mit beiden Teams durchgehen', 'never drop what was said', 'no score reason built on it', 'wer sie am Ende trifft bleibt offen'):
+            self.assertIn(term, evaluation_text, term)
+        self.assertIn('no numeric score and no criterion row', rules)
+        self.assertIn('never only in a run', read(SHARED / 'references/job-preparation.md'))
 
     def test_job_skills_cover_required_dialog_elements(self):
         create = read(SKILLS / 'job-create/SKILL.md')

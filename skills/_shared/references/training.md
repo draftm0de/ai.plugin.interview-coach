@@ -15,16 +15,20 @@
 - `general`: long-term development regardless of employer; shaped by the candidate's skills, experience, role/seniority and goals from profile and learning state.
 - `targeted`: position- and stakeholder-informed coaching.
 - `drill`: repeated new scenarios for the top learning gap, second attempts mandatory on weak replies.
-- `mock`: full uninterrupted simulation; no model answers between questions, summarize at end.
+- `mock`: full uninterrupted simulation; natural follow-ups allowed, but no rating, hints or model answers between questions; summarize at end.
 - `briefing`: sourced reference sheet, not a simulated interview.
+
+## Follow-up dialogue
+
+After every answer first apply `followup.md`: at most one concrete follow-up per turn on the current main question, no rating or hints before it, close the block when evidence suffices, STOP first. Count main questions, follow-ups and retries separately.
 
 ## Coached turn
 
-After each candidate answer in coached modes, use the role-adapted feedback structure in `references/evaluation.md`: **Gesamtbewertung x/10**, relevant **Einzelbewertungen**, **Was war gut?**, **Was würde ich verbessern?**, and a stronger natural spoken answer when helpful. Be specific and evidence-based; avoid a rigid universal rubric or formulaic verbosity. Adapt follow-up questions to the gaps actually observed, and invite a second independent attempt where it adds learning value. Never invent experience, outcomes, metrics or chronology. Keep original-answer evidence distinct from model suggestions.
+When a question block is closed (no follow-up needed or useful), in coached modes use the role-adapted feedback structure in `references/evaluation.md`: **Gesamtbewertung x/10**, relevant **Einzelbewertungen**, **Was war gut?**, **Was würde ich verbessern?**, and a stronger natural spoken answer when helpful. Be specific and evidence-based; avoid a rigid universal rubric or formulaic verbosity. Adapt follow-up questions to the gaps actually observed, and invite a second independent attempt where it adds learning value. Never invent experience, outcomes, metrics or chronology. Keep original-answer evidence distinct from model suggestions.
 
 ## Early stop, pause and language
 
-Before asking the first question, load confirmed interface/interview languages from private `preferences.json`; use the interface language for all coach narration and feedback. Follow `references/session-control.md` for `stop`, `end`, `pause` and resumption. If the user ends early, summarize only the answers actually given, label the run `stopped_early` and persist it with updated state (that candidate only; pass the job with `--job-id` for job training). No extra interview question and no second confirmation.
+Before asking the first question, load the interface language from private `preferences.json` and the effective interview language from the selected candidate (`status`) or job (`job-show`); if unconfirmed, ask first; use the interface language for all coach narration and feedback. Follow `references/session-control.md` for `stop`, `end`, `pause` and resumption. If the user ends early, summarize only the answers actually given (an open follow-up stays unanswered and is not a failed answer), label the run `stopped_early` and persist it with updated state (that candidate only; pass the job with `--job-id` for job training). No extra interview question and no second confirmation.
 
 ## Ending
 

@@ -6,6 +6,7 @@ import stat
 import unittest
 from unittest import mock
 
+from tests.support import coach as support
 from tests.support.coach import Base, iw, make_docx, snapshot
 
 
@@ -123,7 +124,7 @@ class Runs(Base):
         path = self.finish(self.cid, 'run-1', job_id=self.job)
         header = path.read_text().splitlines()[0]
         meta = json.loads(header[len('<!-- zyris-run: '):-4])
-        self.assertEqual((self.cid, self.job, 3), (meta['candidate_id'], meta['job_id'], meta['schema_version']))
+        self.assertEqual((self.cid, self.job, iw.RUN_SCHEMA), (meta['candidate_id'], meta['job_id'], meta['schema_version']))
         with self.assertRaises(FileExistsError):
             self.finish(self.cid, 'run-1', job_id=self.job)
         self.assertEqual(header, path.read_text().splitlines()[0])
@@ -256,10 +257,11 @@ class CliSmoke(Base):
         self.assertEqual('complete', json.loads(self.cli('cv-import', '--project', self.project, '--candidate', cid, '--file', cv).stdout)['extraction_status'])
         status = json.loads(self.cli('status', '--project', self.project, '--candidate', cid).stdout)
         run, state = self.write('run.md', '# run\n'), self.write('state.md', '# state\n')
+        dialogue_file = self.write('dialogue.json', json.dumps(support.dialogue(1)))
         self.cli('finish', '--project', self.project, '--candidate', cid, '--run-id', 'r1', '--run-file', run, '--state-file', state,
-                 '--expected-state-sha256', status['state_sha256'], '--status', 'completed', '--answered-count', '1')
+                 '--expected-state-sha256', status['state_sha256'], '--status', 'completed', '--answered-count', '1', '--dialogue-file', dialogue_file)
         self.cli('finish', '--project', self.project, '--candidate', cid, '--run-id', 'r1', '--run-file', run, '--state-file', state,
-                 '--expected-state-sha256', status['state_sha256'], '--status', 'completed', '--answered-count', '1', expect=1)
+                 '--expected-state-sha256', status['state_sha256'], '--status', 'completed', '--answered-count', '1', '--dialogue-file', dialogue_file, expect=1)
         self.assertIn('VALID', self.cli('validate', '--project', self.project).stdout)
         self.cli('status', '--project', self.base, '--candidate', cid, expect=1)  # other project: unresolved
         ambiguous = self.cli('candidate-create', '--project', self.project, '--name', 'Erika Beispiel')

@@ -16,7 +16,6 @@ import unicodedata
 # import staging: protected recovery data that may contain training answers or CV text (never a deletable cache).
 CONTROL = ".journal"
 LEGACY_CONTROL = ".zyris"                       # previous layout: recognized only to be REFUSED, never read, moved, copied or deleted
-CONTROL_SEGMENTS = (CONTROL, LEGACY_CONTROL)    # Git protection treats both as complete path segments
 RUN_ID = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._-]{0,120}$")
 CANDIDATE_ID = re.compile(r"^c-[a-z0-9]+(?:-[a-z0-9]+)*-[0-9a-f]{8}$")
 JOB_ID = re.compile(r"^j-[a-z0-9]+(?:-[a-z0-9]+)*-[0-9a-f]{8}$")
@@ -72,32 +71,6 @@ def sync_directory(path):
             os.close(fd)
 
 
-_RECORDERS = []
-
-
-@contextmanager
-def recording():
-    """Collect every path this process writes through the managed writers (used to attribute Git changes)."""
-    touched = set()
-    _RECORDERS.append(touched)
-    try:
-        yield touched
-    finally:
-        _RECORDERS.remove(touched)
-
-
-def touch(path):
-    for touched in _RECORDERS:
-        touched.add(str(path))
-
-
-def touch_tree(path):
-    path = Path(path)
-    for item in ([path] if path.is_file() else sorted(path.rglob("*"))):
-        if item.is_file():
-            touch(item)
-
-
 def write_atomic(path, content, *, create_only=False, staging=None):
     """Publish flushed data from an explicit staging directory (default: sibling)."""
     path = Path(path)
@@ -120,7 +93,6 @@ def write_atomic(path, content, *, create_only=False, staging=None):
         else:
             os.replace(temporary, path)
         sync_directory(path.parent)
-        touch(path)
     finally:
         temporary.unlink(missing_ok=True)
 
