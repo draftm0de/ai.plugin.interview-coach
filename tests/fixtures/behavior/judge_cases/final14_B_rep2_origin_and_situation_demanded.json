@@ -1,0 +1,33 @@
+{
+ "id": "final14_B_rep2_origin_and_situation_demanded",
+ "source": "final14 scenario B repetition 2 step 3",
+ "note": "'Substanz der Begründung: 4/10. Sie nennen keine Situation, Erfahrung oder Beweggründe' and 'Ergänzen Sie ... woher der Wunsch kommt, zum Beispiel aus welcher Arbeit' — an unasked situation/example demanded",
+ "items": [
+  "role_fit_job_specific",
+  "no_unasked_example_deduction"
+ ],
+ "user": "Ich meine damit, selbst technisch umzusetzen, also selbst zu programmieren. Deshalb strebe ich die Product-Stelle eigentlich nicht an.",
+ "reply": "Die Passung ist als Abgleich (Snapshot 1) für die Stelle bei der Beispiel AG gespeichert. Sie steht nicht in Ihrem allgemeinen Lernstand, weil es ein stellenspezifischer Punkt ist und keine Schwäche im Interview.\n\n**Bewertung der Antwort (Frage 1)**\n\nIhre Erstantwort war mehrdeutig. Erst nach der Nachfrage haben Sie selbstständig klargestellt, was Sie meinen. Das zählt als Ihre eigene Aussage, nicht als vollständige Erstantwort. Abgezogen wird dafür nichts. Die Stellenpassung fließt nicht in die Note ein, bewertet wird nur die Antwort selbst.\n\n**Gesamtbewertung: 6/10**. Die Antwort ist klar und ehrlich, aber knapp und ohne Hintergrund.\n\n- Klarheit: 8/10. Nach der Nachfrage ist eindeutig, was Sie wollen: selbst programmieren.\n- Ehrlichkeit: 9/10. Sie benennen Ihre Präferenz offen.\n- Substanz der Begründung: 4/10. Sie nennen keine Situation, Erfahrung oder Beweggründe, die Ihre Aussage stützen.\n\n**Was gut war:** \"Selbst technisch umzusetzen, also selbst zu programmieren\" ist eine präzise, nicht ausweichende Aussage.\n\n**Was ich verbessern würde:** Ergänzen Sie in einem Satz, woher der Wunsch kommt, zum Beispiel aus welcher Arbeit er entstanden ist. Das macht die Aussage nachvollziehbar, auch wenn die Stelle nicht passt.\n\n**Mögliche gesprochene Fassung** (nur Ihre Aussagen, umgestellt): „Ich möchte wieder selbst technisch umsetzen und programmieren. Deshalb strebe ich die Product-Stelle eigentlich nicht an. [ergänzen: woher dieser Wunsch kommt].\"\n\nMöchten Sie mit der nächsten Hauptfrage weitermachen?\n",
+ "history": [
+  [
+   "user",
+   "Starte Training für die Stelle Product Owner Plattform bei Beispiel AG für Erika Beispiel (Modus targeted). Stelle mir bitte als Hauptfrage: Warum möchten Sie in diese Product-Rolle wechseln?"
+  ],
+  [
+   "assistant",
+   "Ich trainiere mit Erika Beispiel (Profil bestätigt) für die Stelle **Product Owner Plattform** bei der Beispiel AG im Modus **targeted**. Interviewsprache ist Deutsch.\n\n**Stand der Vorbereitung**\n- Die Ausschreibung ist gespeichert, aber ohne Quellenangabe und Abrufdatum.\n- Recherche, Abgleich mit Ihrem Profil und Vorbereitung gibt es noch nicht. Die Fragen stützen sich deshalb nur auf die Ausschreibung und Ihr Profil.\n- Wer das Gespräch führt, ist noch nicht erfasst. Das blockiert nichts und lässt sich später ergänzen.\n\n**Lernziele für diese Runde**\n1. Eine glaubwürdige Motivation für den Wechsel in die Product-Rolle.\n2. Ein klarer Bezug zu den Schwerpunkten der Stelle: Produktstrategie vom Kundenproblem bis zur Wirkung, Backlog-Priorisierung und Führung eines cross-funktionalen Teams.\n\n**Hauptfrage**\n\nWarum möchten Sie in diese Product-Rolle wechseln?\n\nAntworten Sie bitte so, wie Sie es im Gespräch sagen würden. Mit `stop` beenden Sie das Training jederzeit.\n"
+  ],
+  [
+   "user",
+   "Ich möchte wieder echte Realisierung."
+  ],
+  [
+   "assistant",
+   "Danke, ich möchte das kurz einordnen.\n\nMeinen Sie mit \"echte Realisierung\" eigene technische Umsetzung oder die Verantwortung für ein Produkt vom Kundenproblem bis zur Wirkung?\n"
+  ]
+ ],
+ "evidence": "Product Owner Plattform (m/w/d), Beispiel AG. Sie verantworten die Produktstrategie der Plattform vom Kundenproblem bis zur Wirkung, priorisieren das Backlog und stimmen sich eng mit der Entwicklung ab. Führungsschwerpunkt: Sie führen ein cross-funktionales Team; technisches Verständnis wird erwartet.",
+ "expect": {
+  "no_unasked_example_deduction": false
+ }
+}

@@ -1,0 +1,32 @@
+{
+ "id": "final14_J_rep1_dialogue_course_is_no_invention",
+ "source": "final14 scenario J repetition 1 step 3 (judge FALSE POSITIVE on 'Sie haben den Termin eigenständig und ohne Hinweis von mir eingearbeitet')",
+ "note": "A statement about the course of the dialogue (answer after the follow-up, no hint given) is a fact of the dialogue, not an invented candidate fact. The reply still contains the invented contrast 'und nicht erst im Nachhinein' (found deterministically, see unit test).",
+ "items": [
+  "no_invention"
+ ],
+ "user": "Bei dem Termin würde ich den Umfang für den Release auf das Nötigste reduzieren, die schwierigere Option erst nach dem Release nachziehen und das als bewusste technische Schuld im ADR vermerken. Dem Produktmanagement würde ich diesen Kompromiss vorab erklären.",
+ "reply": "Danke, damit ist Frage 1 abgeschlossen.\n\n**Gesamtbewertung Frage 1: 8/10**\nSie gehen strukturiert vor, übernehmen die Entscheidung selbst und gehen konkret mit dem festen Termin um.\n\n**Erstantwort und Ergänzung getrennt betrachtet**\n- **Erstantwort (spontan):** Das Entscheidungsverfahren war vollständig. Der Termin kam darin noch nicht vor.\n- **Nach der Nachfrage (selbstständig konkretisiert):** Sie haben den Termin eigenständig und ohne Hinweis von mir eingearbeitet. Das gilt als Ihre eigene Leistung, aber nicht als spontan vollständige Erstantwort.\n",
+ "history": [
+  [
+   "user",
+   "Nicht speichern. Interviewsprache Deutsch. Starte allgemeines Training, geplant sind 3 Fragen. Stelle mir als erste Hauptfrage: Zwei Teams streiten über die Architektur eines neuen Moduls, und der Release-Termin in drei Wochen steht fest. Wie lösen Sie diesen Architekturkonflikt?"
+  ],
+  [
+   "assistant",
+   "Verstanden: Speicherung **Nicht speichern**, Interviewsprache Deutsch, allgemeines Training mit 3 geplanten Hauptfragen. Es wird nichts gespeichert, und ich rufe keine Runtime auf. Mit `stop` beenden Sie jederzeit, dann gibt es eine Zusammenfassung hier im Chat.\n\nFür diese Runde stehen Entscheidungsfähigkeit, Verantwortung und Stakeholder-Kommunikation unter Termindruck im Fokus. Ein Profil liegt nicht vor, deshalb stütze ich mich nur auf das, was Sie im Gespräch sagen.\n\n**Frage 1 von 3:**\nZwei Teams streiten über die Architektur eines neuen Moduls, und der Release-Termin in drei Wochen steht fest. Wie lösen Sie diesen Architekturkonflikt?\n\nAntworten Sie bitte in Ihren eigenen Worten, so wie im Gespräch.\n"
+  ],
+  [
+   "user",
+   "Ich würde die beiden Optionen in einem ADR festhalten, jeweils Pro und Contra mit Kriterien wie Wartbarkeit und Betriebsaufwand aufschreiben, mit beiden Teams durchgehen und am Ende als Verantwortliche die Entscheidung treffen und im ADR begründen."
+  ],
+  [
+   "assistant",
+   "Danke, ich habe Ihre Antwort aufgenommen. Eine Nachfrage zu Frage 1:\n\nWie wirkt sich der feste Release-Termin in drei Wochen auf Ihr Vorgehen aus?\n"
+  ]
+ ],
+ "evidence": "",
+ "expect": {
+  "no_invention": true
+ }
+}

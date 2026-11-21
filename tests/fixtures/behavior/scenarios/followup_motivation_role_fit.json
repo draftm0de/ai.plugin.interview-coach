@@ -51,13 +51,15 @@
   {
    "user": "Ich meine damit, selbst technisch umzusetzen, also selbst zu programmieren. Deshalb strebe ich die Product-Stelle eigentlich nicht an.",
    "judge": [
-    "role_fit_job_specific"
+    "role_fit_job_specific",
+    "no_unasked_example_deduction"
    ],
    "tools_exclude": [
     "finish"
    ],
    "answers_previous_question": true,
-   "no_preference_penalty": true
+   "no_preference_penalty": true,
+   "no_example_deduction": true
   },
   {
    "user": "stop",
@@ -92,6 +94,12 @@
    ],
    "not_in_state": [
     "(?i)realisierung|programmier|hands[- ]on|selbst umsetz"
+   ]
+  },
+  {
+   "type": "stored_text_absent",
+   "patterns": [
+    "(?i)(?:fehlt|fehlen|kein\\w*|ohne)\\b[^.\\n]{0,60}\\bBeispiel\\w*|\\bBeispiel\\w*[^.\\n]{0,40}\\b(?:fehlt|fehlen)\\b|mit einem Beispiel (?:belegen|stützen)"
    ]
   }
  ]

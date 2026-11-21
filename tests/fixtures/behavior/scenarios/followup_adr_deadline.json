@@ -54,7 +54,8 @@
    "tools_exclude": [
     "finish"
    ],
-   "answers_previous_question": true
+   "answers_previous_question": true,
+   "no_unstated_characterization": true
   },
   {
    "user": "stop",

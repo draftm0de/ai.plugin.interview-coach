@@ -1,0 +1,24 @@
+{
+ "id": "final14_D_rep3_invented_contrast",
+ "source": "final14 scenario D repetition 3 step 2 (FAIL no_invention)",
+ "note": "'Sie informieren das Produktmanagement vorab statt erst nach der Entscheidung.' — the candidate said only that the product management is informed in advance; the contrast is invented.",
+ "items": [
+  "no_invention"
+ ],
+ "user": "Ich würde beide Teams anhören, die Optionen im ADR mit Pro und Contra festhalten und als Verantwortliche entscheiden; das Ergebnis erkläre ich beiden Teams persönlich und binde sie in die Umsetzung ein. Wegen des festen Termins in drei Wochen würde ich den Release-Umfang reduzieren, die aufwendigere Option nachziehen, die technische Schuld im ADR vermerken und das Produktmanagement vorab informieren.",
+ "reply": "Ihre Antwort deckt alles ab, was die Frage verlangt: Vorgehen im Konflikt, Entscheidung und Umgang mit dem festen Termin. Ich stelle deshalb keine Nachfrage und schließe den Block ab.\n\n**Gesamtbewertung: 8/10**\nEine klare, gut strukturierte Antwort mit konkreten Schritten, eindeutiger Entscheidungsverantwortung und einer realistischen Antwort auf den Termindruck.\n\n**Einzelbewertung**\n- **Konkrete Vorgehensschritte: 8/10.** Anhören, Optionen im ADR mit Pro und Contra festhalten, entscheiden, kommunizieren. Die Reihenfolge ist nachvollziehbar.\n- **Entscheidungsverantwortung: 9/10.** \"Als Verantwortliche entscheiden\" benennt eindeutig, wer entscheidet, und das Vorgehen ist dokumentiert.\n- **Stakeholder- und Teamwirkung: 8/10.** Sie erklären das Ergebnis beiden Teams persönlich und binden sie in die Umsetzung ein.\n- **Umgang mit dem Termin: 8/10.** Sie reduzieren den Release-Umfang und ziehen die aufwendigere Option nach. Die technische Schuld halten Sie im ADR fest und informieren das Produktmanagement vorab.\n- **Kommunikation: 8/10.** Die Antwort ist kompakt, sachlich und gut sprechbar.\n\n**Was besonders gut war**\n- Der ADR dient zugleich als Entscheidungsgrundlage und als Ort für die technische Schuld.\n- Sie lösen den Zielkonflikt über den Umfang und lassen den Termin unangetastet.\n- Sie informieren das Produktmanagement vorab statt erst nach der Entscheidung.\n\n**Was ich verbessern würde** (Empfehlungen, keine Lücken)\n- Zusätzlich möglich wäre, kurz zu nennen, woran Sie die Entscheidung festmachen, zum Beispiel an Risiko, Aufwand oder Wartbarkeit.\n- Ebenfalls möglich: ein Satz dazu, wie Sie vorgehen, wenn ein Team die Entscheidung weiterhin nicht mitträgt.\n\n**Mögliche bessere gesprochene Antwort** (Vorschlag, nur mit Ihren Aussagen umgeordnet)\n„Ich höre zuerst beide Teams an und halte die Optionen mit Pro und Contra in einem ADR fest. Dann entscheide ich als Verantwortliche und erkläre das Ergebnis beiden Teams persönlich. Wegen des festen Termins in drei Wochen reduziere ich den Release-Umfang und ziehe die aufwendigere Option nach. Die technische Schuld vermerke ich im ADR, das Produktmanagement informiere ich vorab, und beide Teams binde ich in die Umsetzung ein.\"\n\n---\n\n**Frage 2 von 3:**\n\nDas Produktmanagement möchte kurz vor dem Release ein zusätzliches Feature aufnehmen, das aus Ihrer Sicht ein erhebliches Betriebsrisiko birgt. Wie gehen Sie damit um?\n",
+ "history": [
+  [
+   "user",
+   "Starte allgemeines Training für Erika Beispiel, geplant sind 3 Fragen. Stelle mir bitte genau diese Frage als erste Hauptfrage: Zwei Teams streiten über die Architektur eines neuen Moduls, und der Release-Termin in drei Wochen steht fest. Wie lösen Sie diesen Architekturkonflikt?"
+  ],
+  [
+   "assistant",
+   "Ich starte das allgemeine Training für Erika Beispiel. Das Profil ist bestätigt, die Interviewsprache ist Deutsch, und der Lernstand ist noch leer. Es gibt also keine früheren Runs, auf die ich aufbauen müsste.\n\n**Ziele für diese Session (3 Fragen):**\n1. Entscheidungsverantwortung und Moderation bei fachlichen Konflikten\n2. Umgang mit Termindruck und Abwägungen\n3. Konkrete, überprüfbare Vorgehensschritte statt allgemeiner Aussagen\n\nIch stelle eine Frage nach der anderen und bewerte jeweils nach Abschluss des Fragenblocks. Mit `stop` beende ich jederzeit, mit `pause` speichere ich einen Checkpoint.\n\n**Frage 1 von 3:**\n\nZwei Teams streiten über die Architektur eines neuen Moduls, und der Release-Termin in drei Wochen steht fest. Wie lösen Sie diesen Architekturkonflikt?\n"
+  ]
+ ],
+ "evidence": "",
+ "expect": {
+  "no_invention": false
+ }
+}

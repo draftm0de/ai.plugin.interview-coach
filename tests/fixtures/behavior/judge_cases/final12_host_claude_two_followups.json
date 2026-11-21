@@ -1,0 +1,24 @@
+{
+ "id": "final12_host_claude_two_followups",
+ "source": "final12 host Claude Code nostorage turn 2 (host check 'exactly one question mark' FAILED; the same pattern appeared in final10)",
+ "note": "Two answer tasks: 'Wie gehen Sie konkret vor, damit die Entscheidung rechtzeitig fällt? Und wie sorgen Sie dafür, dass das unterlegene Team sie danach mitträgt und umsetzt?'",
+ "items": [
+  "single_followup"
+ ],
+ "user": "Ich würde die beiden Optionen in einem ADR festhalten, Pro und Contra mit Kriterien wie Wartbarkeit und Betriebsaufwand aufschreiben, mit beiden Teams durchgehen und am Ende als Verantwortliche die Entscheidung treffen und im ADR begründen.",
+ "reply": "Danke. Ich habe dazu eine Nachfrage.\n\nDer Release-Termin in drei Wochen steht fest. Wie gehen Sie konkret vor, damit die Entscheidung rechtzeitig fällt? Und wie sorgen Sie dafür, dass das unterlegene Team sie danach mitträgt und umsetzt?",
+ "history": [
+  [
+   "user",
+   "Nicht speichern. Allgemeines Training für eine Team-Lead-Rolle, Interviewsprache Deutsch, geplant sind 3 Fragen. Stelle mir bitte genau diese Frage als erste Hauptfrage: Zwei Teams streiten über die Architektur eines neuen Moduls, und der Release-Termin in drei Wochen steht fest. Wie lösen Sie diesen Architekturkonflikt?"
+  ],
+  [
+   "assistant",
+   "**Nicht speichern:** Alles bleibt in diesem Chat. Es gibt keine Datei und keinen Export, und ich kann nicht zusagen, dass das Training in einem späteren Chat verfügbar ist.\n\n**Setup**\n- Kandidatenprofil: Entwurf. Es enthält nur, was Sie im Gespräch sagen, und gilt erst als Fakt, wenn Sie es bestätigen.\n- Modus: `general`, Zielrolle Team Lead, Interviewsprache Deutsch, 3 Hauptfragen.\n- Lernziele:\n  1. Entscheidungen in Konflikten strukturiert herleiten und begründen.\n  2. Termin, Qualität und Teamdynamik gegeneinander abwägen.\n  3. Konkrete Maßnahmen und Ergebnisse statt allgemeiner Prinzipien nennen.\n- Sie können jederzeit `pause` oder `stop` schreiben.\n\n**Frage 1 von 3**\n\nZwei Teams streiten über die Architektur eines neuen Moduls, und der Release-Termin in drei Wochen steht fest. Wie lösen Sie diesen Architekturkonflikt?\n\nBitte antworten Sie so, wie Sie es im echten Interview tun würden. Ich bewerte erst nach Ihrer Antwort und einer möglichen Nachfrage."
+  ]
+ ],
+ "evidence": "",
+ "expect": {
+  "single_followup": false
+ }
+}

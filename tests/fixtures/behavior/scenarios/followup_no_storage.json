@@ -34,7 +34,8 @@
     "no_invention",
     "no_false_missing"
    ],
-   "answers_previous_question": true
+   "answers_previous_question": true,
+   "no_unstated_characterization": true
   },
   {
    "user": "stop",

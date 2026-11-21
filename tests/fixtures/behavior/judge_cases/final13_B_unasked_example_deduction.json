@@ -1,0 +1,32 @@
+{
+ "id": "final13_B_unasked_example_deduction",
+ "source": "final13 scenario B step 3 (judge PASS on role_fit, scripted score checks passed; overlooked professional error)",
+ "note": "'Konkretheit: 5/10. Es fehlt ein Beispiel, was du genau umsetzen möchtest oder wann du das zuletzt getan hast.' — the question 'Warum möchten Sie in diese Product-Rolle wechseln?' asked for no example. The same wording was stored in the run's block_assessment and as a next-training item in state.md.",
+ "items": [
+  "no_unasked_example_deduction"
+ ],
+ "user": "Ich meine damit, selbst technisch umzusetzen, also selbst zu programmieren. Deshalb strebe ich die Product-Stelle eigentlich nicht an.",
+ "reply": "Danke, das ist jetzt eindeutig. Damit ist die Hauptfrage abgeschlossen, und ich bewerte den Block.\n\n**Gesamtbewertung: 7/10** (für die Qualität der Antwort selbst)\nDie Aussage ist ehrlich, nach der Nachfrage klar und konkret: selbst programmieren. Die Erstantwort war mehrdeutig, den Kern hast du nach der Nachfrage selbstständig geschärft. Das ist kein Abzug.\n\n**Einzelbewertung**\n- Klarheit (nach der Nachfrage): 8/10. „Selbst technisch umsetzen, selbst programmieren\" ist unmissverständlich.\n- Ehrlichkeit: 9/10. Du sagst direkt, was du willst und was nicht.\n- Konkretheit: 5/10. Es fehlt ein Beispiel, was du genau umsetzen möchtest oder wann du das zuletzt getan hast.\n\n**Erstantwort und Ergänzung**\n- Erstantwort: „Ich möchte wieder echte Realisierung\" war mehrdeutig.\n- Ergänzung: Du hast sie nach einer neutralen Nachfrage selbstständig konkretisiert.\n\n**Was gut war**\nDu hast ohne Ausweichen gesagt, was „Realisierung\" für dich bedeutet. Dein Wunsch ist klar formuliert.\n\n**Was ich verbessern würde**\nNenne in einer echten Antwort gleich im ersten Satz, was du konkret meinst, etwa „selbst programmieren\", ergänzt um ein Beispiel. Dann entfällt die Nachfrage.\n\n**Fit-Punkt für die Stelle (ohne Note, keine Kompetenzbewertung)**\nDu bevorzugst hands-on Umsetzung und strebst die Product-Rolle eigentlich nicht an. Die Ausschreibung betont Produktstrategie, Backlog-Priorisierung und Führung eines cross-funktionalen Teams, daneben wird technisches Verständnis erwartet. Mein Eindruck: Das passt nicht gut zusammen. Ob die Stelle gar keine technische Mitarbeit zulässt, steht nicht in der Ausschreibung und bleibt offen.\n\nDieser Punkt gehört zur Stelle, nicht zu deinen allgemeinen Schwächen. Ich speichere ihn als Fit-Punkt zur Stelle, spätestens wenn die Sitzung endet. Bisher ist noch nichts gespeichert.\n\nMöchten Sie die Runde für diese Stelle trotzdem mit der nächsten Frage fortsetzen?\n",
+ "history": [
+  [
+   "user",
+   "Starte Training für die Stelle Product Owner Plattform bei Beispiel AG für Erika Beispiel (Modus targeted). Stelle mir bitte als Hauptfrage: Warum möchten Sie in diese Product-Rolle wechseln?"
+  ],
+  [
+   "assistant",
+   "**Targeted-Training: Product Owner Plattform bei Beispiel AG (Erika Beispiel)**\n\nSpeicher, Kandidatin (Profil bestätigt) und Stelle sind geladen. Das Gespräch läuft auf Deutsch. Ich stelle eine Frage nach der anderen und bewerte, sobald der Fragenblock abgeschlossen ist. Mit `stop` beende ich sofort, mit `pause` speichere ich einen Fortsetzungspunkt.\n\n**Schwerpunkte für diese Runde**\n1. Eine glaubwürdige, ehrliche Motivation für den Wechsel in die Product-Rolle\n2. Bezug zu den Anforderungen der Stelle: Verantwortung für die Produktstrategie vom Kundenproblem bis zur Wirkung, Backlog-Priorisierung und Führung eines cross-funktionalen Teams\n3. Klare, gesprochene Antworten\n\n**Lücken in der Vorbereitung**\n- Die Stelle ist erst als Ausschreibung gesichert. Recherche zu Beispiel AG, Abgleich mit deinem Profil und Vorbereitungsnotizen fehlen noch.\n- Die Gesprächspartner sind noch nicht erfasst. Das blockiert nichts und lässt sich später nachtragen.\n\nDie Fragen stützen sich deshalb vor allem auf die Ausschreibung und dein bestätigtes Profil, nicht auf Firmenrecherche.\n\n**Hauptfrage:**\n\nWarum möchten Sie in diese Product-Rolle wechseln?\n\nAntworte bitte so, wie du es im echten Gespräch sagen würdest.\n"
+  ],
+  [
+   "user",
+   "Ich möchte wieder echte Realisierung."
+  ],
+  [
+   "assistant",
+   "Danke, ich möchte Ihre Aussage genau verstehen.\n\nWas verstehen Sie konkret unter „echter Realisierung“ in Ihrer täglichen Arbeit?\n"
+  ]
+ ],
+ "evidence": "Product Owner Plattform (m/w/d), Beispiel AG. Sie verantworten die Produktstrategie der Plattform vom Kundenproblem bis zur Wirkung, priorisieren das Backlog und stimmen sich eng mit der Entwicklung ab. Führungsschwerpunkt: Sie führen ein cross-funktionales Team; technisches Verständnis wird erwartet.",
+ "expect": {
+  "no_unasked_example_deduction": false
+ }
+}

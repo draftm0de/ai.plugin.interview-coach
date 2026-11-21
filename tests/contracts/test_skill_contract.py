@@ -178,6 +178,19 @@ class HostEntryPoints(unittest.TestCase):
         self.assertIn('job-add --kind match', read(SKILLS / 'job-training/SKILL.md'))
         self.assertIn('saved as a new `match` snapshot', rules)
         self.assertIn('Recall the main question', rules)
+        # the "oder" contradiction: forbid several answer tasks, not the word; one neutral A-or-B clarification is allowed
+        self.assertNotIn('one question with an "oder"/"und"-alternative', rules)
+        for term in ('one answer task', 'The word "oder" itself is not forbidden', 'Meinen Sie damit A oder B?', 'naming possible meanings is optional, not a duty',
+                     'Not allowed: a suggestive question', 'Und wie sorgen Sie dafür, dass das unterlegene Team sie mitträgt?'):
+            self.assertIn(term, rules, term)
+        evaluation_rules = read(SHARED / 'references/evaluation.md')
+        for skill in ('candidate-training', 'job-training'):                 # the rules are inline in the always-loaded skill text, not only in the references
+            text = read(SKILLS / skill / 'SKILL.md')
+            for term in ('exactly one question mark', 'Und wie'):
+                self.assertIn(term, text, (skill, term))
+        self.assertIn('Substanz der Begründung', rules)
+        for term in ('a missing example is never a deduction', 'Konkretheit 5/10, es fehlt ein Beispiel', 'denkt von Anfang an mit'):
+            self.assertIn(term, evaluation_rules, term)
         for term in ('never a `completion`', 'never list its topic in `other_open_gaps`', 'oder', 'Substanz der Begründung', 'ohne Punktzahl'):
             self.assertIn(term, rules, term)
         evaluation_text = read(SHARED / 'references/evaluation.md')

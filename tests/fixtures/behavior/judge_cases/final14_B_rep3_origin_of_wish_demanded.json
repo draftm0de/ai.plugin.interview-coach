@@ -1,0 +1,33 @@
+{
+ "id": "final14_B_rep3_origin_of_wish_demanded",
+ "source": "final14 scenario B repetition 3 step 3",
+ "note": "'Substanz der Begründung: 5/10 ... nicht, was Sie an der eigenen Umsetzung reizt oder woher der Wunsch kommt' — scores missing reasons for the stated wish",
+ "items": [
+  "role_fit_job_specific",
+  "no_unasked_example_deduction"
+ ],
+ "user": "Ich meine damit, selbst technisch umzusetzen, also selbst zu programmieren. Deshalb strebe ich die Product-Stelle eigentlich nicht an.",
+ "reply": "Danke, damit ist Ihre Aussage klar. Ich habe sie als jobspezifischen Passungspunkt gesichert (Match-Snapshot 1 für *Product Owner Plattform*, `job-add` erfolgreich). Der Lauf selbst wird erst beim Abschluss der Session gespeichert.\n\n**Bewertung Block 1: Warum möchten Sie in die Product-Rolle wechseln?**\n\n**Gesamtbewertung: 7/10.** Ihre Antwort ist nach der Klärung eindeutig und ehrlich. Sie bleibt knapp, weil Sie Ihr Ziel benennen, aber nicht erläutern.\n\n- **Erstantwort:** \"Ich möchte wieder echte Realisierung.\" war mehrdeutig und wurde erst durch die Nachfrage klar. Das ist kein Abzug.\n- **Antwort nach der Nachfrage:** Sie haben selbstständig und klar gesagt, dass Sie selbst programmieren wollen und die Stelle deshalb eigentlich nicht anstreben.\n\n**Einzelbewertung**\n- Klarheit der Aussage (nach der Nachfrage): 8/10\n- Ehrlichkeit: 9/10\n- Substanz der Begründung: 5/10. Sie sagen, was Sie wollen, aber nicht, was Sie an der eigenen Umsetzung reizt oder woher der Wunsch kommt.\n\n**Passungspunkt (ohne Punktzahl):** Ihr Wunsch nach eigenem Programmieren steht im Spannungsfeld zum Schwerpunkt dieser Stelle (Produktstrategie, Priorisierung, Teamführung). Das ist eine Frage der Passung für diesen Job und keine Schwäche in Ihrer Antwort. Die Ausschreibung erwartet technisches Verständnis, schließt technische Mitarbeit aber nicht aus.\n\n**Was gut war:** Sie haben nicht versucht, die Frage mit Floskeln zu beantworten, sondern direkt gesagt, was Sie wollen.\n\n**Was ich verbessern würde:** Ergänzen Sie ein bis zwei Sätze dazu, was Sie an der eigenen Umsetzung schätzen. Das macht die Aussage nachvollziehbar.\n\n**Vorschlag für eine gesprochene Antwort** (nur aus Ihren Angaben umgestellt):\n\"Mir ist wichtig, selbst technisch umzusetzen, also selbst zu programmieren. [ergänzen: was Sie daran reizt] Deshalb ist die Product-Rolle für mich eigentlich nicht das Ziel.\"\n\nWie möchten Sie weitermachen: mit dieser Stelle (dann nehme ich als Hauptfrage 2 eine Frage zu den Anforderungen der Ausschreibung) oder mit einem allgemeinen Training für Rollen, die näher an Ihrem Ziel liegen?\n",
+ "history": [
+  [
+   "user",
+   "Starte Training für die Stelle Product Owner Plattform bei Beispiel AG für Erika Beispiel (Modus targeted). Stelle mir bitte als Hauptfrage: Warum möchten Sie in diese Product-Rolle wechseln?"
+  ],
+  [
+   "assistant",
+   "Ich habe alles geladen: Erika Beispiel (Profil bestätigt), Job *Product Owner Plattform* bei Beispiel AG, Interviewsprache Deutsch, Modus **targeted**.\n\n**Ausgangslage**\n- Gespeichert ist bisher nur die Ausschreibung. Recherche, Match und Vorbereitung gibt es noch nicht, und die Gesprächspartner wurden noch nicht erfasst. Die Fragen stützen sich deshalb auf die Ausschreibung (Produktstrategie vom Kundenproblem bis zur Wirkung, Backlog-Priorisierung, Führung eines cross-funktionalen Teams, technisches Verständnis) und auf Ihr bestätigtes Profil.\n- Lernziele für diese Session: eine glaubwürdige, konkrete Motivation für den Wechsel in die Product-Rolle, ein Bezug zu den Anforderungen der Stelle und eine klare, ehrliche Darstellung Ihrer Erfahrung.\n\nAntworten Sie bitte so, wie Sie es im Gespräch sagen würden. Mit `stop` beende ich die Session jederzeit, mit `pause` speichere ich einen Zwischenstand.\n\n**Hauptfrage 1:** Warum möchten Sie in diese Product-Rolle wechseln?\n"
+  ],
+  [
+   "user",
+   "Ich möchte wieder echte Realisierung."
+  ],
+  [
+   "assistant",
+   "Danke, Sie möchten also wieder stärker in die Realisierung kommen.\n\nMeinen Sie damit eigene technische Umsetzung oder die Verantwortung für ein Produkt vom Kundenproblem bis zur Wirkung?\n"
+  ]
+ ],
+ "evidence": "Product Owner Plattform (m/w/d), Beispiel AG. Sie verantworten die Produktstrategie der Plattform vom Kundenproblem bis zur Wirkung, priorisieren das Backlog und stimmen sich eng mit der Entwicklung ab. Führungsschwerpunkt: Sie führen ein cross-funktionales Team; technisches Verständnis wird erwartet.",
+ "expect": {
+  "role_fit_job_specific": false
+ }
+}

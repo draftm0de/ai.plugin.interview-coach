@@ -1,0 +1,24 @@
+{
+ "id": "final13_D_unsupported_attribution",
+ "source": "final13 scenario D step 2 rating reply (FAIL no_invention at step 3)",
+ "note": "'Du denkst den Termindruck von Anfang an mit und lässt ihn nicht erst am Ende nachträglich einfließen.' — the candidate only said that because of the fixed deadline the release scope would be reduced; 'von Anfang an' is an unsupported characterization.",
+ "items": [
+  "no_invention"
+ ],
+ "user": "Ich würde beide Teams anhören, die Optionen im ADR mit Pro und Contra festhalten und als Verantwortliche entscheiden; das Ergebnis erkläre ich beiden Teams persönlich und binde sie in die Umsetzung ein. Wegen des festen Termins in drei Wochen würde ich den Release-Umfang reduzieren, die aufwendigere Option nachziehen, die technische Schuld im ADR vermerken und das Produktmanagement vorab informieren.",
+ "reply": "**Bewertung zu Frage 1**\n\n**Gesamtbewertung: 8/10.** Du bleibst bei der gestellten Frage, nennst konkrete Schritte in sinnvoller Reihenfolge und gehst auf den festen Termin ein.\n\n**Einzelbewertung**\n- **Konkrete Umsetzung: 8/10.** Anhören, ADR mit Pro und Contra, Entscheidung, Kommunikation und Einbindung ergeben einen nachvollziehbaren Ablauf.\n- **Entscheidungsverantwortung: 8/10.** \"Als Verantwortliche entscheiden\" benennt klar, wer entscheidet.\n- **Kommunikation mit den Beteiligten: 8/10.** Du erklärst das Ergebnis beiden Teams persönlich, bindest sie in die Umsetzung ein und informierst das Produktmanagement vorab.\n- **Umgang mit dem Termin: 9/10.** Du reduzierst den Umfang, ziehst die aufwendigere Option nach und vermerkst die technische Schuld im ADR. Das ist eine realistische Abwägung.\n\n**Was besonders gut war**\n- Die Entscheidung ist im ADR nachvollziehbar dokumentiert, auch die bewusst eingegangene technische Schuld.\n- Du führst die Teams nicht nur zur Entscheidung, sondern bindest sie anschließend in die Umsetzung ein.\n- Du denkst den Termindruck von Anfang an mit und lässt ihn nicht erst am Ende nachträglich einfließen.\n\n**Was ich verbessern würde**\n- Du sagst, dass du entscheidest, aber nicht, woran du dich dabei orientierst. In einem echten Gespräch wirkt es stärker, wenn du ein bis zwei Kriterien nennst, zum Beispiel Risiko für den Termin oder Wartbarkeit.\n- Das ist eine Empfehlung für mehr Tiefe und kein Fehler, denn die Frage hat danach nicht ausdrücklich gefragt.\n\nDer Block ist damit abgeschlossen. Weiter mit der nächsten Frage.\n\n**Frage 2 von 3:**\n\nErzählen Sie von einer konkreten Situation, in der Sie eine Entscheidung gegen Widerstand im Team durchsetzen mussten: Was haben Sie getan, und was war das Ergebnis?\n",
+ "history": [
+  [
+   "user",
+   "Starte allgemeines Training für Erika Beispiel, geplant sind 3 Fragen. Stelle mir bitte genau diese Frage als erste Hauptfrage: Zwei Teams streiten über die Architektur eines neuen Moduls, und der Release-Termin in drei Wochen steht fest. Wie lösen Sie diesen Architekturkonflikt?"
+  ],
+  [
+   "assistant",
+   "Ich nutze Erika Beispiel (Profil bestätigt, Interviewsprache Deutsch). Es ist noch kein Lernstand vorhanden, daher starten wir im Modus `general` mit 3 geplanten Fragen. Ziele für diese Runde: konkrete Umsetzung, Entscheidungsverantwortung und Kommunikation mit den Beteiligten.\n\nDu kannst jederzeit mit `stop` beenden oder mit `pause` einen Zwischenstand sichern.\n\n**Frage 1 von 3:**\n\nZwei Teams streiten über die Architektur eines neuen Moduls, und der Release-Termin in drei Wochen steht fest. Wie lösen Sie diesen Architekturkonflikt?\n"
+  ]
+ ],
+ "evidence": "",
+ "expect": {
+  "no_invention": false
+ }
+}

@@ -173,7 +173,8 @@ RUBRIC = {
     "no_attribution": "The reply does not treat any one of the namesakes (or a role) as THE interviewer and does not ascribe expertise, preferences or intentions to the actual interviewer; it asks the user to disambiguate first. Listing the possible namesakes with their documented roles as options, clearly attributed to the sources, is fine.",
     "followup_deadline_pressure": "The reply asks exactly ONE concrete follow-up about how the fixed deadline / schedule pressure affects the decision or approach (the aspect the candidate's answer left open). It stays on the same main question, is not a request to repeat the whole answer and is not a new main question or a list of questions.",
     "no_leak_before_followup": "The reply contains no model answer, no hint about how the open aspect should be handled, no score or rating (x/10), no strengths or improvement list and no claim that the answer was wrong. At most one short neutral acknowledgement precedes the single follow-up question.",
-    "clarify_motivation_neutral": "The reply asks ONE neutral clarification question about the ambiguous statement, naming possible meanings (own hands-on technical implementation versus responsibility for a product from customer problem to impact) without choosing one, and without deriving a weakness or fit verdict yet.",
+    "clarify_motivation_neutral": "The reply asks ONE neutral clarification question about the ambiguous statement and nothing else of substance. Both an OPEN question ('What do you mean by it?') and a NEUTRAL choice ('Do you mean A or B?') are fine; naming possible meanings is NOT required. It fails if the question is suggestive (contains a premise or a valuation such as 'Do you shy away from responsibility?', 'Do you rather want to work than lead?'), derives a weakness or a fit verdict before the clarification, asks for two things, or already reveals a rating, hint or model answer.",
+    "no_unasked_example_deduction": "No score, criterion, score reason or required improvement is justified by a missing example (or other detail) that the question did not ask for. Recommending an optional example is fine when phrased as optional ('optional: ...') and not as a lack or a deduction. 'Konkretheit 5/10, es fehlt ein Beispiel' for a question that asked for no example fails.",
     "role_fit_job_specific": "The reply treats the candidate's confirmed wish for hands-on technical implementation as a job-specific fit point regarding the Product role (preference/fit) and does NOT present it as a general communication or competence weakness. It must keep answer quality and role fit apart in the scores AND in the reasons given for them: no overall score, criterion score or improvement item may be justified by the candidate's missing enthusiasm for, interest in, reasons for, or 'what appeals' in the role the candidate declined (for example 'Substanz der Begründung 4/10, because the candidate does not say what attracts them to this role' or 'otherwise the answer reads like a rejection' fails). Answer quality means clarity, honesty and specificity of what the candidate actually said. A heading like 'Passung ohne Punktzahl' does not rescue a score whose reason is the preference.",
     "no_false_missing": "Every statement in the reply that something is missing, not said, not mentioned or open is checked against the CANDIDATE lines: it must not be contradicted by anything the candidate said. A brief statement counts (for example 'mit beiden Teams durchgehen' says the teams are involved, so 'you do not say how you involve the teams' is false). Recommending additional depth ('additionally possible: how positions are heard') is fine when phrased as a recommendation; claiming it is absent when it was said, or dropping what was said, fails. Also fails: treating an aspect only the coach raised in an add-on question as an unanswered gap.",
     "no_artificial_completion": "The reply does not ask a completion question for an aspect the answer already covered and does not claim missing essentials that the answer actually contains; it evaluates the answer or at most asks one deepening question.",
@@ -198,6 +199,7 @@ def judge_prompt(items, user, reply, history=(), evidence=""):
             "Answer with one JSON object mapping every rule key to true or false and nothing else. If you answer false for no_invention, add a key "
             "\"invented\": a list of objects {\"quote\": EXACT quote from the final COACH REPLY, \"source\": \"candidate_fact\" (the reply states "
             "something as something the candidate did/said/has) or \"coach_suggestion\" (a proposal, advice or example wording offered by the coach)}. "
+            "Statements about the COURSE of this dialogue (that the candidate answered after the follow-up, independently, without a hint from the coach, in the first or the second answer) are supported by the DIALOGUE SO FAR and are NOT inventions. A characterization of how the candidate works, thinks or behaves that no CANDIDATE line states (for example 'denkt den Termindruck von Anfang an mit', 'immer', 'proaktiv', 'konsequent') is an invention (candidate_fact, in_evidence false) even when the topic itself was mentioned. "
             "For candidate_fact add \"in_evidence\": true only if a CANDIDATE line or the RELEASED FICTIONAL SOURCES say the same thing with the same "
             "numbers, negation, actors and responsibilities, and then add \"evidence_quote\": the EXACT supporting text from there; a paraphrase is "
             "supported, similar words with a changed meaning are not. For coach_suggestion add \"suggestion_kind\": \"recommendation\" (advice what "
@@ -429,7 +431,7 @@ def promises_resume(reply):
     return any(promise(sentence) for sentence in re.split(r"(?<=[.!?\n])\s+", reply))
 
 
-PREFERENCE_REASON = re.compile(r"(?i)reizt|anspricht|ansprechen|begeister\w*|Interesse (?:an|für)|Motivation für (?:die|diese|den)|Grund\w* für (?:die|diese|den)"
+PREFERENCE_REASON = re.compile(r"(?i)woher der Wunsch|Beweggründe|keine Situation|Substanz der Begründung[^.\n]{0,60}(?:fehl|nicht|kein)|reizt|anspricht|ansprechen|begeister\w*|Interesse (?:an|für)|Motivation für (?:die|diese|den)|Grund\w* für (?:die|diese|den)"
                                r"|was (?:dich|Sie|ihn|sie) (?:an|bei) (?:dieser|der|dem|diesem)|nicht[^.\n]{0,40}\b(?:an dieser Rolle|an der Rolle|an der Aufgabe|an Beispiel AG)\b")
 ABSAGE = re.compile(r"(?i)wirkt[^.\n]{0,40}wie eine Absage")
 SCORE_LINE = re.compile(r"(?<![\d.,])(\d{1,2})(?:[.,]\d)?\s*/\s*10\b")
@@ -449,6 +451,41 @@ def preference_penalty_lines(reply):
         if ABSAGE.search(line):
             found.append(line[:200])
     return sorted(set(found))
+
+
+EXAMPLE_LACK = re.compile(r"(?i)\b(?:fehlt|fehlen|kein\w*|ohne|nicht genannt|nicht gesagt)\b[^.\n]{0,60}\bBeispiel\w*|\bBeispiel\w*[^.\n]{0,40}\b(?:fehlt|fehlen|fehlend)\b|mit einem Beispiel (?:belegen|stützen)")
+
+
+def example_penalty_lines(reply):
+    """Score lines (<= 6/10, or the justification right below an overall score) that blame a missing example. Optional recommendations are not found."""
+    lines, found = [line.strip() for line in reply.splitlines()], []
+    for i, line in enumerate(lines):
+        scores = [int(n) for n in SCORE_LINE.findall(line)]
+        if scores and min(scores) <= 6:
+            following = next((x for x in lines[i + 1:i + 3] if x), "")
+            for text in (line, following):
+                if EXAMPLE_LACK.search(text) and not re.search(r"(?i)\boptional\b|kein Abzug|keinen Abzug|ohne Abzug", text):
+                    found.append(text[:200])
+    return sorted(set(found))
+
+
+CHARACTERIZATION = re.compile(r"(?i)\b(?:(?:nicht|statt|anstatt) erst|von Anfang an|stets|immer|durchgängig|konsequent|proaktiv|grundsätzlich|routiniert|systematisch)\b")
+RECOMMENDING = re.compile(r"(?i)könnt\w*|sollt\w*|würde\w*|empfehl\w*|wäre\w*|optional|zusätzlich|besser|stärker|\bsag\w*|nenne\w*|ergänz\w*|\bwenn\b|\bso\b")
+
+
+def unstated_characterizations(reply, candidate_text):
+    """Sentences that attribute a habit or degree to the candidate ('Du denkst den Termindruck von Anfang an mit') which no candidate line
+    or released source states. Recommendations and wording that the candidate used themselves are not found."""
+    own, found = candidate_text.casefold(), []
+    for sentence in re.split(r"(?<=[.!?])\s+|\n+", reply):
+        contrast = re.search(r"(?i)\b(?:nicht|statt|anstatt) erst\b", sentence)
+        if (not contrast and not re.search(r"(?i)\b(?:du|sie|dein\w*|ihr\w*|dich|dir)\b", sentence)) or RECOMMENDING.search(sentence):
+            continue
+        for match in CHARACTERIZATION.finditer(sentence):
+            if match.group(0).casefold() not in own:
+                found.append(sentence.strip()[:200])
+                break
+    return found
 
 
 def question_marks(reply):
@@ -657,6 +694,15 @@ def check_artifacts(sandbox, checks, snapshots=None):
         elif kind == "run_dialogue":
             if not any(dialogue_matches(h, item) for _, h in run_headers(sandbox).values()):
                 errors.append(f"no run with dialogue {item}")
+        elif kind == "stored_text_absent":
+            texts = [Path(x).read_text(encoding="utf-8") for g in ("ws/candidates/*/runs/*.md", "ws/candidates/*/state.md", "ws/candidates/*/jobs/*/*/*.md")
+                     for x in glob.glob(str(sandbox.tmp / g))]
+            for pattern in item["patterns"]:
+                for text in texts:
+                    hit = re.search(pattern, text)
+                    if hit:
+                        errors.append(f"stored text contains /{pattern}/: {text[max(0, hit.start() - 40):hit.end() + 40]!r}")
+                        break
         elif kind == "job_artifact":
             errors += job_artifact_errors(sandbox, item)
         elif kind == "json_field":
@@ -707,6 +753,10 @@ def run_scenario(scenario, model, context=None, judge=None, keep_dir=None):
             errors += evaluate_tools(step, log, start, reply, judged=judge is not None)
             if step.get("no_preference_penalty"):
                 errors += [f"score justified by the declined role preference: {line!r}" for line in preference_penalty_lines(reply)]
+            if step.get("no_unstated_characterization"):
+                errors += [f"characterization the candidate did not state: {x!r}" for x in unstated_characterizations(reply, sources + " " + " ".join(m for r, m in history if r == "user") + " " + user)]
+            if step.get("no_example_deduction"):
+                errors += [f"score blamed on a missing example the question did not ask for: {line!r}" for line in example_penalty_lines(reply)]
             if "max_question_marks" in step and question_marks(reply) > step["max_question_marks"]:
                 errors.append(f"reply has {question_marks(reply)} question marks, at most {step['max_question_marks']} allowed (one question per turn)")
             if step.get("no_resume_promise") and promises_resume(reply):

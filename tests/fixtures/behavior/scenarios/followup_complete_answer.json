@@ -35,7 +35,8 @@
    ],
    "tools_exclude": [
     "finish"
-   ]
+   ],
+   "no_unstated_characterization": true
   },
   {
    "user": "Das war meine ganze Antwort zu dieser Frage. Bitte bewerte jetzt den Frageblock.",
@@ -52,7 +53,8 @@
    "evaluable_over": [
     2,
     3
-   ]
+   ],
+   "no_unstated_characterization": true
   },
   {
    "user": "stop",

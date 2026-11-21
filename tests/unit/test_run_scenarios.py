@@ -439,20 +439,101 @@ class Rubric(unittest.TestCase):
 
     def test_judge_calibration_cases_are_wired_to_the_real_rubric_and_detect_a_wrong_judge(self):
         cases = scenarios.calibration_cases()
-        self.assertGreaterEqual(len(cases), 4)
+        self.assertGreaterEqual(len(cases), 17)
         for case in cases:
             for key in case['expect']:
                 self.assertIn(key, scenarios.RUBRIC, case['id'])
-        def right(p):
-            reply = p.split('FINAL COACH REPLY:')[1]
-            missing = 'Sie sagen nicht, wie Sie die Teams einbinden' in reply
-            return json.dumps({'role_fit_job_specific': 'Substanz der Begründung' not in reply, 'no_false_missing': not missing,
-                               'false_missing': [{'quote': 'Sie sagen nicht, wie Sie die Teams einbinden', 'candidate_quote': 'mit beiden Teams durchgehen'}] if missing else []})
-        self.assertTrue(all(row[4] for row in scenarios.run_calibration(right)))
-        lenient = lambda p: '{"role_fit_job_specific": true, "no_false_missing": true}'          # the judge that let final10 B pass
-        failing = [(row[0], row[1]) for row in scenarios.run_calibration(lenient) if not row[4]]
-        self.assertEqual({('final10_B_role_fit_penalty', 'role_fit_job_specific'), ('final10_host_claude_false_missing', 'no_false_missing')}, set(failing))
-        self.assertFalse(all(row[4] for row in scenarios.run_calibration(lambda p: 'no json')))   # UNCLEAR is never an accepted verdict
+        evidence_keys = {'no_invention', 'no_false_missing'}       # a negative verdict there needs quotes (tested separately)
+        plain = [c for c in cases if not any(v is False and k in evidence_keys for k, v in c['expect'].items())]
+        answers = {c['reply'].strip(): c['expect'] for c in plain}
+        right = lambda p: json.dumps(answers[p.split('FINAL COACH REPLY:')[1].strip()])
+        self.assertTrue(all(row[4] for row in scenarios.run_calibration(right, plain)))
+        lenient = lambda p: json.dumps({k: True for k in scenarios.RUBRIC})                         # the judge that let the overlooked errors pass
+        missed = {row[0] for row in scenarios.run_calibration(lenient, cases) if not row[4]}
+        self.assertEqual({c['id'] for c in cases if False in c['expect'].values()}, missed)
+        self.assertTrue({'final10_B_role_fit_penalty', 'final10_host_claude_false_missing', 'final13_B_unasked_example_deduction',
+                         'final13_D_unsupported_attribution', 'final12_host_claude_two_followups', 'clarify_suggestive', 'clarify_prejudging',
+                         'final14_B_rep2_origin_and_situation_demanded', 'final14_B_rep3_origin_of_wish_demanded', 'final14_D_rep3_invented_contrast'} <= missed)
+        self.assertFalse(all(row[4] for row in scenarios.run_calibration(lambda p: 'no json', cases)))   # UNCLEAR is never an accepted verdict
+
+    def test_final13_D_unsupported_attribution_is_found_only_with_a_verifiable_quote(self):
+        case = self.case('final13_D_unsupported_attribution')
+        quote = 'Du denkst den Termindruck von Anfang an mit und lässt ihn nicht erst am Ende nachträglich einfließen.'
+        raw = json.dumps({'no_invention': False, 'invented': [{'quote': quote, 'source': 'candidate_fact', 'in_evidence': False}]})
+        verdicts, problems = scenarios.run_judge(lambda p: raw, ['no_invention'], case['user'], case['reply'], [tuple(x) for x in case['history']])
+        self.assertIs(False, verdicts['no_invention'])
+        self.assertIn('Anfang', problems[0])
+        # a faithful restatement of what the candidate said is supported by their own words
+        ok = json.dumps({'no_invention': False, 'invented': [{'quote': 'Wegen des festen Termins in drei Wochen würde ich den Release-Umfang reduzieren', 'source': 'candidate_fact',
+                                                               'in_evidence': True, 'evidence_quote': 'Wegen des festen Termins in drei Wochen würde ich den Release-Umfang reduzieren'}]})
+        reply = case['reply'] + '\nWegen des festen Termins in drei Wochen würde ich den Release-Umfang reduzieren'
+        self.assertEqual([], scenarios.run_judge(lambda p: ok, ['no_invention'], case['user'], reply, [])[1])
+
+    def test_unstated_characterizations_are_found_in_the_final13_rating_and_not_in_recommendations_or_own_words(self):
+        case = self.case('final13_D_unsupported_attribution')
+        said = ' '.join(m for r, m in [tuple(x) for x in case['history']] if r == 'user') + ' ' + case['user']
+        found = scenarios.unstated_characterizations(case['reply'], said)
+        self.assertEqual(1, len(found), found)
+        self.assertIn('von Anfang an', found[0])
+        self.assertEqual([], scenarios.unstated_characterizations('Du denkst den Termindruck von Anfang an mit.', said + ' Ich denke den Termin von Anfang an mit.'))   # own words
+        self.assertEqual([], scenarios.unstated_characterizations('Sie könnten den Termin von Anfang an einbeziehen.', said))                  # recommendation
+        scenario = {'id': 'x', 'context': 'c', 'steps': [{'user': 'u', 'no_unstated_characterization': True}]}
+        self.assertEqual('FAIL', scenarios.run_scenario(scenario, lambda p: case['reply'], context='CTX', judge=lambda p: '{}')['status'])
+        shipped = scenarios.load('followup_complete_answer')
+        self.assertTrue(all(shipped['steps'][i].get('no_unstated_characterization') for i in (1, 2)))
+        self.assertIn("von Anfang an", scenarios.judge_prompt(['no_invention'], 'u', 'r'))
+
+    def test_final14_regressions_origin_of_wish_invented_contrasts_and_dialogue_course(self):
+        rep2, rep3 = self.case('final14_B_rep2_origin_and_situation_demanded'), self.case('final14_B_rep3_origin_of_wish_demanded')
+        # rep3: the deterministic guard found it although the judge passed it; rep2: the example/situation guard and the judge
+        self.assertTrue(scenarios.preference_penalty_lines(rep3['reply']), 'origin of the wish as score reason')
+        self.assertTrue(scenarios.preference_penalty_lines(rep2['reply']), 'no situation/experience/motives as score reason')
+        self.assertEqual({'no_unasked_example_deduction': False}, rep2['expect'])
+        self.assertEqual({'role_fit_job_specific': False}, rep3['expect'])
+        # D rep3 and J rep1: invented contrasts are found deterministically, own words and recommendations are not
+        d3 = self.case('final14_D_rep3_invented_contrast')
+        said = ' '.join(m for r, m in [tuple(x) for x in d3['history']] if r == 'user') + ' ' + d3['user']
+        found = scenarios.unstated_characterizations(d3['reply'], said)
+        self.assertTrue(any('statt erst' in x for x in found), found)
+        j = 'Der Kompromiss wird dem Produktmanagement vorab erklärt und nicht erst im Nachhinein.'
+        self.assertTrue(scenarios.unstated_characterizations(j, said))
+        self.assertEqual([], scenarios.unstated_characterizations(j, said + ' nicht erst im Nachhinein'))
+        self.assertEqual([], scenarios.unstated_characterizations('Sie könnten es vorab erklären statt erst nach der Entscheidung.', said))
+        # the judge false positive of final14 J: dialogue-course statements are allowed by prompt and kept as a control case
+        prompt = scenarios.judge_prompt(['no_invention'], 'u', 'r')
+        self.assertIn('COURSE of this dialogue', prompt)
+        self.assertEqual({'no_invention': True}, self.case('final14_J_rep1_dialogue_course_is_no_invention')['expect'])
+        for key in ('followup_complete_answer', 'followup_adr_deadline', 'followup_no_storage'):
+            self.assertTrue(any(s.get('no_unstated_characterization') for s in scenarios.load(key)['steps']), key)
+
+    def test_clarification_rubric_accepts_open_and_neutral_choice_and_rejects_suggestive_or_prejudging(self):
+        rubric = scenarios.RUBRIC['clarify_motivation_neutral']
+        self.assertIn('OPEN', rubric)
+        self.assertIn('NEUTRAL choice', rubric)
+        self.assertIn('naming possible meanings is NOT required', rubric)
+        self.assertIn('suggestive', rubric)
+        expect = {c['id']: c['expect']['clarify_motivation_neutral'] for c in scenarios.calibration_cases() if 'clarify_motivation_neutral' in c['expect']}
+        self.assertEqual({'clarify_open': True, 'clarify_choice': True, 'clarify_suggestive': False, 'clarify_prejudging': False}, expect)
+        for name in ('open', 'choice'):                              # both accepted forms are one answer task with one question mark
+            self.assertEqual(1, scenarios.question_marks(self.case(f'clarify_{name}')['reply']))
+
+    def test_final13_B_missing_example_is_found_in_scores_stored_text_and_by_the_rubric(self):
+        bad, control = self.case('final13_B_unasked_example_deduction'), self.case('control_B_example_optional')
+        self.assertTrue(any('Beispiel' in line for line in scenarios.example_penalty_lines(bad['reply'])), scenarios.example_penalty_lines(bad['reply']))
+        self.assertEqual([], scenarios.example_penalty_lines(control['reply']))
+        self.assertIn('Optional: ein Beispiel', control['reply'])        # an optional recommendation stays allowed
+        scenario = {'id': 'x', 'context': 'c', 'steps': [{'user': 'u', 'no_example_deduction': True}]}
+        self.assertEqual('FAIL', scenarios.run_scenario(scenario, lambda p: bad['reply'], context='CTX', judge=lambda p: '{}')['status'])
+        self.assertEqual('PASS', scenarios.run_scenario(scenario, lambda p: control['reply'], context='CTX', judge=lambda p: '{}')['status'])
+        shipped = scenarios.load('followup_motivation_role_fit')
+        self.assertTrue(shipped['steps'][2]['no_example_deduction'])
+        self.assertIn('no_unasked_example_deduction', shipped['steps'][2]['judge'])
+        stored = next(a for a in shipped['artifacts'] if a['type'] == 'stored_text_absent')
+        # what final13 really stored (run block_assessment, run text, state next-training) matches the patterns
+        import re
+        for text in ('Konkretheit 5/10, es fehlt ein Beispiel.', 'Konkretheit 5/10 (kein Beispiel).', '- Antworten konkret formulieren und mit einem Beispiel belegen.'):
+            self.assertTrue(any(re.search(p, text) for p in stored['patterns']), text)
+        self.assertFalse(any(re.search(p, 'Optional: ein Beispiel würde die Aussage stützen.') for p in stored['patterns']))
 
     def test_false_missing_needs_verifiable_quotes_on_both_sides_and_stays_unclear_otherwise(self):
         case = self.case('final10_host_claude_false_missing')

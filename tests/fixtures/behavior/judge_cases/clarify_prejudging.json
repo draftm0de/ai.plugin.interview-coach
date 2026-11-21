@@ -1,0 +1,24 @@
+{
+ "id": "clarify_prejudging",
+ "source": "constructed fictional reply",
+ "note": "clarify_motivation_neutral calibration: open and neutral-choice clarification pass; suggestive or pre-judging questions fail.",
+ "items": [
+  "clarify_motivation_neutral"
+ ],
+ "user": "Ich möchte wieder echte Realisierung.",
+ "reply": "Danke. Das klingt, als wollten Sie lieber programmieren als führen, und dann passt die Stelle wohl nicht. Stimmt das?",
+ "history": [
+  [
+   "user",
+   "Starte Training für die Stelle Product Owner Plattform bei Beispiel AG für Erika Beispiel (Modus targeted). Stelle mir bitte als Hauptfrage: Warum möchten Sie in diese Product-Rolle wechseln?"
+  ],
+  [
+   "assistant",
+   "**Targeted-Training: Product Owner Plattform bei Beispiel AG (Erika Beispiel)**\n\nSpeicher, Kandidatin (Profil bestätigt) und Stelle sind geladen. Das Gespräch läuft auf Deutsch. Ich stelle eine Frage nach der anderen und bewerte, sobald der Fragenblock abgeschlossen ist. Mit `stop` beende ich sofort, mit `pause` speichere ich einen Fortsetzungspunkt.\n\n**Schwerpunkte für diese Runde**\n1. Eine glaubwürdige, ehrliche Motivation für den Wechsel in die Product-Rolle\n2. Bezug zu den Anforderungen der Stelle: Verantwortung für die Produktstrategie vom Kundenproblem bis zur Wirkung, Backlog-Priorisierung und Führung eines cross-funktionalen Teams\n3. Klare, gesprochene Antworten\n\n**Lücken in der Vorbereitung**\n- Die Stelle ist erst als Ausschreibung gesichert. Recherche zu Beispiel AG, Abgleich mit deinem Profil und Vorbereitungsnotizen fehlen noch.\n- Die Gesprächspartner sind noch nicht erfasst. Das blockiert nichts und lässt sich später nachtragen.\n\nDie Fragen stützen sich deshalb vor allem auf die Ausschreibung und dein bestätigtes Profil, nicht auf Firmenrecherche.\n\n**Hauptfrage:**\n\nWarum möchten Sie in diese Product-Rolle wechseln?\n\nAntworte bitte so, wie du es im echten Gespräch sagen würdest.\n"
+  ]
+ ],
+ "evidence": "Product Owner Plattform (m/w/d), Beispiel AG. Sie verantworten die Produktstrategie der Plattform vom Kundenproblem bis zur Wirkung, priorisieren das Backlog und stimmen sich eng mit der Entwicklung ab. Führungsschwerpunkt: Sie führen ein cross-funktionales Team; technisches Verständnis wird erwartet.",
+ "expect": {
+  "clarify_motivation_neutral": false
+ }
+}

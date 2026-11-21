@@ -165,3 +165,16 @@ class EvidenceFidelity(unittest.TestCase):
         self.assertIn(False, [ok for _, ok in sc.checks])
         source = (ROOT / 'tests/native/run_host_dialogue.py').read_text()
         self.assertEqual(2, source.count('    rating_checks(sc, "3", rating["text"])'))
+
+
+class OneFollowupCheck(unittest.TestCase):
+    def test_final12_two_followups_fail_the_host_check_and_a_single_choice_passes(self):
+        def run(reply):
+            sc = StopReplyChecks.Sc()
+            hd.one_followup(sc, '2', reply)
+            return dict(sc.checks)
+        cases = {c['id']: c for c in (json.loads(p.read_text(encoding='utf-8')) for p in (ROOT / 'tests/fixtures/behavior/judge_cases').glob('*.json'))}
+        bad = run(cases['final12_host_claude_two_followups']['reply'])
+        self.assertFalse(bad['2: exactly one question mark'])
+        good = run('Geht es Ihnen beim festen Termin eher darum, den Umfang zu begrenzen oder die Entscheidung zu beschleunigen?')
+        self.assertTrue(good['2: exactly one question mark'])
