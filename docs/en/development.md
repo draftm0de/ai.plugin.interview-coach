@@ -114,7 +114,7 @@ From the Coach repository:
 make install-local TARGET=claude
 make update-local TARGET=codex
 # Without Make:
-python3 -B scripts/local_marketplace.py update-local --target codex
+python3 -B scripts/plugin.py update-local --target codex
 ```
 
 Both commands delegate to the configured marketplace and include all associated local plugins in the shared `draftmode-ai-plugins-dev` catalog. Missing required checkouts block before host changes. `DRY_RUN=1` creates snapshots without invoking a host.

@@ -50,6 +50,12 @@ test-research:
 test-smoke:
 	$(PYTHON) tests/behavior/run_smoke.py --cli $(CLI) --output-dir .tmp/tests/smoke/$(CLI)
 
+# Read-only structure check (--review adds scope/source evidence); never installs or publishes.
+SOURCE ?= .
+.PHONY: verify plugin-verify
+verify plugin-verify:
+	$(PYTHON) scripts/verify.py --source "$(SOURCE)" --kind plugin $(if $(filter 1,$(REVIEW)),--review,)
+
 # Repository import metadata; no per-plugin marketplace or ZIP builds.
 .SUFFIXES:
 check-plugin:
@@ -59,4 +65,4 @@ sync-plugin:
 
 .PHONY: install-local update-local
 install-local update-local:
-	$(PYTHON) scripts/local_marketplace.py $@ --target "$(TARGET)" $(if $(MARKETPLACE),--marketplace "$(MARKETPLACE)",) $(if $(filter 1,$(DRY_RUN)),--dry-run,)
+	$(PYTHON) scripts/plugin.py $@ --target "$(TARGET)" $(if $(MARKETPLACE),--marketplace "$(MARKETPLACE)",) $(if $(filter 1,$(DRY_RUN)),--dry-run,)

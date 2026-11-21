@@ -76,7 +76,7 @@ Im Coach-Repository:
 make install-local TARGET=claude
 make update-local TARGET=codex
 # Ohne Make:
-python3 -B scripts/local_marketplace.py update-local --target codex
+python3 -B scripts/plugin.py update-local --target codex
 ```
 
 Beide Befehle delegieren an den konfigurierten Marketplace und erfassen alle zugeordneten lokalen Plugins im gemeinsamen Entwicklungskatalog `draftmode-ai-plugins-dev`. Fehlende benötigte Checkouts stoppen vor Host-Änderungen. `DRY_RUN=1` erstellt Snapshots ohne Host-Aufruf.

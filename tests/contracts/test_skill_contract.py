@@ -8,6 +8,8 @@ import sys
 import tempfile
 import unittest
 
+from tests.support.payload import build_payload
+
 ROOT = next(p for p in Path(__file__).resolve().parents if (p / 'Makefile').is_file())
 SKILLS = ROOT / 'skills'
 SHARED = SKILLS / '_shared'
@@ -212,8 +214,7 @@ class InstallablePayload(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.payload = Path(self.tmp.name).resolve() / 'plugin'
-        for name in ('skills', 'assets', '.claude-plugin', '.codex-plugin'):
-            shutil.copytree(ROOT / name, self.payload / name)
+        build_payload(self.payload)
 
     def test_both_hosts_find_all_skills_in_the_payload(self):
         claude = json.loads(read(self.payload / '.claude-plugin/plugin.json'))

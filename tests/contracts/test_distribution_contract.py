@@ -4,6 +4,8 @@ import tempfile
 from pathlib import Path
 import unittest
 
+from tests.support.payload import build_payload
+
 ROOT = next(p for p in Path(__file__).resolve().parents if (p / 'Makefile').is_file())
 SOURCE = ROOT / "skills/interview-coach"
 
@@ -11,10 +13,11 @@ class InstallationTests(unittest.TestCase):
 
     def test_repository_manifests_without_marketplace_or_version(self):
         subprocess.run(['python3', str(ROOT/'scripts/plugin.py'), 'check'], check=True, capture_output=True)
-        for relative in ('plugin.json','.claude-plugin/plugin.json','.codex-plugin/plugin.json'):
+        for relative in ('plugin.json','.claude-plugin/plugin.json'):
             manifest=json.loads((ROOT/relative).read_text())
             self.assertEqual('interview-coach',manifest['name'])
             self.assertNotIn('version',manifest)
+        self.assertFalse((ROOT/'.codex-plugin').exists(), 'the Codex manifest is generated into the install payload only')
         self.assertEqual('Interview Coach',json.loads((ROOT/'.claude-plugin/plugin.json').read_text())['displayName'])
         for relative in ('.claude-plugin/marketplace.json','.agents/plugins/marketplace.json'):
             self.assertFalse((ROOT/relative).exists())
@@ -42,6 +45,7 @@ class InstallationTests(unittest.TestCase):
     def test_all_five_skills_declared_by_manifest_layout(self):
         names = sorted(p.parent.name for p in (ROOT / "skills").glob("*/SKILL.md"))
         self.assertEqual(["candidate-create", "candidate-training", "interview-coach", "job-create", "job-training"], names)
-        codex = json.loads((ROOT / ".codex-plugin/plugin.json").read_text())
+        with tempfile.TemporaryDirectory() as tmp:
+            codex = json.loads((build_payload(Path(tmp)) / ".codex-plugin/plugin.json").read_text())
         self.assertEqual("./skills/", codex["skills"])
         self.assertEqual("Interview Coach", codex["interface"]["displayName"])

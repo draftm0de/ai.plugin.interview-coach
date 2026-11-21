@@ -29,6 +29,8 @@ import uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from tests.support.payload import build_payload  # noqa: E402
 WRAPPER_VERSION = "3"
 TOTAL_S, RESERVE_S, MIN_PHASE_S, KILL_GRACE_S = 600, 60, 15, 3
 LIMITS = {"E": 120, "F": 60, "G": 120, "H": 60}
@@ -491,8 +493,7 @@ def prepare(res, claude):
     write_state(res, state)   # deadline is fixed BEFORE any preparation
     tmp = Path(tempfile.mkdtemp(prefix="coach-hostacc3-")).resolve()
     payload, project = tmp / "plugin", tmp / "project"
-    for n in ("skills", "assets", ".claude-plugin", ".codex-plugin"):
-        shutil.copytree(ROOT / n, payload / n, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    build_payload(payload)
     (payload / "README.md").write_text("Interview Coach payload copy for host acceptance.\n")
     (project / "files").mkdir(parents=True)
     (project / "files/cv.md").write_text(FIXTURE_CV)

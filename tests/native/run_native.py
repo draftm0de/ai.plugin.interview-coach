@@ -22,6 +22,8 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "skills/_shared/scripts"))
 import interview_workspace as iw  # noqa: E402
+sys.path.insert(0, str(ROOT))
+from tests.support.payload import build_payload  # noqa: E402
 
 SKILLS = ("interview-coach", "candidate-create", "candidate-training", "job-create", "job-training")
 CV = "# Erika Beispiel\n\n## Berufserfahrung\n- Backend-Entwicklerin, Muster GmbH, 2019-2024\n\n## Skills\nPython, Go, SQL\n"
@@ -271,8 +273,7 @@ class Run:
     def __init__(self, host_name, timeout, keep=False):
         self.tmp = Path(tempfile.mkdtemp(prefix=f"coach-native-{host_name}-")).resolve()
         self.payload = self.tmp / "plugin"
-        for name in ("skills", "assets", ".claude-plugin", ".codex-plugin"):
-            shutil.copytree(ROOT / name, self.payload / name)
+        build_payload(self.payload)
         (self.payload / "README.md").write_text("Interview Coach payload copy for native acceptance.\n")
         self.project = self.tmp / "project"
         self.project.mkdir()

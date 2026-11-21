@@ -682,7 +682,7 @@ Historische Abschnitte bleiben unverändert; die lokalen Claude-Code-Abnahmen (E
 **Grund.** Die lokale CLI-Hilfe bietet kein Flag, das ein Plugin-Verzeichnis nur für einen Aufruf lädt (kein Gegenstück zu Claude Code `--plugin-dir`). Der dokumentierte Weg für das Plugin ist `codex plugin marketplace add` plus `codex plugin add interview-coach@draftmode-ai-plugins` (Aufruf `$interview-coach`, `$candidate-create`, `$candidate-training`, `$job-create`, `$job-training`); beides ist Installation und ändert die globale Konfiguration und war ausgeschlossen. Ohne Installation bleibt nur projektlokale Skill-Ladung (`.agents/skills`, wie `tests/native/run_native.py`); sie ist keine native Plugin-Ladung und wurde nicht als Ersatz gefahren. Umgebung: `codex plugin marketplace list` scheitert an einem fremden, defekten Marketplace-Eintrag, `codex plugin list` lief in ein 20-s-Timeout; nicht repariert.
 
 **Unterscheidung.**
-- Native Verfügbarkeit der fünf Skills im Codex-Host: **nicht belegt** (nur Manifest `.codex-plugin/plugin.json` mit `skills: ./skills/` und fünf SKILL.md statisch vorhanden).
+- Native Verfügbarkeit der fünf Skills im Codex-Host: **nicht belegt** (nur das aus dem Installationspaket erzeugte Manifest `.codex-plugin/plugin.json` mit `skills: ./skills/` und fünf SKILL.md statisch vorhanden).
 - Beobachtete Abläufe A/B/C: **keine**.
 - Fachliche Abläufe der übrigen Skills: nicht geprüft.
 - Plugin-Ladung gegenüber Marketplace-Installation: Plugin-Ladung ohne Installation ist in Codex 0.165.0 nicht vorgesehen; nur eine autorisierte Marketplace-Installation (am besten mit eigenem `CODEX_HOME`) oder bewusst als solche deklarierte projektlokale Skills können weitergehen.
